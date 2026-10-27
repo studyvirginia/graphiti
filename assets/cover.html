@@ -1,0 +1,33 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:600px;height:800px;background:#fff;color:#111;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;overflow:hidden}
+  .wrap{width:600px;height:800px;padding:40px 36px 30px;display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff}
+  .icon{width:104px;height:104px;border-radius:24px;}
+  h1{font-size:48px;font-weight:500;letter-spacing:-0.5px;margin-top:12px;line-height:1;color:#111}
+  .tag{margin-top:6px;font-size:18px;color:#555}
+  .card{margin-top:20px;width:528px;padding-bottom:18px;background:#0a0a0a;border-radius:26px;overflow:hidden;padding:0 0 14px}
+  .card img{display:block;width:100%}
+  .eq{color:#fff;font-size:20px;line-height:1.8;margin-top:14px}
+  .eq .katex{font-size:1.08em}
+  .cf{display:flex;justify-content:space-between;padding:4px 22px 0;font-size:13px;color:#9a9a9a}
+  .cf b{color:#fff;font-weight:600}
+  .foot{margin-top:auto;font-size:15px;color:#444;line-height:1.5}
+</style></head><body><div class="wrap">
+  <img class="icon" src="logo.png" alt="">
+  <h1>Graphiti</h1>
+  <div class="tag">Find the math behind anything.</div>
+  <div class="card">
+    <img src="plot_loop.png" alt="">
+    <div class="eq"><div id="e1"></div><div id="e2"></div></div>
+  </div>
+  <div class="foot">Lincoln Marine and Cyrus Emami<br>Congressional App Challenge 2026</div>
+</div>
+<script>
+katex.render("x(t) = -0.2\\cos(8.5t) + 0.3t - 0.1", document.getElementById("e1"), {displayMode:false});
+katex.render("y(t) = -0.5\\cos(5.9t)", document.getElementById("e2"), {displayMode:false});
+</script>
+</body></html>
