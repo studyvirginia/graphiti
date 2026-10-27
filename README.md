@@ -6,7 +6,7 @@
 
 <p align="center"><img src="assets/cover.jpg" width="720" alt="Graphiti cover"></p>
 
-<p align="center">Demo video: (link coming)</p>
+<p align="center">Demo video: (https://youtu.be/JckPfeCiFBk) </p>
 
 ---
 
