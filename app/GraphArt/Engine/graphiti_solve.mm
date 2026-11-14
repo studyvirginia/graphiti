@@ -71,6 +71,80 @@ static void rotate_engine_log(void) {
   open_engine_log();
   prune_engine_logs(kKeepLogs);
 }
+
+// ---- per-solve performance log (reads the engine's own stdout lines in the tee thread; no engine change) ----
+#include <condition_variable>
+#include <chrono>
+#include <sys/sysctl.h>
+struct PerfStep { int st = 0; double iter_ms = 0, admitted = 0, uniq = 0, gpu_busy = 0, gpu_idle = 0, rss_mb = 0; long children = 0, lane_pairs = 0; int permille = -1; };
+struct PerfRun { std::vector<PerfStep> steps; int axis = -1, closed = -1, cx = -1; double pso_ms = -1, final_err = NAN; long P = 0; };
+static std::mutex g_perf_mu; static std::condition_variable g_perf_cv; static PerfRun g_perf; static int g_perf_sync = 0;
+static PerfStep& perf_step(int st) { for (PerfStep& x : g_perf.steps) if (x.st == st) return x; g_perf.steps.push_back(PerfStep()); g_perf.steps.back().st = st; return g_perf.steps.back(); }
+static void perf_line(const char* l) {
+  int st = 0, a = 0; long c = 0, lp = 0; double x = 0, y = 0, z = 0;
+  std::lock_guard<std::mutex> lk(g_perf_mu);
+  if (sscanf(l, "step %d | children %ld admitted %lf shortfall %*lf | rej within %*lf vs pop %*lf | uniq trees %lf", &st, &c, &x, &y) == 4) { PerfStep& s = perf_step(st); s.children = c; s.admitted = x; s.uniq = y; }
+  else if (sscanf(l, "ITER WALL step %d: %lf ms", &st, &x) == 2) perf_step(st).iter_ms = x;
+  else if (sscanf(l, "COFIT step %d: permille %d cpu pairs %ld", &st, &a, &lp) == 3) { PerfStep& s = perf_step(st); s.permille = a; s.lane_pairs = lp; }
+  else if (sscanf(l, "H301 step %d: window %lf ms | GPU busy %lf | idle %lf", &st, &x, &y, &z) == 4) { PerfStep& s = perf_step(st); s.gpu_busy = y; s.gpu_idle = z; }
+  else if (sscanf(l, "H129 step %d | step ms %lf | RSS %lf MB", &st, &x, &y) == 3) perf_step(st).rss_mb = y;
+  else if (sscanf(l, "SINGLE_FAST: axis %d", &a) == 1) { g_perf.axis = a; const char* q = strstr(l, "closed "); if (q) g_perf.closed = atoi(q + 7); }
+  else if (strncmp(l, "H178 startup:", 13) == 0) { const char* q = strstr(l, "PSO creation wall "); if (q) g_perf.pso_ms = atof(q + 18); }
+  else if (strncmp(l, "FINAL_PICK err(", 15) == 0) { const char* q = strchr(l, ')'); if (q && sscanf(q + 1, " %lf | cx %d", &x, &a) == 2) { g_perf.final_err = x; g_perf.cx = a; } }   // "err(rss_x+rss_y)" or "err(SI-CIS nll)" (noise model on)
+  else if (strncmp(l, "s12 loop", 8) == 0) { const char* q = strstr(l, "P="); if (q) g_perf.P = atol(q + 2); }
+  else if (sscanf(l, "[graphiti] PERF_SYNC %d", &a) == 1) { g_perf_sync = a; g_perf_cv.notify_all(); }
+}
+static void perf_feed(const char* buf, size_t n) {   // tee thread only
+  static std::string carry; carry.append(buf, n);
+  size_t b = 0;
+  for (;;) { const size_t e = carry.find('\n', b); if (e == std::string::npos) break; carry[e] = 0; perf_line(carry.c_str() + b); b = e + 1; }
+  carry.erase(0, b); if (carry.size() > 65536) carry.clear();
+}
+static void perf_reset(void) { std::lock_guard<std::mutex> lk(g_perf_mu); g_perf = PerfRun(); }
+static const char* perf_thermal(void) { switch (NSProcessInfo.processInfo.thermalState) { case NSProcessInfoThermalStateNominal: return "nominal"; case NSProcessInfoThermalStateFair: return "fair"; case NSProcessInfoThermalStateSerious: return "serious"; default: return "critical"; } }
+static void perf_report(const char* kind, int rc, int npts, double budget_s, double wall_ms, const char* therm0) {
+  if (g_tee_pipe[1] < 0) return;   // output is not captured (graphiti_diag_init not called): nothing was parsed
+  static int seq = 0; const int my = ++seq;
+  printf("[graphiti] PERF_SYNC %d\n", my); fflush(stdout);
+  PerfRun R;
+  { std::unique_lock<std::mutex> lk(g_perf_mu); g_perf_cv.wait_for(lk, std::chrono::milliseconds(1500), [&] { return g_perf_sync >= my; }); R = g_perf; }
+  std::vector<PerfStep> v; for (const PerfStep& s : R.steps) if (s.iter_ms > 0) v.push_back(s);
+  std::sort(v.begin(), v.end(), [](const PerfStep& a, const PerfStep& b) { return a.st < b.st; });
+  const size_t N = v.size();
+  double sum = 0, ch = 0, ad = 0, uq = 0, lane = 0, gb = 0, gi = 0, rss = 0, first4 = 0; std::vector<double> ms;
+  for (size_t i = 0; i < N; i++) { const PerfStep& s = v[i]; sum += s.iter_ms; ch += (double)s.children; ad += s.admitted; uq += s.uniq; lane += (double)s.lane_pairs; gb += s.gpu_busy; gi += s.gpu_idle; rss = std::max(rss, s.rss_mb); ms.push_back(s.iter_ms); if (i < 4) first4 += s.iter_ms; }
+  std::sort(ms.begin(), ms.end());
+  auto pct = [&](double q) { return N ? ms[std::min(N - 1, (size_t)(q * (double)(N - 1) + 0.5))] : 0.0; };
+  const double sec = sum / 1000.0;
+  char model[64] = "?"; size_t ml = sizeof model; sysctlbyname("hw.machine", model, &ml, nullptr, 0);
+  const char* mode = R.axis < 0 ? "?" : R.axis == 0 ? (R.closed == 1 ? "free-t closed" : "free-t open") : "single-value";
+  printf("[graphiti] PERF %s | %s | rc %d | pts %d | budget %.1f s | device %s | cores %d | thermal %s -> %s\n", kind, mode, rc, npts, budget_s, model, (int)NSProcessInfo.processInfo.activeProcessorCount, therm0, perf_thermal());
+  printf("[graphiti] PERF wall %.0f ms | steps %zu | in steps %.0f ms | outside steps (start-up, final pick) %.0f ms | pipeline creation %.0f ms\n", wall_ms, N, sum, wall_ms - sum, R.pso_ms);
+  if (N) {
+    printf("[graphiti] PERF ms/step mean %.1f | median %.1f | min %.1f | p90 %.1f | max %.1f | first 4 steps %.0f ms\n", sum / (double)N, pct(0.5), ms.front(), pct(0.9), ms.back(), first4);
+    printf("[graphiti] PERF candidates: evaluated %.0f (%.0f /s) | admitted and fitted %.0f (%.0f /s) | unique trees %.0f (%.0f /s) | population %ld\n", ch, ch / sec, ad, ad / sec, uq, uq / sec, R.P);
+    printf("[graphiti] PERF CPU lane pairs %.0f (%.1f %% of admitted) | GPU busy %.0f ms (%.0f %% of step window) | peak RSS %.0f MB | final score %.6g (nll with the noise model on, else rss) cx %d\n", lane, ad > 0 ? 100.0 * lane / ad : 0.0, gb, gb + gi > 0 ? 100.0 * gb / (gb + gi) : 0.0, rss, R.final_err, R.cx);
+    for (const PerfStep& s : v) printf("[graphiti] PERF step %3d | %7.1f ms | children %ld | admitted %.0f (%.0f /s) | uniq %.0f | lane pairs %ld (permille %d) | GPU busy %.1f idle %.1f | RSS %.0f MB\n",
+                                       s.st, s.iter_ms, s.children, s.admitted, s.admitted / (s.iter_ms / 1000.0), s.uniq, s.lane_pairs, s.permille, s.gpu_busy, s.gpu_idle, s.rss_mb);
+  }
+  fflush(stdout);
+  // files: Documents/perf/<stamp>.csv (one row per step) and Documents/perf/summary.csv (one row per solve)
+  NSFileManager* fm = NSFileManager.defaultManager;
+  NSString* dir = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent:@"perf"];
+  [fm createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
+  NSDateFormatter* f = [[NSDateFormatter alloc] init]; f.dateFormat = @"yyyyMMdd-HHmmss"; f.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+  NSString* stamp = [f stringFromDate:NSDate.date];
+  NSMutableString* body = [NSMutableString stringWithFormat:@"# %s,%s,rc=%d,pts=%d,budget_s=%.1f,device=%s,thermal=%s->%s,wall_ms=%.0f,pipeline_ms=%.0f\nstep,ms,children,admitted,admitted_per_s,uniq_trees,lane_pairs,lane_permille,gpu_busy_ms,gpu_idle_ms,rss_mb\n", kind, mode, rc, npts, budget_s, model, therm0, perf_thermal(), wall_ms, R.pso_ms];
+  for (const PerfStep& s : v) [body appendFormat:@"%d,%.1f,%ld,%.0f,%.0f,%.0f,%ld,%d,%.1f,%.1f,%.0f\n", s.st, s.iter_ms, s.children, s.admitted, s.admitted / (s.iter_ms / 1000.0), s.uniq, s.lane_pairs, s.permille, s.gpu_busy, s.gpu_idle, s.rss_mb];
+  NSString* path = [dir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%s.csv", stamp, kind]];
+  [body writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:nil];
+  NSString* sumPath = [dir stringByAppendingPathComponent:@"summary.csv"];
+  if (![fm fileExistsAtPath:sumPath]) [@"stamp,kind,mode,rc,pts,budget_s,device,thermal_start,thermal_end,wall_ms,steps,ms_in_steps,ms_per_step_mean,ms_per_step_median,ms_per_step_max,first4_ms,evaluated_per_s,admitted_per_s,uniq_per_s,lane_pct,gpu_busy_pct,peak_rss_mb,pipeline_ms,final_score,cx\n" writeToFile:sumPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+  NSString* row = [NSString stringWithFormat:@"%@,%s,%s,%d,%d,%.1f,%s,%s,%s,%.0f,%zu,%.0f,%.1f,%.1f,%.1f,%.0f,%.0f,%.0f,%.0f,%.1f,%.0f,%.0f,%.0f,%.3g,%d\n", stamp, kind, mode, rc, npts, budget_s, model, therm0, perf_thermal(), wall_ms, N, sum,
+                   N ? sum / (double)N : 0.0, pct(0.5), N ? ms.back() : 0.0, first4, N ? ch / sec : 0.0, N ? ad / sec : 0.0, N ? uq / sec : 0.0, ad > 0 ? 100.0 * lane / ad : 0.0, gb + gi > 0 ? 100.0 * gb / (gb + gi) : 0.0, rss, R.pso_ms, R.final_err, R.cx];
+  if (NSFileHandle* h = [NSFileHandle fileHandleForWritingAtPath:sumPath]) { [h seekToEndOfFile]; [h writeData:[row dataUsingEncoding:NSUTF8StringEncoding]]; [h closeFile]; }
+  printf("[graphiti] PERF log: %s\n", path.UTF8String); fflush(stdout);
+}
 static void* engine_tee_thread(void*) {
   char buf[8192];
   for (;;) {
@@ -78,6 +152,7 @@ static void* engine_tee_thread(void*) {
     if (n < 0 && errno == EINTR) continue;
     if (n <= 0) break;
     if (g_console_fd >= 0) write_all(g_console_fd, buf, (size_t)n);
+    perf_feed(buf, (size_t)n);
     if (g_engine_fd >= 0) {
       write_all(g_engine_fd, buf, (size_t)n); g_engine_bytes += n;
       if (g_engine_bytes > kRotateBytes) rotate_engine_log();
@@ -240,6 +315,7 @@ static int run_engine(const float* xy, int n, double budget_s, void* ring, const
   setvbuf(stdout, nullptr, _IOLBF, 0);
   g_strokeLog = nil;
   if (!xy || n < 4 || !ring) return 2;
+  perf_reset(); const auto perf_t0 = std::chrono::steady_clock::now(); const char* perf_th0 = perf_thermal();
   NSBundle* b = NSBundle.mainBundle;
   NSString* res = b.resourcePath;
   NSString* work = NSTemporaryDirectory();
@@ -293,5 +369,6 @@ static int run_engine(const float* xy, int n, double budget_s, void* ring, const
   catch (...) { printf("[graphiti] engine run aborted: unknown C++ exception\n"); fflush(stdout); }
   printf("[graphiti] engine run done rc=%d steps=%s n=%d budget=%.2f\n", rc, steps, n, budget_s); fflush(stdout);
   sketch_ui_attach(nullptr);
+  perf_report(strcmp(steps, "0") == 0 ? "prepare" : "solve", rc, n, budget_s, std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - perf_t0).count(), perf_th0);
   return rc;
 }
