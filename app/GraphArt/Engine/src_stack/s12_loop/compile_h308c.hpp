@@ -2,20 +2,34 @@
 #include "compile_memo_i17_h156.h"
 #include "h313a_view.hpp"
 #include "h313b.hpp"
-
+#ifdef H308_DKEY0
+#define DKEY_NS(tr) 0
+#else
+#define DKEY_NS(tr) (tr).nslot
+#endif
+#ifdef H308_CORD_VAL
+#ifndef H308_CORD
+#define H308_CORD
+#endif
+#endif
 #ifndef C308_TS
 #define C308_TS(k) ((void)0)
 #endif
 namespace c308 {
 inline bool g_a2 = false;
 constexpr int kN = 512, kQ = 64;
+#ifdef H308_CORD_VAL
+inline thread_local bool g_sw = false;
+inline thread_local uint8_t g_sigB[kN + 1], g_sigN[kN + 1];
+inline thread_local int g_pcn[h14::MAXM];
+inline thread_local const int* g_force = nullptr;
+inline std::atomic<uint64_t> g_valAcc{0}, g_valRej{0};
+#endif
 using h14::NWD;
 using f38::rec_fields;
 using f38::Scratch;
-
-struct ColT { int ia[h14::MAXQ * (h14::MAXN + 1)]; int ib[h14::MAXQ * (h14::MAXN + 1)]; int io[h14::MAXQ + 1]; int pos[h14::MAXN]; };
+struct ColT { int ia[h14::MAXQ * (h14::MAXN + 1)]; int ib[h14::MAXQ * (h14::MAXN + 1)]; int io[h14::MAXQ + 1]; int pos[h14::MAXN]; int e1[h14::MAXN + 1]; int e2[h14::MAXN + 1]; int need[h14::MAXN + 1]; };
 static thread_local ColT ct;
-
 static inline int build_F_c(const h14::Tab& C, int r, int* out, uint64_t* fbq, int* pend, const int* EA, const int* EB, int NN, int* ia, int* ib) {
   using namespace h42;
   if (C.opnd[r] >= 0) { ia[0] = -1; ib[0] = -1; return 0; }
@@ -27,13 +41,21 @@ static inline int build_F_c(const h14::Tab& C, int r, int* out, uint64_t* fbq, i
     const int t = sp - 1, x = stk[t];
     if (ph[t] == 0) {
       ph[t] = 1;
+#ifdef H308_CORD
+      const int c = ct.e1[x];
+#else
       const int c = EA[x];
+#endif
       if (c != NN && ps.vst[c] != g) { stk[sp] = c; ph[sp] = 0; ++sp; }
       continue;
     }
     if (ph[t] == 1) {
       ph[t] = 2;
+#ifdef H308_CORD
+      const int c = ct.e2[x];
+#else
       const int c = EB[x];
+#endif
       if (c != NN && ps.vst[c] != g) { stk[sp] = c; ph[sp] = 0; ++sp; }
       continue;
     }
@@ -51,7 +73,6 @@ static inline int build_F_c(const h14::Tab& C, int r, int* out, uint64_t* fbq, i
   ia[cnt] = -1; ib[cnt] = -1;
   return cnt;
 }
-
 static void prepare(const View& V, h42::PrepBuf& P) {
   using namespace h42;
   OrdScratch& s = os;
@@ -63,6 +84,9 @@ static void prepare(const View& V, h42::PrepBuf& P) {
   h14::Tab& C = h14::tab;
   int* rep = P.rep; int* opnd = P.opnd;
   C.n = n; C.Q = V.Q; C.opnd = opnd;
+#ifdef H308_CORD
+  ct.need[NN] = 0;
+#endif
   for (int i = 0; i < n; i++) {
     const int o = V.op(i);
     rep[i] = i;
@@ -86,6 +110,23 @@ static void prepare(const View& V, h42::PrepBuf& P) {
     C.OP[i] = o; C.CA[i] = ra; C.CB[i] = rb;
     s.EA[i] = opnd[ra] < 0 ? ra : NN;
     s.EB[i] = (o >= 3 && o <= 6 && opnd[rb] < 0) ? rb : NN;
+#ifdef H308_CORD
+    { const int a = s.EA[i], b = s.EB[i], na = ct.need[a], nb = ct.need[b];
+#ifdef H308_CORD_VAL
+      const bool sw = g_sw && nb > na;
+#elif defined(H308_CORD_NULL)
+      const bool sw = false;
+#elif defined(H308_CORD_RESTR)
+      const bool sw = nb > na && !((o == 5 || o == 4) && a != NN && b != NN);
+#elif defined(H308_CORD_NOMUL)
+      const bool sw = nb > na && o != 5;
+#else
+      const bool sw = nb > na;
+#endif
+      ct.e1[i] = sw ? b : a; ct.e2[i] = sw ? a : b;
+      const int hi = sw ? nb : na, lo = sw ? na : nb;
+      ct.need[i] = hi > lo + 1 ? hi : lo + 1; }
+#endif
   }
   opnd[n] = 0;
   s.EA[NN] = NN; s.EB[NN] = NN; s.pend[NN] = 0;
@@ -104,7 +145,6 @@ static void prepare(const View& V, h42::PrepBuf& P) {
   C.fo[V.Q] = fill;
   for (int q = 0; q < V.Q; q++) { const int r = C.rr[q]; s.pend[opnd[r] < 0 ? r : NN]++; }
 }
-
 static inline void trial(const h42::OrdScratch& s, const h14::Tab& C, int q, int& peakR, int& endR) {
   constexpr int DUM = h14::MAXN + 1;
   int pe[DUM + 1]; unsigned char he[DUM + 1];
@@ -137,7 +177,6 @@ static inline void trial(const h42::OrdScratch& s, const h14::Tab& C, int q, int
   }
   peakR = peak; endR = cur;
 }
-
 static inline void cap_node(Scratch& scr, const h14::Tab& C, int x, int m) {
   const int A = C.CA[x], op = C.OP[x], B = (op >= 3 && op <= 6) ? C.CB[x] : -1;
   scr.sn[m] = x; scr.sa[m] = A; scr.sb[m] = B;
@@ -150,7 +189,6 @@ static inline void cap_mov(Scratch& scr, const h14::Tab& C, int q, int qi, int m
   scr.sn[m] = -1; scr.sa[m] = r; scr.sb[m] = -1;
   scr.reads[r]++; scr.lastread[r] = m; scr.qof[m] = qi;
 }
-
 static inline int commit_cap(h42::OrdScratch& s, const h14::Tab& C, Scratch& scr, int q, int qi, int n, int m) {
   const int NN = n;
   const int* opnd = C.opnd;
@@ -183,7 +221,6 @@ static inline int commit_cap(h42::OrdScratch& s, const h14::Tab& C, Scratch& scr
   if (len == 0) { cap_mov(scr, C, q, qi, m); return m + 1; }
   return m + len;
 }
-
 static int order(const h14::Tab& C, int* out, Scratch& scr) {
   using namespace h42;
   const int n = C.n, Q = C.Q;
@@ -202,10 +239,17 @@ static int order(const h14::Tab& C, int* out, Scratch& scr) {
     }
     int ba = 0;
     int bp = s.rp[rem[0]], be = s.re[rem[0]];
+#ifdef H308_FORCEID
+    for (int a = 1; a < 0; a++) {
+#else
     for (int a = 1; a < nr; a++) {
+#endif
       const int q = rem[a];
       if (s.rp[q] < bp || (s.rp[q] == bp && s.re[q] < be)) { bp = s.rp[q]; be = s.re[q]; ba = a; }
     }
+#ifdef H308_CORD_VAL
+    if (g_force) { for (int a = 0; a < nr; a++) if (rem[a] == g_force[step]) { ba = a; break; } }
+#endif
     const int c = rem[ba];
     for (int w = 0; w <= WN; w++) s.T[w] = 0;
     C308_TS(17);
@@ -224,14 +268,12 @@ static int order(const h14::Tab& C, int* out, Scratch& scr) {
   }
   return m;
 }
-
 template <class E>
 static inline void segs_emit2(uint32_t* sg, const Tree& T, const uint32_t* segmap, const E& e) {
   const uint32_t e1022 = e.enc(1022);
   for (int q = 0; q < 18; q++) sg[q] = (q <= T.Q) ? segmap[q] : (uint32_t)T.segs[q];
   for (int q = 0; q < 18; q++) sg[18 + q] = q < T.Q ? e.enc(T.segs[18 + q]) : e1022;
 }
-
 static inline bool stage_impl(const View& V, Tree& T, cmi6::TreeEnc& te) {
   Scratch& scr = f38::scr;
   const int Q = V.Q, n = V.n();
@@ -241,20 +283,23 @@ static inline bool stage_impl(const View& V, Tree& T, cmi6::TreeEnc& te) {
   if (V.nS > NSV || V.nth > 32) return false;
   T.sp.reserve((size_t)V.nS);
   for (int i = 0; i < V.nS; i++) { int o = V.op(i), a = V.a(i), b = V.b(i); if (a > 31 || b > 31) return false; T.sp.push_back((uint16_t)(o | (a << 6) | (b << 11))); }
-
   C308_TS(4);
   h42::PrepBuf P;
-  c308::prepare(V, P);
-  C308_TS(5);
   const int* opnd = P.opnd;
   int ord[h14::MAXQ];
-  for (int q = 0; q < Q; q++) ord[q] = q;
   h14::Tab& C = h14::tab;
+  int m = 0, nsl = 0, nf = 0, pc = 0;
+  bool decFail = false;
+  uint16_t capt[18];
+  auto phaseA = [&]() -> int {
+  c308::prepare(V, P);
+  C308_TS(5);
+  for (int q = 0; q < Q; q++) ord[q] = q;
   for (int x = 0; x <= n; x++) { scr.reads[x] = 0; scr.lastread[x] = -1; }
-  int m = 0;
+  m = 0;
   if (Q > 1) {
     m = c308::order(C, ord, scr);
-    if (m < 0) { f38::Grid g; return f42::compile_fused_stage(V, T, te, g, 3, nullptr); }
+    if (m < 0) return 2;
   } else if (Q == 1) {
     for (int t = C.fo[0]; t < C.fo[1]; t++) cap_node(scr, C, C.fl[t], m++);
     if (m == 0) cap_mov(scr, C, 0, 0, m++);
@@ -267,20 +312,19 @@ static inline bool stage_impl(const View& V, Tree& T, cmi6::TreeEnc& te) {
     const int r1 = (scr.sa[k + 1] == x) + (scr.sb[k + 1] == x);
     if (r1 == scr.reads[x]) scr.chain[x] = 1;
   }
-  uint16_t capt[18]; for (int q = 0; q < 18; q++) capt[q] = 1022;
+  for (int q = 0; q < 18; q++) capt[q] = 1022;
   C308_TS(8);
   auto code = [&](int x, int k) -> int {
     if (opnd[x] >= 0) return opnd[x];
     if (scr.chain[x] && scr.pos[x] == k - 1) return 1022;
     return scr.slot[x];
   };
-  int nsl = 0, nf = 0, pc = 0;
-  bool decFail = false;
+  nsl = 0; nf = 0; pc = 0; decFail = false;
   scr.newend[0] = 0;
   for (int k = 0; k < m; k++) {
     const int node = scr.sn[k], A0 = scr.sa[k], B0 = scr.sb[k];
     const int A = code(A0, k), B = B0 >= 0 ? code(B0, k) : 0;
-    if (A < 0 || B < 0) return false;
+    if (A < 0 || B < 0) return 1;
     if (opnd[A0] < 0 && scr.slot[A0] >= 0 && scr.lastread[A0] == k) { scr.freeS[nf++] = scr.slot[A0]; scr.slot[A0] = -2; }
     if (B0 >= 0 && B0 != A0 && opnd[B0] < 0 && scr.slot[B0] >= 0 && scr.lastread[B0] == k) { scr.freeS[nf++] = scr.slot[B0]; scr.slot[B0] = -2; }
     int d = 63;
@@ -295,19 +339,70 @@ static inline bool stage_impl(const View& V, Tree& T, cmi6::TreeEnc& te) {
     ++pc;
     scr.newend[k + 1] = pc;
   }
-  if (nsl > MAXSLOT) return false;
+  if (nsl > MAXSLOT) return 1;
+  return 0;
+  };
+  const int rc0 = phaseA();
+#ifdef H308_CORD_VAL
+  if (rc0 == 0 && !decFail) {
+    auto sigs = [&](uint8_t* sg) {
+      for (int i = 0; i <= n; i++) sg[i] = 0;
+      static thread_local unsigned char bnd[h14::MAXM + 1];
+      for (int i = 0; i <= pc; i++) bnd[i] = 0;
+      for (int q = 0; q < Q; q++) bnd[scr.newend[scr.segend[q]]] = 1;
+      int pi = 0;
+      for (int k = 0; k < m; k++) if (scr.sn[k] >= 0) g_pcn[pi++] = scr.sn[k];
+      for (int k = 0; k < pc; k++) {
+        const uint32_t w = scr.pk[k], op = w & 63, a = (w >> 12) & 1023, b = w >> 22;
+        const int nd = g_pcn[k];
+        if (op == 4 || op == 5) sg[nd] |= (uint8_t)((a == 1022 && b == 1022) ? 2u : (b == 1022 ? 1u : 0u));
+        if ((op == 3 || op == 6) && a == 1022 && b == 1022) sg[nd] |= 8;
+        if (k + 1 < pc && scr.rec[k].zo == 0 && scr.rec[k].d63) {
+          const enc34::Dec& bb = scr.rec[k + 1];
+          if (bb.zo >= 7 && bb.zo <= 15 && bb.A == 1022 && !bnd[k + 1]) sg[nd] |= 4;
+        }
+      }
+    };
+    sigs(g_sigB);
+    int ordB[h14::MAXQ]; for (int q = 0; q < Q; q++) ordB[q] = ord[q];
+    g_sw = true; g_force = (Q > 1) ? ordB : nullptr;
+    const int rc1 = phaseA();
+    g_force = nullptr;
+    bool same = rc1 == 0 && !decFail;
+    if (same) { sigs(g_sigN); for (int i = 0; i < n; i++) if (g_sigN[i] != g_sigB[i]) { same = false; break; } }
+    g_sw = false;
+    if (same) g_valAcc.fetch_add(1, std::memory_order_relaxed);
+    else { g_valRej.fetch_add(1, std::memory_order_relaxed); phaseA(); }
+  }
+  g_sw = false;
+#endif
+  if (rc0 == 2) { f38::Grid g; return f42::compile_fused_stage(V, T, te, g, 3, nullptr); }
+  if (rc0 == 1) return false;
+#ifdef H308_NSTAT
+  { static struct St { std::atomic<uint64_t> n{0}, sl{0}, pcs{0}, mx{0}; ~St() { fprintf(stderr, "H308_NSTAT misses %llu sum_nslot %llu sum_pc %llu\n", (unsigned long long)n.load(), (unsigned long long)sl.load(), (unsigned long long)pcs.load());
+#ifdef H308_CORD_VAL
+      fprintf(stderr, "H308_NSTAT cordval accepted %llu rejected %llu\n", (unsigned long long)g_valAcc.load(), (unsigned long long)g_valRej.load());
+#endif
+    } } st;
+    st.n.fetch_add(1, std::memory_order_relaxed); st.sl.fetch_add((uint64_t)nsl, std::memory_order_relaxed); st.pcs.fetch_add((uint64_t)pc, std::memory_order_relaxed); }
+#endif
   C308_TS(9);
   T.prog.assign(scr.pk, scr.pk + pc);
   for (int q = 0; q < 36; q++) T.segs[q] = 0;
   for (int q = 0; q < Q; q++) T.segs[q + 1] = (uint16_t)scr.newend[scr.segend[q]];
   for (int q = 0; q < 18; q++) T.segs[18 + q] = 1022;
   for (int q = 0; q < Q; q++) T.segs[18 + q] = capt[q];
+#ifdef H308_NSLPAD12
+  T.nslot = (nsl == 1 || nsl == 2) ? nsl + 1 : nsl;
+#elif defined(H308_NSLPAD)
+  T.nslot = nsl + H308_NSLPAD;
+#else
   T.nslot = nsl;
+#endif
   T.th.reserve((size_t)V.nth);
   for (int s = 0; s < V.nth; s++) T.th.push_back(V.th(s));
   C308_TS(10);
   if (decFail) { f38::Grid g; return f42::compile_fused_stage(V, T, te, g, 3, nullptr); }
-
   const int SS = T.nth == 0 ? 2 : 16;
   const enc34::ScanE es = enc34::make_scan(T, SS);
   const bool gin = T.nth >= 1 && T.nth <= GN_TH_MAX;
@@ -366,7 +461,6 @@ static inline bool stage_impl(const View& V, Tree& T, cmi6::TreeEnc& te) {
   C308_TS(12);
   return true;
 }
-
 static inline void fix_b1(const Tree& T, cmi6::TreeEnc& te) {
   if (!cmi6::g_b1 || (te.sp4.empty() && te.gp4.empty())) return;
   bool ok = true;
@@ -388,7 +482,6 @@ static inline bool stage(const View& V, Tree& T, cmi6::TreeEnc& te) {
   if (r) fix_b1(T, te);
   return r;
 }
-
 static inline uint32_t publish_idx(cc14::Handle& H, uint64_t h, cc14::Ent X, const uint32_t* kw, size_t nk, const uint32_t* pw, size_t np, const uint16_t* spw, size_t ns) {
   using cc14::Shared; cc14::Shared& S = H.S;
   uint32_t idx, koff, poff, soff;
@@ -411,13 +504,11 @@ static inline uint32_t publish_idx(cc14::Handle& H, uint64_t h, cc14::Ent X, con
     p = (p + 1) & (Shared::TB - 1);
   }
 }
-
 static inline void tok_to_vec(cmi6::TreeEnc& te) {
   if (te.tkp) { te.tk.assign(te.tkp, te.tkp + te.ntkp); te.tkp = nullptr; te.ntkp = 0; }
   if (te.sp4p) { te.sp4.assign(te.sp4p, te.sp4p + te.nsp4p); te.sp4p = nullptr; te.nsp4p = 0; }
   if (te.gp4p) { te.gp4.assign(te.gp4p, te.gp4p + te.ngp4p); te.gp4p = nullptr; te.ngp4p = 0; }
 }
-
 static inline bool compile_enc(cmi6::Handle& H, const View& V, Tree& T, cmi6::TreeEnc& te, double& enc_ms, const uint64_t* hpre = nullptr) {
   const size_t nk = (size_t)(V.theta - V.w);
   const uint64_t h = hpre ? *hpre : cc14::hkey(V.w, nk);

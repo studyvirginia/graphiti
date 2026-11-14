@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <vector>
 #include "final_pick_h.hpp"
-
 namespace sp {
 constexpr int NMAX = 24;
 constexpr int KMAX = 96;

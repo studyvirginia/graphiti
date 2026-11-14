@@ -17,9 +17,7 @@
 #ifndef RK_BITS
 #define RK_BITS 8
 #endif
-
 namespace evo {
-
 constexpr int MAXLEN = 24;
 constexpr int NCASE = 96;
 #ifndef IND_NRES
@@ -39,21 +37,16 @@ inline int mem_lean() { static const int v = getenv("MEM_LEAN") ? atoi(getenv("M
 static_assert(2 * MAXLEN < 64, "cval_of masks complexity to 6 bits; F[64] is indexed by it");
 constexpr int MAX_TRY = 8;
 constexpr double P_XO = 0.9, P_SWAP = 0.5, P_MUT = 0.25;
-
 enum : uint8_t { NOP = 0, CONST = 1, TVAR = 2, ADD = 3, SUB = 4, MUL = 5, DIV = 6,
                  SIN = 7, COS = 8, EXP = 9, LOG = 10, SQ = 11, CUBE = 12, SQRT = 13, CBRT = 14 };
-
 inline int arity(uint8_t o) { return (o >= ADD && o <= DIV) ? 2 : ((o >= SIN && o <= CBRT) ? 1 : 0); }
-
 struct Cand {
   uint8_t len[2];
   uint8_t op[2][MAXLEN];
   float c[2][MAXLEN];
 };
 static_assert(sizeof(Cand) == 244, "Cand must be 244 B");
-
 inline int cplx(const Cand& g) { return g.len[0] + g.len[1]; }
-
 struct Ind {
   Cand g;
   uint8_t ext[2][MAXLEN];
@@ -64,7 +57,6 @@ struct Ind {
   uint16_t cx;
   uint8_t valid;
 };
-
 inline uint64_t splitmix(uint64_t x) {
   x += 0x9E3779B97F4A7C15ull;
   x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9ull;
@@ -72,7 +64,6 @@ inline uint64_t splitmix(uint64_t x) {
   return x ^ (x >> 31);
 }
 inline uint64_t mix(uint64_t a, uint64_t b) { return splitmix(a * 0x100000001B3ull ^ splitmix(b)); }
-
 struct Rng {
   uint64_t s;
   explicit Rng(uint64_t seed) : s(splitmix(seed)) { if (!s) s = 0x9E3779B97F4A7C15ull; }
@@ -85,7 +76,6 @@ struct Rng {
     return std::sqrt(-2.0 * std::log(u1)) * std::cos(6.283185307179586 * u2);
   }
 };
-
 inline void extents(const uint8_t* op, int L, uint8_t* ext) {
   uint8_t st[MAXLEN];
   int sp = 0;
@@ -96,7 +86,6 @@ inline void extents(const uint8_t* op, int L, uint8_t* ext) {
     else { sp--; ext[k] = st[sp - 1]; }
   }
 }
-
 inline bool tree_valid(const uint8_t* op, int L) {
   if (L < 1 || L > MAXLEN) return false;
   int depth = 0;
@@ -111,7 +100,6 @@ inline bool tree_valid(const uint8_t* op, int L) {
   return depth == 1;
 }
 inline bool cand_valid(const Cand& g) { return tree_valid(g.op[0], g.len[0]) && tree_valid(g.op[1], g.len[1]); }
-
 inline void mutate(Cand& g, int t, Rng& r, int* kout = nullptr) {
   int k = (int)r.below(g.len[t]);
   if (kout) *kout = k;
@@ -133,7 +121,6 @@ inline void mutate(Cand& g, int t, Rng& r, int* kout = nullptr) {
     g.op[t][k] = cand[r.below(3)];
   }
 }
-
 inline int tournament(const Ind* par, int base, Rng& r) {
   int best = base + (int)r.below(DECK);
   for (int k = 1; k < TOURN; k++) {
@@ -142,7 +129,6 @@ inline int tournament(const Ind* par, int base, Rng& r) {
   }
   return best;
 }
-
 inline bool make_child(const Ind* par, int base, Rng& r, Ind& out, uint32_t& rebreeds) {
   for (int attempt = 0; attempt < MAX_TRY; attempt++) {
     const Ind& A = par[tournament(par, base, r)];
@@ -179,7 +165,6 @@ inline bool make_child(const Ind* par, int base, Rng& r, Ind& out, uint32_t& reb
   out.valid = 0;
   return false;
 }
-
 inline bool (*g_pool_trace_on)() = nullptr; inline double (*g_pool_trace_now)() = nullptr; inline void (*g_pool_trace_rec)(double, double) = nullptr;
 inline void (*g_pool_trace_wait)(double, double) = nullptr;
 inline int g_pool_h403 = 0;
@@ -285,14 +270,12 @@ class Pool {
   alignas(128) std::atomic<int> left_a_{0}; alignas(128) std::atomic<int> inflight_a_{0}; char pad744_[128];
   bool stop_ = false;
 };
-
 inline void precompute_ext(Pool& pool, Ind* par) {
   pool.run(NDEME, [&](int d) {
     for (int i = d * DECK; i < (d + 1) * DECK; i++)
       for (int t = 0; t < 2; t++) extents(par[i].g.op[t], par[i].g.len[t], par[i].ext[t]);
   });
 }
-
 inline void breed(Pool& pool, const Ind* par, Ind* chi, uint64_t seed, uint64_t step, uint32_t* rebreeds, uint32_t* failed) {
   pool.run(NDEME, [&](int d) {
     Rng r(mix(mix(seed, step), (uint64_t)d));
@@ -303,20 +286,17 @@ inline void breed(Pool& pool, const Ind* par, Ind* chi, uint64_t seed, uint64_t 
     rebreeds[d] = rb; failed[d] = fl;
   });
 }
-
 inline int subtree_start(const uint8_t* op, int k) {
   static constexpr int8_t DA[16] = {0, -1, -1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   int need = 1, q = k;
   for (;;) { need += DA[op[q] & 15]; if (need == 0) return q; q--; }
 }
-
 struct BreedBuf {
   std::vector<Cand> G;
   std::vector<uint16_t> prk;
   std::vector<double> pcw;
   BreedBuf() : G(((mem_lean() & 2) && getenv("H777") && atoi(getenv("H777")) != 0) ? 0 : NPOP), prk(NPOP), pcw(NPOP) {}
 };
-
 inline int tournament_i12(const BreedBuf& BB, int base, Rng& r) {
   const uint16_t* prk = BB.prk.data();
   const double* pcw = BB.pcw.data();
@@ -329,7 +309,6 @@ inline int tournament_i12(const BreedBuf& BB, int base, Rng& r) {
   }
   return (int)best;
 }
-
 __attribute__((always_inline)) inline void splice_tree(Cand& g, int t, const Cand& A, const Cand& B, int tb,
                                                        int s, int i, int js, int szj, int nl) {
   uint8_t U[2 * MAXLEN];
@@ -408,7 +387,6 @@ __attribute__((always_inline)) inline bool make_child_i12(const BreedBuf& BB, in
   out.valid = 0;
   return false;
 }
-
 inline void breed_i12(Pool& pool, const Ind* par, Ind* chi, BreedBuf& BB, uint64_t seed, uint64_t step, uint32_t* rebreeds, uint32_t* failed) {
   pool.run(NDEME, [&](int d) {
     for (int i = d * DECK; i < (d + 1) * DECK; i++) { BB.G[i] = par[i].g; BB.prk[i] = par[i].rank; BB.pcw[i] = par[i].crowd; }
@@ -420,13 +398,11 @@ inline void breed_i12(Pool& pool, const Ind* par, Ind* chi, BreedBuf& BB, uint64
     rebreeds[d] = rb; failed[d] = fl;
   });
 }
-
 struct RankScratch {
   std::vector<uint64_t> A, B, FE, tmp;
   std::vector<uint16_t> rS;
   std::vector<uint32_t> off, pos;
 };
-
 inline void f_raise(uint16_t* F, int c, uint16_t r) {
 #if defined(__ARM_NEON) || defined(__aarch64__)
   static const uint16_t IDX[64] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
@@ -443,18 +419,15 @@ inline void f_raise(uint16_t* F, int c, uint16_t r) {
   for (int i = c; i < 64 && F[i] < r; i++) F[i] = r;
 #endif
 }
-
 inline float fix_err(float e) {
   if (std::isnan(e) || e > std::numeric_limits<float>::max()) return std::numeric_limits<float>::max();
   return e < -std::numeric_limits<float>::max() ? -std::numeric_limits<float>::max() : e;
 }
 inline uint32_t fkey(float f) { uint32_t b; std::memcpy(&b, &f, 4); return (b & 0x80000000u) ? ~b : (b | 0x80000000u); }
 inline float funkey(uint32_t k) { const uint32_t b = (k & 0x80000000u) ? (k & 0x7fffffffu) : ~k; float f; std::memcpy(&f, &b, 4); return f; }
-
 inline double dval_of(uint64_t x) { return (double)funkey((uint32_t)(x >> 32)); }
 inline int cval_of(uint64_t x) { return (int)((x >> 16) & 63); }
 inline uint32_t jof(uint64_t x) { return (uint32_t)(x & 0xffffu); }
-
 inline const double* g_pen_tab = nullptr;
 inline void rank_crowd_pen(int m, const float* err, const uint16_t* cp, uint16_t* rank, double* crowd, RankScratch& sc);
 inline void rank_crowd(int m, const float* err, const uint16_t* cp, uint16_t* rank, double* crowd, RankScratch& sc) {
@@ -509,7 +482,6 @@ inline void rank_crowd(int m, const float* err, const uint16_t* cp, uint16_t* ra
   for (int r = 1; r <= R + 1; r++) sc.off[r] += sc.off[r - 1];
   sc.pos = sc.off;
   for (int k = 0; k < m; k++) sc.FE[sc.pos[rs[k]]++] = src[k];
-
   const double INF = std::numeric_limits<double>::infinity();
   for (int r = 1; r <= R; r++) {
     const uint32_t a = sc.off[r], b = sc.off[r + 1];
@@ -539,7 +511,6 @@ inline void rank_crowd(int m, const float* err, const uint16_t* cp, uint16_t* ra
     }
   }
 }
-
 inline void rank_crowd_pen(int m, const float* err, const uint16_t* cp, uint16_t* rank, double* crowd, RankScratch& sc) {
   if (m > 65535) { fprintf(stderr, "rank_crowd_pen: pool of %d members; the 16-bit index/histogram layout (as rank_crowd) holds at most 65535\n", m); std::abort(); }
   sc.A.resize(m); sc.B.resize(m); sc.FE.resize(m); sc.tmp.resize(m); sc.rS.resize(m);
@@ -628,7 +599,6 @@ inline void rank_crowd_pen(int m, const float* err, const uint16_t* cp, uint16_t
     }
   }
 }
-
 inline void choose_survivors(int n, const double* crowd, RankScratch& sc, uint32_t* surv, std::vector<uint32_t>& tmp) {
   int k = 0;
   const int R = (int)sc.off.size() - 2;
@@ -648,7 +618,6 @@ inline void choose_survivors(int n, const double* crowd, RankScratch& sc, uint32
     }
   }
 }
-
 struct SelScratch {
   RankScratch rs;
   std::vector<uint32_t> pidx, surv, tmp, mtmp;
@@ -657,7 +626,6 @@ struct SelScratch {
   std::vector<uint16_t> prank;
   std::vector<double> pcrowd;
 };
-
 inline void migrants(int d, const Ind* par, uint32_t* out, std::vector<uint32_t>& tmp) {
   tmp.resize(DECK);
   for (int i = 0; i < DECK; i++) tmp[i] = (uint32_t)(d * DECK + i);
@@ -668,7 +636,6 @@ inline void migrants(int d, const Ind* par, uint32_t* out, std::vector<uint32_t>
   });
   for (int k = 0; k < MIGR; k++) out[k] = tmp[k];
 }
-
 inline void select_deme(int d, const Ind* par, Ind* chi, Ind* nxt, const uint32_t* migtab, SelScratch& S) {
   S.pidx.clear();
   for (int i = d * DECK; i < (d + 1) * DECK; i++) S.pidx.push_back((uint32_t)i);
@@ -705,12 +672,10 @@ inline void select_deme(int d, const Ind* par, Ind* chi, Ind* nxt, const uint32_
     o.valid = 1;
   }
 }
-
 inline void select_all(Pool& pool, const Ind* par, Ind* chi, Ind* nxt, uint32_t* migtab, SelScratch* S) {
   pool.run(NDEME, [&](int d) { migrants(d, par, migtab + d * MIGR, S[d].mtmp); });
   pool.run(NDEME, [&](int d) { select_deme(d, par, chi, nxt, migtab, S[d]); });
 }
-
 struct LexState {
   std::vector<float> sv, eps, col;
   std::vector<uint16_t> si;
@@ -719,7 +684,6 @@ struct LexState {
   LexState() : sv((mem_lean() & 1) ? 0 : (size_t)NDEME * NCASE * DECK), eps((mem_lean() & 1) ? 0 : (size_t)NDEME * NCASE), col((mem_lean() & 1) ? 0 : (size_t)NDEME * NCASE * DECK),
                si((mem_lean() & 1) ? 0 : (size_t)NDEME * NCASE * DECK), scr((mem_lean() & 1) ? 0 : NDEME) {}
 };
-
 inline void lex_sort_col(const float* v, int n, float* out_v, uint16_t* out_i, LexState::Scr& s) {
   s.ka.resize(n); s.kb.resize(n); s.ia.resize(n); s.ib.resize(n);
   for (int i = 0; i < n; i++) {
@@ -744,7 +708,6 @@ inline void lex_sort_col(const float* v, int n, float* out_v, uint16_t* out_i, L
     out_v[i] = funkey(ka[i]); out_i[i] = ia[i];
   }
 }
-
 inline void lex_prepare(Pool& pool, const Ind* par, LexState& L) {
   pool.run(NDEME, [&](int d) {
     LexState::Scr& s = L.scr[d];
@@ -761,7 +724,6 @@ inline void lex_prepare(Pool& pool, const Ind* par, LexState& L) {
     }
   });
 }
-
 inline int lex_one(const LexState& L, int d, Rng& r, uint16_t* alive) {
   int perm[NCASE];
   for (int c = 0; c < NCASE; c++) perm[c] = c;
@@ -788,7 +750,6 @@ inline int lex_one(const LexState& L, int d, Rng& r, uint16_t* alive) {
   }
   return alive[na == 1 ? 0 : (int)r.below(na)];
 }
-
 inline void lex_select_all(Pool& pool, const LexState& L, uint64_t seed, uint64_t step, uint32_t* sel) {
   pool.run(NDEME, [&](int d) {
     Rng r(mix(mix(seed ^ 0xA5A5A5A5ull, step), (uint64_t)d));
@@ -797,7 +758,6 @@ inline void lex_select_all(Pool& pool, const LexState& L, uint64_t seed, uint64_
       sel[d * DECK + i] = (uint32_t)(d * DECK + lex_one(L, d, r, alive));
   });
 }
-
 inline void init_rank(Pool& pool, Ind* par, SelScratch* S) {
   pool.run(NDEME, [&](int d) {
     SelScratch& s = S[d];
@@ -807,14 +767,11 @@ inline void init_rank(Pool& pool, Ind* par, SelScratch* S) {
     for (int i = 0; i < DECK; i++) { par[d * DECK + i].rank = s.prank[i]; par[d * DECK + i].crowd = s.pcrowd[i]; }
   });
 }
-
 inline void fill_rows(std::vector<float>& tab, int nrows, uint64_t seed) {
   tab.resize((size_t)nrows * NCASE);
   Rng r(seed);
   for (auto& v : tab) { double g = r.gauss(); v = (float)(g * g); }
 }
-
-
 struct State {
   std::vector<Ind> par, chi, nxt;
   std::vector<uint32_t> migtab, rb, fl, lexsel;
@@ -824,7 +781,6 @@ struct State {
   State() : par(NPOP), chi(NPOP), nxt(NPOP), migtab((size_t)NDEME * MIGR), rb(NDEME), fl(NDEME),
             lexsel((mem_lean() & 1) ? 0 : NPOP), sel(NDEME) {}
 };
-
 inline void init_pop(Pool& pool, State& S, const Cand* seeds, int nseeds, const float* rows, int nrows, uint64_t seed) {
   for (int i = 0; i < NPOP; i++) {
     Ind& I = S.par[i];
@@ -837,22 +793,18 @@ inline void init_pop(Pool& pool, State& S, const Cand* seeds, int nseeds, const 
   }
   init_rank(pool, S.par.data(), S.sel.data());
 }
-
 inline void synth_children(State& S, const float* rows, int nrows, uint64_t seed, uint64_t step) {
   for (int i = 0; i < NPOP; i++) {
     Rng r(mix(mix(seed ^ 0x77ull, step), (uint64_t)i));
     std::memcpy(S.chi[i].res, rows + (size_t)r.below(nrows) * NCASE, sizeof S.chi[i].res);
   }
 }
-
 inline void breed_step(Pool& pool, State& S, uint64_t seed, uint64_t step) {
   precompute_ext(pool, S.par.data());
   breed(pool, S.par.data(), S.chi.data(), seed, step, S.rb.data(), S.fl.data());
 }
-
 inline void select_step(Pool& pool, State& S) {
   select_all(pool, S.par.data(), S.chi.data(), S.nxt.data(), S.migtab.data(), S.sel.data());
   std::swap(S.par, S.nxt);
 }
-
 }

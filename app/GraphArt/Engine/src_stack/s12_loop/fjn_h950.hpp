@@ -5,10 +5,8 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
-
 namespace fjn {
 static const int NW = 9, KW = 10, NPTS = 48;
-
 struct WarpMat { float S[NPTS * NW]; float u0[NW]; double Sd[NPTS * NW]; double u0d[NW]; };
 inline void bspl_basis(const std::vector<double>& kn, int deg, int M, double x, double* B) {
   int span = deg; const int nk = (int)kn.size();
@@ -35,7 +33,6 @@ inline void make_warp(WarpMat& W) {
     for (int k = 0; k < NW; k++) { double s = 0; for (int m = k + 1; m < M; m++) s += B[m]; W.Sd[i * NW + k] = s; W.S[i * NW + k] = (float)s; }
   }
 }
-
 inline int g_fuse = getenv("FJN_FUSE_HOST") ? atoi(getenv("FJN_FUSE_HOST")) : 0;
 inline int geom_CD(int T) { if (g_fuse == 2) return 1 + (T + 2) / 2; const int ND = T + 1; const int SUB = ND <= 4 ? 1 : (ND + 3) / 4; const int CH = SUB == 1 ? (ND + 1) / 2 : 2; if (g_fuse && SUB > 1) return 1 + CH * SUB; return 1 + CH; }
 inline int g_lay = getenv("FJN_LAY") ? atoi(getenv("FJN_LAY")) : 0;
@@ -49,16 +46,23 @@ inline int g_v4 = getenv("FJN_V4_HOST") ? atoi(getenv("FJN_V4_HOST")) : 0;
 inline int g_diet = getenv("FJN_DIET_HOST") ? atoi(getenv("FJN_DIET_HOST")) : 0;
 inline int g_v5 = getenv("FJN_V5_HOST") ? atoi(getenv("FJN_V5_HOST")) : 0;
 inline int g_v5qmax = getenv("FJN_V5QMAX_HOST") ? atoi(getenv("FJN_V5QMAX_HOST")) : 99;
+inline int g_wd = getenv("FJN_WD_HOST") ? atoi(getenv("FJN_WD_HOST")) : 0;
+inline uint32_t wd_k() { return (g_wd & 1) ? 3u : 1u; }
+inline uint32_t wd_pad() { return (g_wd & 2) ? 2u : 0u; }
+inline void wd_s3_rewrite(std::vector<uint32_t>& p4, uint32_t* segs, uint32_t SB) {
+  auto rew = [&](uint32_t w) -> uint32_t { if ((w >> 31) || !((w >> 30) & 1u) || ((w >> 29) & 1u)) return w; return (w & ~0x1FFFFFFFu) | (SB + 3u * ((w & 0x1FFFFFFFu) - SB)); };
+  for (size_t i = 0; i + 3 < p4.size(); i += 4) { p4[i + 2] = rew(p4[i + 2]); p4[i + 3] = rew(p4[i + 3]); }
+  for (int q = 0; q < 18; q++) segs[18 + q] = rew(segs[18 + q]);
+}
 inline int ws_floats(int Q, int T) {
   const int NPK = std::max(4, (T + 3) / 4 * 4), QP = std::max(4, (Q + 3) / 4 * 4), NC = T + KW, NMAX = 2 * T + KW, NPKK = NMAX * (NMAX + 1) / 2;
   int o = 2 * NPK + 4 * NPK + 16 + 32 + 2 * QP + 4 * QP + 48 + 2 + 4 + 32 + 2 * NMAX + 2 * NMAX + NMAX + NMAX + NPKK + (g_lay == 2 || g_lay == 3 ? 0 : 2 * NPKK) + (g_lay == 0 ? NC * 48 : 0) + 96 + 4 + (g_diet ? 0 : g_res48_ws - (((g_v4 & 1) && g_res48_ws) ? 96 : 0)) - (((g_v5 & 4) && Q <= g_v5qmax && g_res48_ws) ? 192 : 0) - ((g_v4 & 2) ? 48 : 0) - ((g_v4 & 4) ? 2 * NMAX : 0);
   return (o + 3) / 4 * 4;
 }
-inline int per_min(int T) { const int NC = T + KW, NMAX = 2 * T + KW; if (g_v3col) return std::max(NMAX * (NMAX + 1) / 2, 72);  return std::max(NMAX * (NMAX + 1) / 2, (NC * 48 + 1) / 2); }
+inline int per_min(int T) { const int NC = T + KW, NMAX = 2 * T + KW; if (g_v3col) return std::max(NMAX * (NMAX + 1) / 2, 72);   return std::max(NMAX * (NMAX + 1) / 2, (NC * 48 + 1) / 2); }
 inline int slotc_floats(int Q, int T) { return (g_v3ts ? 2 * 48 : 2 * geom_CD(T) * 48) + ws_floats(Q, T); }
 inline int HSq(int Q) { return (Q + 1) * 48 + (Q + 1) * 16; }
 inline int eb_stride(int Q, int T) { return 4 * HSq(Q) + (g_v3col ? (T + KW) * 48 : 0); }
-
 struct Rec {
   std::vector<uint32_t> tokP, tokD;
   uint32_t hP[4], hD[4];

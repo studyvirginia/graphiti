@@ -8,7 +8,6 @@
 #include <type_traits>
 #include <arm_neon.h>
 #include <Accelerate/Accelerate.h>
-
 #ifndef S290_VF
 #define S290_VF 1
 #endif
@@ -19,14 +18,12 @@
 #define S290_GS 1
 #endif
 namespace s250b {
-
 struct Geo { int S, LPS, P, T, E; };
 inline Geo geo_for(int Q, bool s2) {
   if (s2) return {2, 16, 3, 32, 96};
   if (Q <= 5) return {16, 8, 6, 128, 768};
   return {16, 16, 3, 256, 768};
 }
-
 struct Inputs {
   const uint32_t* hdr;
   const uint32_t* prog;
@@ -37,7 +34,6 @@ struct Inputs {
   const uint32_t* segs;
   const float* ctab;
 };
-
 template<typename R> struct Work {
   Geo g{};
   int Q = 0, nslot = 0, nsc = 0;
@@ -49,7 +45,6 @@ template<typename R> struct Work {
   std::vector<R> M, D, ybuf;
   std::vector<R> cap;
   std::vector<R> cols;
-
   void prepare(int Q_, bool s2, int nslot_, int nsc_) {
     Q = Q_; nslot = nslot_; nsc = nsc_; g = geo_for(Q, s2);
     const int E = g.E, T = g.T, P = g.P, S = g.S, LPS = g.LPS;
@@ -66,7 +61,6 @@ template<typename R> struct Work {
     accp = ACC.data();
     cap.resize((size_t)Q * E); cols.resize((size_t)Q * S * 48);
   }
-
   inline const R* fetch(uint32_t raw, R* buf) const {
     const uint32_t cl = (raw >> 29) & 3u, of = raw & 0x1FFFFFFFu;
     const R* N = NS.data(); const int E = g.E, T = g.T, P = g.P, S = g.S, LPS = g.LPS;
@@ -90,7 +84,6 @@ template<typename R> struct Work {
     return buf;
   }
 };
-
 template<typename R> inline void exec_instr(Work<R>& W, uint32_t x, uint32_t y, uint32_t zraw, uint32_t wraw, const float* ctab) {
   const int E = W.g.E;
   const R* A = (zraw >> 31) ? W.accp : W.fetch(zraw, W.A.data());
@@ -145,7 +138,6 @@ template<typename R> inline void exec_instr(Work<R>& W, uint32_t x, uint32_t y, 
   W.accp = ACC;
   if (y != 0xFFFFFFFFu) { R* N = W.NS.data() + y; std::memcpy(N, ACC, sizeof(R) * E); }
 }
-
 template<typename R> inline void gs_start_ref(int Q, R* cs, R* y, R tau, R& rss_out, bool& bad) {
   bad = false;
   R on[16];
@@ -166,7 +158,6 @@ template<typename R> inline void gs_start_ref(int Q, R* cs, R* y, R tau, R& rss_
   R rss = 0; for (int i = 0; i < 48; i++) rss += y[i] * y[i];
   rss_out = rss;
 }
-
 inline float s290_dot48(const float* x, const float* y) {
   float32x4_t a0 = vdupq_n_f32(0.f), a1 = vdupq_n_f32(0.f), a2 = vdupq_n_f32(0.f);
   for (int k = 0; k < 48; k += 12) {
@@ -204,7 +195,6 @@ template<typename R> inline void gs_start(int Q, R* cs, R* y, R tau, R& rss_out,
   if constexpr (S290_GS && std::is_same<R, float>::value) gs_start_f(Q, cs, y, tau, rss_out, bad);
   else gs_start_ref(Q, cs, y, tau, rss_out, bad);
 }
-
 template<typename R> inline void run_tree(Work<R>& W, const Inputs& I, uint32_t tree, R tau, R* out16) {
   const uint32_t* h = I.hdr + 4 * (size_t)tree;
   const uint32_t hx = h[0], hy = h[1], hz = h[2], hw = h[3];
@@ -252,5 +242,4 @@ template<typename R> inline void run_tree(Work<R>& W, const Inputs& I, uint32_t 
     out16[s] = (bad || !std::isfinite(rss)) ? std::numeric_limits<R>::infinity() : rss;
   }
 }
-
 }

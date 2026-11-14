@@ -1,6 +1,4 @@
-
 #pragma once
-
 struct SelH33 {
   std::vector<uint64_t> hkey;
   std::vector<uint32_t> hpid, hpos;
@@ -11,7 +9,6 @@ struct SelH33 {
   std::vector<PRec> plist;
 };
 static SelH33 g_sel_h33;
-
 #ifdef H33_PROF
 #define H33_T0 auto _h33t = std::chrono::steady_clock::now();
 #define H33_LAP(name) { auto _h33n = std::chrono::steady_clock::now(); \
@@ -20,7 +17,6 @@ static SelH33 g_sel_h33;
 #define H33_T0
 #define H33_LAP(name)
 #endif
-
 static void select_h33(evo::Pool& pool, evo::State& S, const std::vector<Meta>& pm, const std::vector<Meta>& cm,
                        const uint8_t* admit, std::vector<Meta>& nm, Times& T) {
   using namespace evo;
@@ -32,7 +28,6 @@ static void select_h33(evo::Pool& pool, evo::State& S, const std::vector<Meta>& 
     H.hkey.assign((size_t)NDEME * HMAX, 0); H.hpid.assign((size_t)NDEME * HMAX, 0); H.hpos.assign((size_t)NDEME * HMAX, 0);
   }
   H.mstart.assign(NDEME, 0); H.cur.assign(NDEME, 0); H.fillA.assign(NDEME, 0);
-
   pool.run(NDEME, [&](int d) { migrants(d, S.par.data(), S.migtab.data() + d * MIGR, S.sel[d].mtmp); });
   H33_LAP("migrants")
   pool.run(NDEME, [&](int d) {
@@ -65,7 +60,6 @@ static void select_h33(evo::Pool& pool, evo::State& S, const std::vector<Meta>& 
       H.hkey[base + q] = mt.kh; H.hpid[base + q] = p; H.hpos[base + q] = pos;
     }
   });
-
   H33_LAP("prep+rank")
   size_t cap = 1024; while (cap < 2 * (size_t)NP + 2) cap <<= 1;
   if (H.tkey.size() != cap) { H.tkey.assign(cap, 0); H.tent.assign(cap, 0); }
@@ -116,7 +110,6 @@ static void select_h33(evo::Pool& pool, evo::State& S, const std::vector<Meta>& 
     }
     if (slot < DECK) { fprintf(stderr, "select: deme %d short by %d after both passes (impossible: parents are distinct)\n", d, DECK - slot); exit(1); }
   }
-
   H33_LAP("serial placement")
   const size_t NPL = H.plist.size(), CHK = 1024;
   pool.run((int)((NPL + CHK - 1) / CHK), [&](int c) {

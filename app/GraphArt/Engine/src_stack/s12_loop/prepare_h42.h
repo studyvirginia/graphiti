@@ -2,10 +2,8 @@
 #include <cstdint>
 #include <cstring>
 #include "corder_su_h42.h"
-
 namespace h42 {
 struct PrepBuf { int opnd[MAXN + 1]; int rep[MAXN]; };
-
 struct PrepScratch {
   uint64_t key[2 * MAXN];
   int val[2 * MAXN];
@@ -17,11 +15,9 @@ struct PrepScratch {
   uint32_t rgen;
 };
 static thread_local PrepScratch ps;
-
 static inline void next_gen(uint32_t& g, uint32_t* arr, int len) {
   if (++g == 0) { for (int i = 0; i < len; i++) arr[i] = 0; g = 1; }
 }
-
 static inline int build_F_st(const h14::Tab& C, int r, int* out, uint64_t* fbq, int* pend, const int* EA, const int* EB, int NN) {
   if (C.opnd[r] >= 0) return 0;
   const uint32_t g = ps.vgen, rg = ps.rgen;
@@ -51,7 +47,6 @@ static inline int build_F_st(const h14::Tab& C, int r, int* out, uint64_t* fbq, 
   }
   return cnt;
 }
-
 static void prepare(const View& V, PrepBuf& P) {
   OrdScratch& s = os;
   const int n = V.n();
@@ -62,7 +57,6 @@ static void prepare(const View& V, PrepBuf& P) {
     P.rep[i] = i;
   }
   P.opnd[n] = 0;
-
   int cap = 16; while (cap < 2 * n) cap <<= 1;
   const uint64_t mask = (uint64_t)cap - 1;
   next_gen(ps.kgen, ps.kst, 2 * MAXN);
@@ -79,7 +73,6 @@ static void prepare(const View& V, PrepBuf& P) {
       p = (p + 1) & mask;
     }
   }
-
   h14::Tab& C = h14::tab;
   const int* rep = P.rep;
   const int* opnd = P.opnd;

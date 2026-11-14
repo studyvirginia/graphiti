@@ -6,28 +6,22 @@
 #include "h156_flags.h"
 #include "nf_flat_h16_i13_h156.hpp"
 #include "compile_memo_i17_h156.h"
-
 namespace h156 {
-
 struct RetainStats {
   long nf_ev = 0, cc_ev = 0, enc_ev = 0;
   long nf_kept = 0, cc_kept = 0, enc_kept = 0;
   uint32_t thr = 0;
 };
-
 static inline uint64_t nf_block_bytes(const nf16::BHdr* hd) {
   const uint64_t nb = (uint64_t)hd->nabs * 4 + (uint64_t)hd->pn_len * sizeof(skn::PNode);
   return ((uint64_t)sizeof(nf16::BHdr) + nb + 7) & ~(uint64_t)7;
 }
-
 static inline double cc_entry_bytes(const cc14::Ent& e, const cmi6::Slot& s, const uint32_t* ar = nullptr) {
   double b = (double)sizeof(cc14::Ent) + 4.0 * e.nkey + 4.0 * e.nprog + 2.0 * e.nsp + (double)cmi6::slot_hdr_bytes();
   if (s.st == 2) b += 4.0 * (double)(ar ? cmi6::slot_words(s, ar) : (uint64_t)s.nsp4 + s.ngp4 + (cmi6::g_h913 ? cmi6::tabw(s.cmode, s.Qs) : 0u));
   return b;
 }
-
 static inline uint32_t gen_of(uint32_t t, uint32_t nt) { return t < nt ? t : nt - 1; }
-
 static inline void compact_nf(nf16::Shared& S, uint32_t thr, RetainStats& out) {
   std::vector<uint64_t> keep;
   long live = 0;
@@ -56,7 +50,6 @@ static inline void compact_nf(nf16::Shared& S, uint32_t thr, RetainStats& out) {
   out.nf_ev = live - (long)keep.size();
   out.nf_kept = (long)keep.size();
 }
-
 static inline void compact_cc(cc14::Shared& C, cmi6::Memo& M, uint32_t thr, RetainStats& out) {
   const uint32_t ne = std::min<uint32_t>(C.nent.load(std::memory_order_relaxed), cc14::Shared::MAXENT);
   std::vector<uint8_t> live(ne, 0);
@@ -73,7 +66,6 @@ static inline void compact_cc(cc14::Shared& C, cmi6::Memo& M, uint32_t thr, Reta
     if (C.ent[i].touch >= thr) keep.push_back(i);
   }
   const uint32_t K = (uint32_t)keep.size();
-
   std::vector<uint32_t> nk_off(ne, 0), np_off(ne, 0), ns_off(ne, 0), nt_off(ne, 0);
   auto slide = [](const std::vector<uint32_t>& lst, auto offf, auto cntf, auto* base, std::vector<uint32_t>& nw) -> uint64_t {
     std::vector<uint32_t> o(lst);
@@ -97,7 +89,6 @@ static inline void compact_cc(cc14::Shared& C, cmi6::Memo& M, uint32_t thr, Reta
   for (uint32_t i : keep) if (M.at(i).st == 2) enc_keep.push_back(i);
   const uint64_t tot_t = slide(enc_keep, [&](uint32_t i) { return (uint64_t)M.at(i).sp_off; },
                                [&](uint32_t i) { return cmi6::slot_words(M.at(i), M.arena); }, M.arena, nt_off);
-
   for (uint32_t r = 0; r < K; r++) {
     const uint32_t i = keep[r];
     if (r != i) { C.ent[r] = C.ent[i]; std::memcpy((void*)&M.at(r), (const void*)&M.at(i), M.stride); }
@@ -107,7 +98,6 @@ static inline void compact_cc(cc14::Shared& C, cmi6::Memo& M, uint32_t thr, Reta
     if (s.st == 2) { s.sp_off = nt_off[i]; s.gp_off = nt_off[i] + s.nsp4; }
   }
   if (ne > K) memset((void*)&M.at(K), 0, M.stride * (ne - K));
-
   for (uint32_t p = 0; p < cc14::Shared::TB; p++) C.tab[p].store(0, std::memory_order_relaxed);
   for (uint32_t r = 0; r < K; r++) {
     uint32_t p = (uint32_t)(C.ent[r].h & (cc14::Shared::TB - 1));
@@ -127,7 +117,6 @@ static inline void compact_cc(cc14::Shared& C, cmi6::Memo& M, uint32_t thr, Reta
   out.enc_ev = nlive_enc - enc_kept;
   out.enc_kept = enc_kept;
 }
-
 static inline void retain(nf16::Shared& S, cc14::Shared& C, cmi6::Memo& M, uint32_t st, double cap_bytes, RetainStats& out) {
   const uint32_t NT = st + 2;
   std::vector<double> hist(NT, 0.0);
@@ -145,7 +134,6 @@ static inline void retain(nf16::Shared& S, cc14::Shared& C, cmi6::Memo& M, uint3
   }
   for (uint32_t i = 0; i < ne; i++)
     if (live[i]) hist[gen_of(C.ent[i].touch, NT)] += cc_entry_bytes(C.ent[i], M.at(i), M.arena);
-
   const double target = 0.5 * cap_bytes;
   uint32_t thr = st > 0 ? st - 1 : 0;
   double cum = 0;
@@ -158,5 +146,4 @@ static inline void retain(nf16::Shared& S, cc14::Shared& C, cmi6::Memo& M, uint3
   compact_nf(S, thr, out);
   compact_cc(C, M, thr, out);
 }
-
 }

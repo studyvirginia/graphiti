@@ -6,18 +6,14 @@
 #include <vector>
 #include <atomic>
 #include <cstdlib>
-
 namespace skn {
-
 enum : uint8_t {
   OP_NOP = 0, OP_CONST = 1, OP_T = 2, OP_ADD = 3, OP_SUB = 4, OP_MUL = 5, OP_DIV = 6,
   OP_SIN = 7, OP_COS = 8, OP_EXP = 9, OP_LOG = 10, OP_SQ = 11, OP_CUBE = 12,
   OP_SQRT = 13, OP_CBRT = 14
 };
 enum : uint8_t { I_THETA = 1, I_T = 2, I_NEG = 15, I_ONE = 16 };
-
 struct Cand { uint8_t len[2]; uint8_t op[2][24]; float c[2][24]; };
-
 constexpr int MAXN = 24;
 constexpr int MAXTE = 1024, MAXFAC = 512, MAXMONO = 1024, MAXSUM = 512;
 constexpr int MAXMP = 1 << 15, MAXSP = 1 << 15, MAXPAIR = 1 << 17, MAXP2 = 1 << 14;
@@ -26,31 +22,25 @@ constexpr int MAXINS = 512, MAXTH = 32, MAXQ = 255;
 constexpr int MAXSCR = 512;
 constexpr int WMAX = 2 + 128 + MAXINS + MAXINS + MAXTH + 8;
 static_assert(MAXTE <= TABN / 2 && MAXMONO <= TABN / 2 && MAXFAC <= TABN / 2 && MAXSUM <= TABN / 2, "intern table load <= 1/2");
-
 constexpr int COEF_LIN = 0, COEF_FIX = 1;
 enum : uint8_t { TE_LIN = 0, TE_FIX = 1, TE_ONEV = 2, TE_LEAF = 3, TE_BIN = 4, TE_UN = 5, TE_NEG = 6 };
 enum : uint8_t { FAC_T = 0, FAC_FN = 1, FAC_RSUM = 2, FAC_RMONO = 3, FAC_COLL = 4 };
-
 struct TE { uint8_t kind, op; int32_t a, b, leaf; uint64_t h; };
 struct FAC { uint8_t kind, op; int32_t arg; uint64_t h; };
 struct MON { int32_t off, len; uint64_t h; };
 struct SUMO { int32_t off, len; uint64_t h; };
 struct PR { int32_t coef, mono; };
 static inline bool eqpr(const PR* a, const PR* b, int n) { for (int k = 0; k < n; ++k) if (a[k].coef != b[k].coef || a[k].mono != b[k].mono) return false; return true; }
-
 static constexpr uint64_t H_LIN = 0x1001, H_FIX = 0x1002, H_ONEV = 0x1007, H_LEAF = 0x1003, H_BIN = 0x1004,
                           H_UN = 0x1005, H_NEG = 0x1006, H_T = 0x2001, H_FN = 0x2002,
                           H_RS = 0x2003, H_RM = 0x2004, H_COLL = 0x2005, H_EMPTY = 0x3001, H_SUM = 0x3002;
-
 static inline uint64_t mx(uint64_t h, uint64_t x) {
   h = (h ^ (x + 0x9E3779B97F4A7C15ull + (h << 6) + (h >> 2))) * 0xff51afd7ed558ccdull;
   return h ^ (h >> 33);
 }
 static inline bool cur(uint64_t e, uint32_t g) { return (uint32_t)(e >> 32) == g; }
 static inline bool eq32(const int32_t* a, const int32_t* b, int n) { for (int k = 0; k < n; ++k) if (a[k] != b[k]) return false; return true; }
-
 struct KE { uint64_t h; int32_t coef, mono; };
-
 struct Ctx {
   TE te[MAXTE]; int nte;
   KE kbuf[MAXP2];
@@ -79,7 +69,6 @@ struct Ctx {
     if (++gen == 0) { memset(tte, 0, sizeof tte); memset(tfac, 0, sizeof tfac);
                       memset(tmon, 0, sizeof tmon); memset(tsum, 0, sizeof tsum); gen = 1; }
   }
-
   int te_leaf(int pos) {
     if (nte >= MAXTE) { ovf = true; return COEF_LIN; }
     te[nte] = TE{TE_LEAF, 0, -1, -1, pos, H_LEAF};
@@ -108,7 +97,6 @@ struct Ctx {
   }
   int te_un(uint8_t op, int a) { return te_intern(TE_UN, op, a, -1, mx(mx(H_UN, op), te[a].h)); }
   int te_neg(int a) { return te_intern(TE_NEG, 0, a, -1, mx(H_NEG, te[a].h)); }
-
   void sort_fac(int32_t* f, int n) const {
     for (int i = 1; i < n; ++i) {
       int32_t x = f[i]; uint64_t hx = fac[x].h; int j = i - 1;
@@ -206,7 +194,6 @@ struct Ctx {
     return mon_single(f);
   }
 };
-
 struct NFOut { const PR* cols; int q; };
 static inline int free_offset() { static const int v = getenv("FREE_OFFSET") ? atoi(getenv("FREE_OFFSET")) : 1; return v; }
 static inline void nf_add_const(const PR* root, int& q) {
@@ -214,8 +201,6 @@ static inline void nf_add_const(const PR* root, int& q) {
   for (int k = 0; k < q; ++k) if (root[k].mono == 0) return;
   const_cast<PR*>(root)[q] = PR{COEF_LIN, 0}; ++q;
 }
-
-
 inline int pivot_sum(Ctx& C, const PR* V, int nv, int p, PR* A) {
   int k = 0;
   A[k++] = PR{COEF_FIX, V[p].mono};
@@ -229,7 +214,6 @@ inline PR collapse(Ctx& C, const PR* V, int nv) {
   int f = C.fac_intern(FAC_COLL, 0, sid, C.sum[sid].h);
   return PR{V[0].coef, C.mon_single(f)};
 }
-
 inline bool nf_tree(Ctx& C, const uint8_t* op, const float* c, int n, NFOut* out) {
   (void)c;
   if (n < 1 || n > MAXN) return false;
@@ -242,7 +226,6 @@ inline bool nf_tree(Ctx& C, const uint8_t* op, const float* c, int n, NFOut* out
   C.nfac = 1;
   C.mon_intern(nullptr, 0);
   int monoT = C.mon_single(0);
-
   int lc[MAXN], rc[MAXN], st[MAXN], sp = 0;
   bool tf[MAXN];
   for (int i = 0; i < n; ++i) {
@@ -260,7 +243,6 @@ inline bool nf_tree(Ctx& C, const uint8_t* op, const float* c, int n, NFOut* out
     } else return false;
   }
   if (sp != 1) return false;
-
   PR* val[MAXN]; int vl[MAXN];
   for (int i = 0; i < n; ++i) {
     uint8_t o = op[i];
@@ -393,7 +375,6 @@ inline bool nf_tree(Ctx& C, const uint8_t* op, const float* c, int n, NFOut* out
   out->cols = root; out->q = q;
   return true;
 }
-
 struct Prog {
   uint32_t w[WMAX];
   int nw, nabs, nS, nV, Q, nth;
@@ -402,7 +383,6 @@ struct Prog {
   float theta[MAXTH];
   uint64_t h1, h2;
 };
-
 namespace detail {
 inline int push(Ctx& C, uint8_t op, int a, int b) {
   if (C.ni >= MAXINS) { C.ovf = true; return 0; }
@@ -467,7 +447,6 @@ inline int emit_sum(Ctx& C, int s, bool freq) {
   return r;
 }
 }
-
 inline double te_val(Ctx& C, const float* c, int id) {
   if (C.tdone[id]) return C.tevals[id];
   const TE& E = C.te[id];
@@ -506,7 +485,6 @@ inline double te_val(Ctx& C, const float* c, int id) {
   C.tdone[id] = 1; C.tevals[id] = v;
   return v;
 }
-
 inline bool compile(Ctx& C, const NFOut& nf, const float* c, Prog& P) {
   int nobj_m = C.nmon, nobj_f = C.nfac, nobj_s = C.nsum, nobj_t = C.nte;
   for (int i = 0; i < nobj_m; ++i) C.mm[i] = -1;
@@ -575,7 +553,6 @@ inline bool compile(Ctx& C, const NFOut& nf, const float* c, Prog& P) {
   P.h1 = h1; P.h2 = h2;
   return true;
 }
-
 struct View {
   const uint32_t* w;
   int Q, nth, nS, nV; bool wide;
@@ -600,11 +577,8 @@ struct View {
   uint32_t mask(int i) const { return wide ? masks[i] : ((masks[i >> 2] >> (8 * (i & 3))) & 0xFF); }
   float th(int s) const { float v; memcpy(&v, theta + s, 4); return v; }
 };
-
-
 constexpr int MAXNODES = 256;
 struct PNode { uint8_t kind, op; uint16_t a, b; int32_t leaf; };
-
 inline void replay_nodes(const PNode* nd, int pn_len, const uint16_t* slot_root, int nth, const float* c, Prog& P) {
   double v[MAXNODES];
   for (int i = 0; i < pn_len; ++i) {
@@ -651,7 +625,6 @@ inline void replay_nodes(const PNode* nd, int pn_len, const uint16_t* slot_root,
     memcpy(P.w + P.nabs + s, &f, 4);
   }
 }
-
 struct DagBuilder {
   int32_t lmap[MAXTE]; uint32_t lgen[MAXTE]; uint32_t lg;
   std::vector<PNode> out;
@@ -684,7 +657,6 @@ struct DagBuilder {
     return true;
   }
 };
-
 struct NFMemo {
   struct Key { uint8_t len; uint8_t op[MAXN]; };
   struct Ent {
@@ -699,7 +671,6 @@ struct NFMemo {
   static constexpr uint32_t MAXENT = 1u << 17;
   static constexpr size_t MAXAW = 1u << 24;
   static constexpr size_t MAXPN = 1u << 22;
-
   std::vector<uint32_t> tab;
   std::vector<Ent> ent;
   std::vector<uint32_t> aw;
@@ -773,7 +744,6 @@ struct NFMemo {
     return good && P.Q <= maxq;
   }
 };
-
 struct NFShared {
   static constexpr uint32_t TB = 1u << 19;
   static constexpr uint32_t MAXENT = 1u << 18;
@@ -800,13 +770,11 @@ struct NFShared {
   NFShared(const NFShared&) = delete;
   NFShared& operator=(const NFShared&) = delete;
 };
-
 struct NFHandle {
   NFShared& S;
   DagBuilder DB;
   long hits, misses, drops, bigskip;
   explicit NFHandle(NFShared& s) : S(s), hits(0), misses(0), drops(0), bigskip(0) {}
-
   void publish(uint64_t h, const NFMemo::Ent& X, const uint32_t* words, int nabs, const PNode* nodes, int npn_) {
     uint32_t idx = S.nent.fetch_add(1, std::memory_order_relaxed);
     if (idx >= NFShared::MAXENT) { ++drops; return; }
@@ -827,7 +795,6 @@ struct NFHandle {
       p = (p + 1) & (NFShared::TB - 1);
     }
   }
-
   bool nf_compile(Ctx& C, const uint8_t* op, const float* c, int n, Prog& P, int maxq, int* st = nullptr) {
     NFMemo::Key k; memset(&k, 0, sizeof k);
     k.len = (uint8_t)n;
@@ -875,5 +842,4 @@ struct NFHandle {
     return good && P.Q <= maxq;
   }
 };
-
 }

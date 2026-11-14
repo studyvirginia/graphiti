@@ -10,14 +10,11 @@
 #include "../s02_nf/sk_nf_h2b.hpp"
 #include "sobol_tab.h"
 using namespace skn;
-
 enum { T_T = 1, T_ONE = 2 };
 static const int NSV = 32, MAXSLOT = 40, NPT = 48;
 static const int GN_TH_MAX = 24;
-
 struct Tree { int Q, nth, nS, nslot; std::vector<uint32_t> prog; std::vector<uint16_t> sp; std::vector<float> th; std::vector<uint32_t> rec; uint16_t segs[36];
   const uint32_t* progp = nullptr; const uint16_t* segsp = nullptr; uint32_t nprogp = 0; };
-
 static bool compile_tree(const View& V, Tree& T) {
   T.Q = V.Q; T.nth = V.nth; T.nS = V.nS; T.prog.clear(); T.sp.clear(); T.th.clear();
   if (V.nS > NSV || V.nth > 32) return false;
@@ -74,7 +71,6 @@ static bool compile_tree(const View& V, Tree& T) {
   T.nslot = nsl; if (nsl > MAXSLOT) return false;
   for (int s = 0; s < V.nth; s++) T.th.push_back(V.th(s)); return true;
 }
-
 static bool zconvS(const Tree& T, std::vector<uint32_t>& p4, uint32_t* segs, int SS) {
   const uint32_t SL = SS * 48; const int nsc = T.nS <= 4 ? 4 : T.nS <= 8 ? 8 : T.nS <= 16 ? 16 : 32; const uint32_t TT = T.nslot * SL + SS * nsc;
   auto enc = [&](uint32_t c) -> uint32_t { if (c == 1022) return (1u << 31) | (3u << 29) | (TT + 48); if (c < 64) return c * SL; if (c == 900) return 2u << 29; if (c == 901) return (3u << 29) | (TT + 48); return (1u << 29) | (c - 64); };
@@ -98,7 +94,6 @@ static bool zconvS(const Tree& T, std::vector<uint32_t>& p4, uint32_t* segs, int
       o.insert(o.end(), a, a + 4); k++; }
     newidx[n] = (int)(o.size() / 4); for (int q = 0; q <= T.Q; q++) segs[q] = newidx[T.segs[q]]; p4 = o; }
   return true; }
-
 static bool zgconv(const Tree& T, int CD, std::vector<uint32_t>& p4, uint32_t* segs, uint32_t& hw, size_t& per) {
   const uint32_t NSC = T.nS + 2, SB = T.nslot * CD * 48;
   auto enc = [&](uint32_t c) -> uint32_t { if (c == 1022) return 1u << 31; if (c < 64) return c * CD * 48; if (c == 900) return 1u << 29; if (c == 901) return (1u << 30) | (SB + T.nS); return (1u << 30) | (SB + (c - 64)); };
@@ -122,7 +117,6 @@ static bool zgconv(const Tree& T, int CD, std::vector<uint32_t>& p4, uint32_t* s
       o.insert(o.end(), a, a + 4); k++; }
     newidx[n] = (int)(o.size() / 4); for (int q = 0; q <= T.Q; q++) segs[q] = newidx[T.segs[q]]; p4 = o; }
   if (SB >= 65536) return false; hw = NSC | (SB << 8) | ((uint32_t)T.nth << 24); per = (size_t)SB + 2 * CD * NSC; return true; }
-
 static double eval_rss(const View& V, const double* th, const double* y) {
   int n = V.n(), Q = V.Q; std::vector<double> v(n), R((size_t)Q * (Q + 1), 0.0); double rs = 0;
   for (int p = 0; p < NPT; p++) { double t = p / 47.0;

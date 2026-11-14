@@ -8,7 +8,6 @@
 #include "sicis_host.hpp"
 namespace geop {
 inline double g_sc[2] = {1.0, 1.0};
-
 inline double geo_nll(const fitx::Rec& fr, const float* Y0, const float* Y1, const Sketch::CisPerCellEnergyInput& en, const float* nrm = nullptr, int M = 1024, float* cout = nullptr) {
   static const bool sgn_tan = !getenv("GEO_SIGN") || atoi(getenv("GEO_SIGN")) != 0;
   const double t0 = fr.kind == 1 ? (double)fr.u[9] : 0.0, t1 = t0 + 1.0;
@@ -61,7 +60,6 @@ inline double geo_nll(const fitx::Rec& fr, const float* Y0, const float* Y1, con
   if (cout) for (int p = 0; p < N; p++) cout[p] = c[p];
   return sicis::score48(c, en);
 }
-
 inline int trig_extra_k(const fitx::Rec& fr, int M = 64) {
   const double t0 = fr.kind == 1 ? (double)fr.u[9] : 0.0, t1 = t0 + 1.0, PI = 3.14159265358979323846;
   struct TN { int side, idx; bool sin_; std::vector<double> arg; double span; };

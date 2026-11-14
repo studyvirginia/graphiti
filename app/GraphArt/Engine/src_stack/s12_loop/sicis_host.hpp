@@ -12,15 +12,12 @@
 #endif
 #include "sketch/cis_scoring.hpp"
 #include "sketch/sigma_v2_native.hpp"
-
 namespace sicis {
-
 inline bool enabled()
 {
     static int const v = [] { char const* e = std::getenv("SICIS"); return (e && e[0] == '1') ? 1 : 0; }();
     return v != 0;
 }
-
 inline bool strokeEnergies(float const* x, float const* y, int n, Sketch::CisPerCellEnergyInput& out)
 {
     out = Sketch::CisPerCellEnergyInput{};
@@ -51,7 +48,6 @@ inline bool strokeEnergies(float const* x, float const* y, int n, Sketch::CisPer
     }
     return true;
 }
-
 inline double score(std::vector<double> const& res48, Sketch::CisPerCellEnergyInput const& energies)
 {
     Sketch::CisScoringConfig cfg;
@@ -61,7 +57,6 @@ inline double score(std::vector<double> const& res48, Sketch::CisPerCellEnergyIn
     Sketch::CisScoringResult const r = Sketch::evaluateCisScoring(res48, energies.perCellEnergy, {}, cfg, energies);
     return r.ok ? r.fitness : 1.0e30;
 }
-
 struct Fast48Ctx { bool ok = false; std::size_t M = 0; double pc[8][48], lp[8][48], src[8][48], sper[48]; };
 inline bool fastEnabled() { static const bool v = [] { const char* e = std::getenv("SICIS_FAST"); return !(e && e[0] == '0'); }(); return v; }
 inline double scoreGeneric48(float const* res48, Sketch::CisPerCellEnergyInput const& energies)
@@ -131,7 +126,6 @@ inline double scoreFast48(float const* res48, Sketch::CisPerCellEnergyInput cons
     double const fit = sh + sc;
     return std::isfinite(fit) ? fit : 1.0e30;
 }
-
 #if defined(__aarch64__)
 inline bool scoreBatch48(float const* res, int n, Sketch::CisPerCellEnergyInput const& en, double* out, bool* fb)
 {
@@ -248,11 +242,9 @@ inline bool scoreBatch48(float const* res, int n, Sketch::CisPerCellEnergyInput 
     return true;
 }
 #endif
-
 inline double score48(float const* res48, Sketch::CisPerCellEnergyInput const& energies)
 {
     if (fastEnabled()) { double const f = scoreFast48(res48, energies); if (!std::isnan(f)) { return f; } }
     return scoreGeneric48(res48, energies);
 }
-
 }

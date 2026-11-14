@@ -6,14 +6,11 @@
 #include <set>
 #include <utility>
 #include <vector>
-
 namespace Sketch {
-
 struct NetBandConfig {
     double z = 1.96;
     std::vector<int> scales{1, 2, 4, 8, 16};
 };
-
 struct NetBandRow {
     int index;
     int nodes;
@@ -21,22 +18,18 @@ struct NetBandRow {
     bool adequate;
     double worstRatio;
 };
-
 struct NetBandResult {
     int pickIndex;
     int accuracyIndex;
     std::vector<NetBandRow> rows;
 };
-
 namespace detail {
-
 inline double chi2UpperFactor(double m, double z) {
     m = std::max(m, 1.0);
     double const a = 2.0 / (9.0 * m);
     double const v = std::pow(1.0 - a + z * std::sqrt(a), 3.0);
     return std::max(1.0, v);
 }
-
 inline std::vector<double> aggToK(const std::vector<double>& v, int K) {
     int const R = static_cast<int>(v.size());
     if (K >= R) return v;
@@ -55,9 +48,7 @@ inline std::vector<double> aggToK(const std::vector<double>& v, int K) {
     }
     return out;
 }
-
 }
-
 inline std::vector<std::vector<double>> netBands(const std::vector<double>& sigma2,
                                                  const std::vector<double>& logVar,
                                                  int nData, const NetBandConfig& cfg) {
@@ -86,14 +77,12 @@ inline std::vector<std::vector<double>> netBands(const std::vector<double>& sigm
     }
     return out;
 }
-
 inline NetBandResult netBandSelect(
         const std::vector<std::vector<double>>& regionErr,
         const std::vector<int>& nodes, const std::vector<double>& shapeErr,
         const std::vector<double>& sigma2, int nData,
         const std::vector<double>& logVar = {}, const NetBandConfig& cfg = {}) {
     auto const bands = netBands(sigma2, logVar, nData, cfg);
-
     std::vector<NetBandRow> rows;
     std::set<std::pair<int, double>> seen;
     for (int i = 0; i < static_cast<int>(regionErr.size()); ++i) {
@@ -119,7 +108,6 @@ inline NetBandResult netBandSelect(
         if (a.nodes != b.nodes) return a.nodes < b.nodes;
         return a.shapeErr < b.shapeErr;
     });
-
     int pick = -1;
     for (const auto& r : rows) if (r.adequate) { pick = r.index; break; }
     int acc = -1;
@@ -127,5 +115,4 @@ inline NetBandResult netBandSelect(
     for (const auto& r : rows) if (r.shapeErr < best) { best = r.shapeErr; acc = r.index; }
     return {pick, acc, rows};
 }
-
 }

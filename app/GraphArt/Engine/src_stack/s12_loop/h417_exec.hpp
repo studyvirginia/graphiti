@@ -1,4 +1,3 @@
-
 #pragma once
 #include <Accelerate/Accelerate.h>
 #include <arm_neon.h>

@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 #include <vector>
-
 struct PolInputs {
   const uint32_t* tok;
   const uint32_t* hdr;
@@ -12,21 +11,17 @@ struct PolInputs {
   const float* th0;
   uint32_t per;
 };
-
 struct PolResult {
   float th[32];
   float a[16];
   float rss0, rcur;
   uint32_t steps, npp, ndp;
 };
-
 class PolishWork {
  public:
   PolishWork();
   void polish(const PolInputs& in, uint32_t tree, int Q, float tau, float flr, int itmax, PolResult& out);
-
   void roots_debug(const PolInputs& in, uint32_t tree, const float* TH, int C, int Q, float* out);
-
  private:
   struct Tree { uint32_t x, nS, z, nsc2, SB, nth; };
   void eval(const PolInputs& in, const Tree& T, const uint32_t* sg, const float* TH, const float* tvec, int C, int Q);

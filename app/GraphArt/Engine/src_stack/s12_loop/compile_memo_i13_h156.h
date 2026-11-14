@@ -6,9 +6,7 @@
 #include <cstring>
 #include <vector>
 #include "compile_cache_h14_i13_h156.h"
-
 namespace cmi6 {
-
 struct TreeEnc {
   uint8_t s_ok = 0, g_ok = 0;
   uint32_t sg[36], gg[36];
@@ -24,7 +22,6 @@ struct TreeEnc {
   const uint32_t* ptk() const { return tkp ? tkp : tk.data(); }
   const uint32_t* gtp = nullptr;
 };
-
 static inline void encode_tree_i6(const Tree& tr, TreeEnc& te) {
   std::memset(te.sg, 0, sizeof te.sg); std::memset(te.gg, 0, sizeof te.gg);
   { std::vector<uint32_t> p4; uint32_t sg[36]; std::memset(sg, 0, sizeof sg);
@@ -34,7 +31,6 @@ static inline void encode_tree_i6(const Tree& tr, TreeEnc& te) {
     if (zgconv(tr, tr.nth <= 4 ? 1 + (tr.nth + 1) / 2 : 3, p4, sg, hw, per)) {
       te.g_ok = 1; std::memcpy(te.gg, sg, sizeof sg); te.ghw = hw; te.gper = (uint32_t)per; te.gp4 = std::move(p4); } }
 }
-
 struct Slot {
   uint32_t st;
   uint32_t ghw, gper, sp_off, nsp4, gp_off, ngp4;
@@ -119,7 +115,6 @@ static inline void gt_put(uint32_t* d, const GtScr& g) {
   if (!g.p4.empty()) std::memcpy(d + GT_HDR, g.p4.data(), g.p4.size() * 4);
 }
 static constexpr size_t ARENA_WORDS = (size_t)1 << 27;
-
 struct Memo {
   size_t stride;
   Slot* slot;
@@ -133,14 +128,12 @@ struct Memo {
   Memo(const Memo&) = delete;
   Memo& operator=(const Memo&) = delete;
 };
-
 struct alignas(128) Handle {
   cc14::Handle C;
   Memo& M;
   long enc_hit = 0, enc_miss = 0, enc_local = 0;
   Handle(cc14::Shared& s, Memo& m) : C(s), M(m) {}
 };
-
 static inline double since_ms(std::chrono::steady_clock::time_point t) {
   return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t).count();
 }
@@ -149,7 +142,6 @@ static inline void timed_encode(const Tree& T, TreeEnc& te, double& enc_ms) {
   encode_tree_i6(T, te);
   enc_ms += since_ms(t0);
 }
-
 static inline bool locate(const cc14::Shared& S, const uint32_t* w, size_t nk, uint64_t h, uint32_t& idx) {
   uint32_t p = (uint32_t)(h & (cc14::Shared::TB - 1));
   for (;;) {
@@ -160,7 +152,6 @@ static inline bool locate(const cc14::Shared& S, const uint32_t* w, size_t nk, u
     p = (p + 1) & (cc14::Shared::TB - 1);
   }
 }
-
 static inline uint64_t slot_words(const Slot& s, const uint32_t* ar) {
   uint64_t w = (uint64_t)s.nsp4 + s.ngp4;
   if ((s.cmode & 4) && ar) w += GT_HDR + ar[(uint64_t)s.gp_off + s.ngp4];
@@ -190,7 +181,6 @@ static inline void load_enc(const Slot& s, const uint32_t* ar, TreeEnc& te) {
     te.gp4.assign(ar + s.gp_off, ar + s.gp_off + s.ngp4);
   }
 }
-
 static inline bool compile_enc(Handle& H, const View& V, Tree& T, TreeEnc& te, double& enc_ms) {
   if (!cc14::compile_cached(H.C, V, T)) return false;
   const size_t nk = (size_t)(V.theta - V.w);
@@ -220,7 +210,6 @@ static inline bool compile_enc(Handle& H, const View& V, Tree& T, TreeEnc& te, d
   }
   return true;
 }
-
 static inline void prefetch_batch(const cc14::Shared& S, const Memo& M, const uint32_t* const* w, const size_t* nk, int n,
                                   const uint64_t* hin = nullptr) {
   uint64_t hh[32]; uint32_t pp[32]; uint32_t ix[32];
@@ -247,5 +236,4 @@ static inline void prefetch_batch(const cc14::Shared& S, const Memo& M, const ui
     if (__atomic_load_n(&sl.st, __ATOMIC_ACQUIRE) == 2) { __builtin_prefetch(M.arena + sl.sp_off, 0, 3); __builtin_prefetch(M.arena + sl.gp_off, 0, 3); }
   }
 }
-
 }

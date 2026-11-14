@@ -1,13 +1,10 @@
 #pragma once
 #include <cstring>
 #include "../s02_nf/sk_nf_h2b.hpp"
-
 namespace h11 {
 constexpr int MAXN = 512, MAXQ = 64, MAXM = MAXN + MAXQ + 4;
-
 struct Tab { const int* opnd; const int* OP; const int* CA; const int* CB; };
 struct Seq { int* sn; int* sa; int* sb; };
-
 static inline int emit_root(const Tab& T, unsigned char* dn, const Seq& S, int* rd, int* lr, int m, int r) {
   const int m0 = m;
   int stx[MAXN], sts[MAXN]; int sp = 0;
@@ -26,7 +23,6 @@ static inline int emit_root(const Tab& T, unsigned char* dn, const Seq& S, int* 
   if (m == m0) { S.sn[m] = -1; S.sa[m] = r; S.sb[m] = -1; rd[r]++; lr[r] = m; ++m; }
   return m;
 }
-
 static inline bool corder(const skn::View& V, const int* rep, const int* opnd, int n, int* out) {
   const int Q = V.Q;
   if (Q < 2 || Q > MAXQ || n < 1 || n > MAXN) return false;

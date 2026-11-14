@@ -10,11 +10,8 @@
 #include <limits>
 #include <string>
 #include <vector>
-
 #include "sketch/cis_scoring.hpp"
-
 namespace fp {
-
 inline std::string expr_of(const uint8_t* op, const float* c, int len, int& pos) {
   if (pos < 0 || pos >= len) return "?";
   const int k = pos--;
@@ -33,16 +30,13 @@ inline std::string expr_of(const uint8_t* op, const float* c, int len, int& pos)
   }
   return "?";
 }
-
 template <class Cand>
 inline std::string tree_str(const Cand& g, int t) {
   const int len = g.len[t];
   int pos = len - 1;
   return expr_of(g.op[t], g.c[t], len, pos);
 }
-
 struct Pick { int idx; int cx; double err; bool band; };
-
 inline int pick_index(const std::vector<double>& err, const std::vector<int>& cx, int m_dof, double z, const char* reason_out[1], bool nll = false) {
   const int n = (int)err.size();
   int best = -1;
@@ -65,13 +59,10 @@ inline int pick_index(const std::vector<double>& err, const std::vector<int>& cx
   reason_out[0] = pick >= 0 ? "simplest skyline member inside band" : "accuracy end (no member inside band)";
   return pick >= 0 ? pick : best;
 }
-
 namespace nml {
-
 inline constexpr double kLn2 = 0.6931471805599453;
 inline constexpr double kPi = 3.141592653589793;
 inline constexpr int kFlagN = 1, kFlagS = 2;
-
 struct LogRing {
   static double zero() { return -std::numeric_limits<double>::infinity(); }
   static double fromInt(long long k) { return k > 0 ? std::log((double)k) : zero(); }
@@ -84,7 +75,6 @@ struct LogRing {
   static double mul(double a, double b) { return (a == zero() || b == zero()) ? zero() : a + b; }
   static double pairSame(double a) { return a == zero() ? zero() : a + add(a, 0.0) - kLn2; }
 };
-
 inline std::vector<double> canon_counts(int cmax, bool alpha8 = true) {
   using R = LogRing;
   std::vector<std::array<double, 4>> n((size_t)std::max(cmax, 1) + 1);
@@ -131,7 +121,6 @@ inline std::vector<double> canon_counts(int cmax, bool alpha8 = true) {
   for (size_t c = 0; c < n.size(); ++c) for (double v : n[c]) out[c] = R::add(out[c], v);
   return out;
 }
-
 inline double struct_code_canon(int c) {
   static const bool alpha8 = [] { const char* v = std::getenv("STRUCT_ALPHABET"); return v == nullptr || std::strtol(v, nullptr, 0) != 0; }();
   static const std::vector<double> table = canon_counts(128, alpha8);
@@ -141,22 +130,18 @@ inline double struct_code_canon(int c) {
   for (unsigned v = (unsigned)c; v > 1U; v >>= 1U) ++fl;
   return table[c] + (2.0 * fl + 1.0) * kLn2;
 }
-
 inline int const_leaves(const uint8_t* op, int len) {
   int k = 0;
   for (int i = 0; i < len; i++) if (op[i] == 1) k++;
   return k;
 }
-
 }
-
 inline constexpr int kT13Default = 3;
 inline int t13_mask() {
   static const int m = [] { const char* v = std::getenv("SKETCH_T13"); return v != nullptr ? (int)std::strtol(v, nullptr, 0) : kT13Default; }();
   return m;
 }
 inline bool t13_bit(int b) { return ((t13_mask() >> b) & 1) != 0; }
-
 inline int pick_index_nml(const std::vector<double>& err, const std::vector<int>& cx,
                           const std::vector<int>& nx, const std::vector<int>& ny,
                           const std::vector<int>& k, int n_pts, std::vector<double>* total_out = nullptr,
@@ -181,9 +166,7 @@ inline int pick_index_nml(const std::vector<double>& err, const std::vector<int>
   }
   return pick;
 }
-
 namespace nml {
-
 struct Member {
   std::vector<double> theta;
   std::vector<int> roles;
@@ -191,11 +174,8 @@ struct Member {
   int nodesX = 0, nodesY = 0;
   int nodesXReduced = 0, nodesYReduced = 0;
 };
-
 struct Ranges { double extent = 1.0, freq = 0.0, phase = 0.0, expRate = 0.0; bool expRateOk = false; };
-
 using ResidualFn = std::function<bool(const std::vector<double>& theta, std::vector<double>& r48)>;
-
 struct FullTerms {
   double nll = std::numeric_limits<double>::quiet_NaN();
   double paramTerm = std::numeric_limits<double>::quiet_NaN();
@@ -206,7 +186,6 @@ struct FullTerms {
   int k = 0, kId = 0, n = 0, nDead = 0, nCollinear = 0, nOutOfRangeId = 0;
   bool admissible = true, ok = false;
 };
-
 struct IdentLD { double logDet = 0; int rank = 0, nDead = 0, nCollinear = 0; std::vector<int> kept; bool ok = false; };
 inline IdentLD identifiable_logdet(const std::vector<std::vector<double>>& cols, int n, double eps) {
   IdentLD out;
@@ -243,7 +222,6 @@ inline IdentLD identifiable_logdet(const std::vector<std::vector<double>>& cols,
   out.ok = true;
   return out;
 }
-
 inline bool full_terms(const Member& m, const ResidualFn& resid, const Sketch::CisPerCellEnergyInput& en,
                        const Ranges& rg, FullTerms& t, double fd_rel = 1e-3) {
   const int k = (int)m.theta.size();
@@ -312,9 +290,7 @@ inline bool full_terms(const Member& m, const ResidualFn& resid, const Sketch::C
   if (!t.admissible) t.total = std::numeric_limits<double>::infinity();
   return true;
 }
-
 }
-
 inline double pen_param(int k, int n_pts) { return 0.5 * k * std::log((double)std::max(n_pts, 1) / (2.0 * nml::kPi)); }
 inline double pen_struct(int nx, int ny) { return nml::struct_code_canon(nx) + nml::struct_code_canon(ny); }
 inline double search_pen(int k, int n_pts, int nx, int ny) { return pen_param(k, n_pts) + pen_struct(nx, ny); }
@@ -328,7 +304,6 @@ inline nml::FullTerms fallback_terms(int k, int n_pts, int nx, int ny) {
   t.ok = false;
   return t;
 }
-
 inline int pick_index_nml_full(const std::vector<double>& err, const std::vector<int>& cx,
                                const std::vector<nml::FullTerms>& fulls, std::vector<double>* total_out = nullptr,
                                bool all_members = false) {
@@ -351,5 +326,4 @@ inline int pick_index_nml_full(const std::vector<double>& err, const std::vector
   }
   return pick;
 }
-
 }

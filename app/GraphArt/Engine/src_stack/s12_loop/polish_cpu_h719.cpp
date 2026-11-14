@@ -4,7 +4,6 @@
 #include <cmath>
 #include <cstring>
 #include <algorithm>
-
 #include <cstdlib>
 #ifdef H840_PROF
 #include <mach/mach_time.h>
@@ -49,7 +48,6 @@ constexpr int P240_MAXQ = 16;
 constexpr int P240_MAXC = 25;
 constexpr float P240_INF_ = INFINITY;
 constexpr int P240_MAXN = 24, P240_MAXN1 = P240_MAXN + 1;
-
 inline float P240_dot48(const float* x, const float* y) {
   float32x4_t a0 = vdupq_n_f32(0.f), a1 = vdupq_n_f32(0.f), a2 = vdupq_n_f32(0.f);
   for (int k = 0; k < P240_NP; k += 12) {
@@ -95,9 +93,7 @@ inline float P240_und(int op, float m, float r) {
   }
 }
 }
-
 PolishWork::PolishWork() {}
-
 const float* PolishWork::load(uint32_t w, float* buf, int C) {
   if (w >> 31) return accp_;
   const uint32_t off = w & 0x1FFFFFFFu;
@@ -108,7 +104,6 @@ const float* PolishWork::load(uint32_t w, float* buf, int C) {
   if ((w >> 29) & 1u) return TS_.data() + off;
   return R_.data() + vslot(off);
 }
-
 void PolishWork::exec(const uint32_t* w4, int C) {
   if (g421_on()) { exec421(w4, C); return; }
   if (g417_on()) { exec417(w4, C); return; }
@@ -169,7 +164,6 @@ void PolishWork::exec(const uint32_t* w4, int C) {
   accp_ = acc;
   if (dst != 0xFFFFFFFFu) std::memcpy(R_.data() + vslot(dst), acc, sizeof(float) * (size_t)C * P240_NP);
 }
-
 void PolishWork::exec417(const uint32_t* w4, int C) {
   const uint32_t op = w4[0], dst = w4[1];
   const float* a = nullptr; const float* b = nullptr; float as[P240_MAXC], bs[P240_MAXC]; bool sa = false, sb = false;
@@ -189,7 +183,6 @@ void PolishWork::exec417(const uint32_t* w4, int C) {
   accp_ = acc;
   if (R && acc != R) std::memcpy(R, acc, sizeof(float) * (size_t)C * P240_NP);
 }
-
 template <bool SA, bool SBB>
 __attribute__((noinline)) static void H840_unary(uint32_t op, const float* a, const float* asp, const float* b, const float* bsp, float* acc, int C, size_t ns) {
   float as[P240_MAXC], bs[P240_MAXC];
@@ -234,7 +227,6 @@ static inline void H840_simple(uint32_t op, const float* a, const float* asp, co
 #undef LA
 #undef LB
 }
-
 void PolishWork::exec421(const uint32_t* w4, int C) {
   P840_START(xt_);
   const uint32_t op = w4[0], dst = w4[1];
@@ -265,7 +257,6 @@ void PolishWork::exec421(const uint32_t* w4, int C) {
 #endif
   }
 }
-
 void PolishWork::exec840(const uint32_t* w4, int C) {
   const uint32_t op = w4[0], dst = w4[1];
   const float *a = nullptr, *b = nullptr, *asp = nullptr, *bsp = nullptr; bool sa = false, sb = false;
@@ -291,7 +282,6 @@ void PolishWork::exec840(const uint32_t* w4, int C) {
   accp_ = acc;
   if (R && acc != R) g840_copy(R, acc, (size_t)C * P240_NP);
 }
-
 void PolishWork::eval(const PolInputs& in, const Tree& T, const uint32_t* sg, const float* TH, const float* tvec, int C, int Q) {
   P840_START(pt_);
   const int pb_ = C == 1 ? 0 : 8; (void)pb_;
@@ -357,7 +347,6 @@ void PolishWork::eval(const PolInputs& in, const Tree& T, const uint32_t* sg, co
     P840(pb_ + 2, pt_);
   }
 }
-
 void PolishWork::eval644(const PolInputs& in, const Tree& T, const uint32_t* sg, int C, int Q) {
   K644& K = k644_[C == 1 ? 0 : 1];
   if (K.tok != in.tok || K.sg != sg || K.C != C || K.Q != Q || K.x != T.x || K.cd != cd_ || K.nsc2 != nsc2_ || K.SB != SB_ || K.R != R_.data() ||
@@ -413,7 +402,6 @@ void PolishWork::eval644(const PolInputs& in, const Tree& T, const uint32_t* sg,
   }
   accp_ = K.accp_end;
 }
-
 namespace {
 void P240_mgs(int n, float* cols, float* tr, int L, float tau, bool dual, const float* on, float& pred) {
   pred = 0.0f;
@@ -435,7 +423,6 @@ void P240_mgs(int n, float* cols, float* tr, int L, float tau, bool dual, const 
   }
 }
 }
-
 namespace {
 struct P240_PassS { float E[P240_MAXQ * P240_NP]; float Y[P240_NP]; float a[P240_MAXQ]; float rss; };
 }
@@ -461,7 +448,6 @@ void PolishWork::polish(const PolInputs& in, uint32_t tree, int Q, float tau, fl
   const float* tvec = in.tvec + 48 * tree;
   const int nth = (int)T.nth;
   const int Cd = nth + 1;
-
   auto plain = [&](const float* TH, P240_PassS& P) {
     const bool direct = (g840_bits() & 2) && !g644_on() && (g641_on() || (g643_bits() & 1));
     if (direct) { rdst_ = P.E; rstr_ = P240_NP; }
@@ -575,7 +561,6 @@ void PolishWork::polish(const PolInputs& in, uint32_t tree, int Q, float tau, fl
     for (int j = 0; j < nth; j++) d[j] = -tr[nth * nth + j];
     if (!P240_fin(rss)) pred = -1.0f;
   };
-
   float th[32] = {0}, cand0[32] = {0}, cand1[32] = {0}, d[32] = {0};
   for (int j = 0; j < nth; j++) th[j] = in.th0[32 * tree + j];
   P240_PassS PB[3];
@@ -629,7 +614,6 @@ void PolishWork::polish(const PolInputs& in, uint32_t tree, int Q, float tau, fl
   out.rss0 = rss0; out.rcur = rcur;
   out.steps = steps; out.npp = npp; out.ndp = ndp;
 }
-
 void PolishWork::roots_debug(const PolInputs& in, uint32_t tree, const float* TH, int C, int Q, float* out) {
   const uint32_t* h = in.hdr + 4 * tree;
   Tree T{h[0], h[1] >> 16, h[2], h[3] & 255u, (h[3] >> 8) & 0xFFFFu, h[3] >> 24};

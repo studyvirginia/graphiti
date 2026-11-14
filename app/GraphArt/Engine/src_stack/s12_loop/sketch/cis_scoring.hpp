@@ -1,5 +1,4 @@
 #pragma once
-
 #include <algorithm>
 #include <atomic>
 #include <cmath>
@@ -7,11 +6,8 @@
 #include <cstdlib>
 #include <limits>
 #include <vector>
-
 #include "sketch/net_band_select.hpp"
-
 namespace Sketch {
-
 inline constexpr int kCisExactModeDefault = 4;
 inline auto cisExactModeRef() -> std::atomic<int>&
 {
@@ -30,7 +26,6 @@ inline void setCisExactMode(int mode)
     }
     cisExactModeRef().store(mode, std::memory_order_relaxed);
 }
-
 struct CisScoringConfig {
     bool useCisScoring{false};
     bool scoreDcCell{true};
@@ -39,7 +34,6 @@ struct CisScoringConfig {
     int exactLikelihood{cisExactModeDefault()};
     int residualPrecision{0};
 };
-
 struct CisCell {
     int level{0};
     std::size_t index{0};
@@ -52,7 +46,6 @@ struct CisCell {
     double recordDelta{0.0};
     bool intervalCell{false};
 };
-
 struct CisScoringResult {
     double fitness{0.0};
     double shapeNll{0.0};
@@ -61,13 +54,11 @@ struct CisScoringResult {
     std::vector<CisCell> cells;
     bool ok{true};
 };
-
 struct CisPerCellEnergyInput {
     std::vector<double> perCellEnergy;
     bool present{false};
     std::vector<std::vector<double>> memberEnergy;
 };
-
 inline void applyDirectCellEnergyStub(std::vector<CisCell>& cells, CisPerCellEnergyInput const& direct)
 {
     if (!direct.present || direct.perCellEnergy.size() != cells.size()) { return; }
@@ -75,7 +66,6 @@ inline void applyDirectCellEnergyStub(std::vector<CisCell>& cells, CisPerCellEne
         cells[i].predictedEnergy = std::max(direct.perCellEnergy[i], 0.0);
     }
 }
-
 inline constexpr int kCisGrid48Default = 7;
 inline auto cisGrid48ModeFromEnv() -> int
 {
@@ -85,7 +75,6 @@ inline auto cisGrid48ModeFromEnv() -> int
     }();
     return v;
 }
-
 inline constexpr int kB3Grid48GpuDefault = 1;
 inline auto b3Grid48GpuFromEnv() -> int
 {
@@ -95,7 +84,6 @@ inline auto b3Grid48GpuFromEnv() -> int
     }();
     return v;
 }
-
 struct CisGrid48Counters {
     std::atomic<long long> badStroke{0};
     std::atomic<long long> missingModel{0};
@@ -111,7 +99,6 @@ inline auto cisGrid48Counters() -> CisGrid48Counters&
     static CisGrid48Counters c;
     return c;
 }
-
 inline constexpr int kCisEnsembleDefault = 1;
 inline auto cisEnsembleModeFromEnv() -> int
 {
@@ -121,7 +108,6 @@ inline auto cisEnsembleModeFromEnv() -> int
     }();
     return v;
 }
-
 inline constexpr int kNmlAbsDefault = 0;
 inline auto nmlAbsModeFromEnv() -> int
 {
@@ -131,12 +117,9 @@ inline auto nmlAbsModeFromEnv() -> int
     }();
     return v;
 }
-
 namespace detail {
-
 constexpr double kCisPi = 3.14159265358979323846;
 constexpr double kCisEnergyEps = 1e-300;
-
 inline void cisHaarLevel(std::vector<double> const& x, std::vector<double>& approx, std::vector<double>& det)
 {
     std::size_t const n = x.size();
@@ -154,7 +137,6 @@ inline void cisHaarLevel(std::vector<double> const& x, std::vector<double>& appr
         approx[pairs] = x[n - 1];
     }
 }
-
 inline std::vector<double> cisHaarLevelInverse(std::vector<double> const& approx, std::vector<double> const& det, std::size_t n)
 {
     std::size_t const pairs = n / 2;
@@ -171,7 +153,6 @@ inline std::vector<double> cisHaarLevelInverse(std::vector<double> const& approx
     }
     return x;
 }
-
 inline double cisTrigamma(double x)
 {
     double result = 0.0;
@@ -185,7 +166,6 @@ inline double cisTrigamma(double x)
         + xi2 * xi * (1.0 / 6.0 - xi2 * (1.0 / 30.0 - xi2 * (1.0 / 42.0 - xi2 * (1.0 / 30.0))));
     return result;
 }
-
 inline int cisNearestSupportedK(std::size_t count)
 {
     static constexpr int kSupported[] = {1, 2, 4, 8, 16};
@@ -200,10 +180,8 @@ inline int cisNearestSupportedK(std::size_t count)
     }
     return best;
 }
-
 constexpr int kSgPolyOrder = 2;
 constexpr int kSgWindowSize = kSgPolyOrder + 1;
-
 inline auto cisSolveSmallLinearSystem(std::vector<std::vector<double>> A, std::vector<double> b, bool& ok) -> std::vector<double>
 {
     std::size_t const n = b.size();
@@ -230,7 +208,6 @@ inline auto cisSolveSmallLinearSystem(std::vector<std::vector<double>> A, std::v
     }
     return x;
 }
-
 inline auto cisSgOneSidedCoeffs(int windowSize, int order, double evalPos, bool& ok) -> std::vector<double>
 {
     int const m = order + 1;
@@ -263,14 +240,12 @@ inline auto cisSgOneSidedCoeffs(int windowSize, int order, double evalPos, bool&
     }
     return c;
 }
-
 inline void cisHaarLevelSgBoundary(std::vector<double> const& x, std::vector<double>& approx, std::vector<double>& det)
 {
     cisHaarLevel(x, approx, det);
     std::size_t const n = x.size();
     if (n % 2 != 1) { return; }
     if (n < static_cast<std::size_t>(kSgWindowSize) + 1) { return; }
-
     std::size_t const boundaryIdx = n - 1;
     std::size_t const windowStart = boundaryIdx - static_cast<std::size_t>(kSgWindowSize);
     std::vector<double> const window(x.begin() + static_cast<std::ptrdiff_t>(windowStart), x.begin() + static_cast<std::ptrdiff_t>(boundaryIdx));
@@ -282,19 +257,15 @@ inline void cisHaarLevelSgBoundary(std::vector<double> const& x, std::vector<dou
     if (!std::isfinite(pred)) { return; }
     double const boundaryDetail = x[boundaryIdx] - pred;
     if (!std::isfinite(boundaryDetail)) { return; }
-
     approx.back() = pred;
     det.push_back(boundaryDetail);
 }
-
 }
-
 struct HaarDecomposition {
     std::vector<std::vector<double>> details;
     std::vector<double> approxFinal;
     std::vector<std::size_t> lengthsAtLevel;
 };
-
 inline auto haarForward(std::vector<double> const& residual) -> HaarDecomposition
 {
     HaarDecomposition out;
@@ -310,7 +281,6 @@ inline auto haarForward(std::vector<double> const& residual) -> HaarDecompositio
     out.approxFinal = cur;
     return out;
 }
-
 inline auto haarForwardSgBoundary(std::vector<double> const& residual) -> HaarDecomposition
 {
     HaarDecomposition out;
@@ -332,7 +302,6 @@ inline auto haarForwardSgBoundary(std::vector<double> const& residual) -> HaarDe
     out.approxFinal = cur;
     return out;
 }
-
 inline auto haarInverse(HaarDecomposition const& dec) -> std::vector<double>
 {
     std::vector<double> cur = dec.approxFinal;
@@ -341,7 +310,6 @@ inline auto haarInverse(HaarDecomposition const& dec) -> std::vector<double>
     }
     return cur;
 }
-
 inline auto haarFlattenCoeffs(HaarDecomposition const& dec) -> std::vector<double>
 {
     std::vector<double> flat;
@@ -352,7 +320,6 @@ inline auto haarFlattenCoeffs(HaarDecomposition const& dec) -> std::vector<doubl
     flat.insert(flat.end(), dec.approxFinal.begin(), dec.approxFinal.end());
     return flat;
 }
-
 inline auto cisLognormalNllOfRatio(double ratio, double dof, double extraVar = 0.0) -> double
 {
     double const dofSafe = std::max(dof, 1e-6);
@@ -361,7 +328,6 @@ inline auto cisLognormalNllOfRatio(double ratio, double dof, double extraVar = 0
     double const L = std::log(std::max(ratio, detail::kCisEnergyEps));
     return 0.5 * (L * L) / var + 0.5 * std::log(2.0 * detail::kCisPi * var);
 }
-
 inline auto cisExactCellNllData(double y, double dof, double logSp) -> double
 {
     return 0.5 * y + 0.5 * dof * (std::log(2.0 * detail::kCisPi) + logSp);
@@ -371,7 +337,6 @@ inline auto cisExactCellNllLog(double y, double L, double dof) -> double
     if (L == -std::numeric_limits<double>::infinity()) { return std::numeric_limits<double>::infinity(); }
     return 0.5 * y - 0.5 * dof * L + 0.5 * dof * std::log(2.0) + std::lgamma(0.5 * dof);
 }
-
 namespace detail {
 inline auto cisUlpF32Half(double r) -> double
 {
@@ -380,7 +345,6 @@ inline auto cisUlpF32Half(double r) -> double
     float const nx = std::nextafter(f, std::numeric_limits<float>::infinity());
     return 0.5 * (static_cast<double>(nx) - static_cast<double>(f));
 }
-
 inline auto cisUlpF16Half(double mag) -> double
 {
     if (!std::isfinite(mag)) { return std::numeric_limits<double>::infinity(); }
@@ -392,7 +356,6 @@ inline auto cisUlpF16Half(double mag) -> double
     double const ulp = (exp2 >= -14) ? std::ldexp(1.0, exp2 - 10) : std::ldexp(1.0, -24);
     return 0.5 * ulp;
 }
-
 inline auto cisFp16Mode1FallbackHalfWidth() -> double { return cisUlpF16Half(1.0); }
 inline auto cisLogRegLowerGamma(double a, double x) -> double
 {
@@ -428,7 +391,6 @@ inline auto cisLogRegLowerGamma(double a, double x) -> double
     return std::log1p(-std::exp(logQ));
 }
 }
-
 inline auto cisRecordingHalfWidths(std::vector<double> const& residual, int precision = 0) -> HaarDecomposition
 {
     std::vector<double> w(residual.size());
@@ -458,7 +420,6 @@ inline auto cisRecordingHalfWidths(std::vector<double> const& residual, int prec
     out.approxFinal = cur;
     return out;
 }
-
 inline auto buildCisCells(
     HaarDecomposition const& dec,
     std::vector<double> const& sigma2,
@@ -467,7 +428,6 @@ inline auto buildCisCells(
 {
     std::vector<CisCell> cells;
     bool const haveLv = !logVar.empty() && logVar.size() == sigma2.size();
-
     auto pushLevel = [&](std::vector<double> const& coeffs, int level) {
         std::size_t const n = coeffs.size();
         if (n == 0) { return; }
@@ -494,23 +454,19 @@ inline auto buildCisCells(
             cells.push_back(cell);
         }
     };
-
     for (std::size_t li = 0; li < dec.details.size(); ++li) {
         pushLevel(dec.details[li], static_cast<int>(li + 1));
     }
     if (scoreDcCell) {
         pushLevel(dec.approxFinal, static_cast<int>(dec.details.size() + 1));
     }
-
     return cells;
 }
-
 inline auto cisEpiExtraVar(CisCell const& cell) -> double
 {
     if (!cell.hasEpi) { return 0.0; }
     return std::exp(std::clamp(cell.predictedLogVar, -8.0, 4.0));
 }
-
 inline void computeCisNllExact(std::vector<CisCell>& cells, int mode, double& shapeNll, double& scaleNll,
                                double& sHat, bool& ok)
 {
@@ -564,7 +520,6 @@ inline void computeCisNllExact(std::vector<CisCell>& cells, int mode, double& sh
     scaleNll = 0.5 * D * (sHat - 1.0 - logS);
     if (std::isnan(shapeNll) || std::isnan(scaleNll)) { ok = false; }
 }
-
 inline double cisLseNegMean(std::vector<double> const& x)
 {
     std::size_t const M = x.size();
@@ -580,7 +535,6 @@ inline double cisLseNegMean(std::vector<double> const& x)
     if (!(sum > 0.0)) { return std::numeric_limits<double>::infinity(); }
     return mn - std::log(sum) + std::log(static_cast<double>(M));
 }
-
 inline void computeCisNllEnsemble(std::vector<CisCell>& cells, int mode,
                                   std::vector<std::vector<double>> const& memberEnergy,
                                   double& shapeNll, double& scaleNll, double& sHat, bool& ok)
@@ -595,12 +549,10 @@ inline void computeCisNllEnsemble(std::vector<CisCell>& cells, int mode,
     for (auto const& me : memberEnergy) {
         if (me.size() != n) { ok = false; return; }
     }
-
     std::vector<double> savedPredicted(n);
     for (std::size_t i = 0; i < n; ++i) { savedPredicted[i] = cells[i].predictedEnergy; }
     std::vector<char> savedInterval(n);
     for (std::size_t i = 0; i < n; ++i) { savedInterval[i] = cells[i].intervalCell ? 1 : 0; }
-
     std::vector<double> shapeM(M), fitM(M), sHatM(M);
     std::vector<std::vector<double>> nllPerCellM(M, std::vector<double>(n));
     for (std::size_t m = 0; m < M; ++m) {
@@ -614,17 +566,14 @@ inline void computeCisNllEnsemble(std::vector<CisCell>& cells, int mode,
         sHatM[m] = sH;
         for (std::size_t i = 0; i < n; ++i) { nllPerCellM[m][i] = cells[i].nll; }
     }
-
     for (std::size_t i = 0; i < n; ++i) {
         cells[i].predictedEnergy = savedPredicted[i];
         cells[i].intervalCell = savedInterval[i] != 0;
     }
     if (!ok) { return; }
-
     shapeNll = cisLseNegMean(shapeM);
     double const total = cisLseNegMean(fitM);
     scaleNll = total - shapeNll;
-
     double mn = shapeM[0];
     for (double v : shapeM) { mn = std::min(mn, v); }
     std::vector<double> w(M, 0.0);
@@ -647,7 +596,6 @@ inline void computeCisNllEnsemble(std::vector<CisCell>& cells, int mode,
     }
     if (std::isnan(shapeNll) || std::isnan(scaleNll)) { ok = false; }
 }
-
 inline auto cisJointCoarseFromEnv() -> int
 {
     static int const v = [] {
@@ -656,7 +604,6 @@ inline auto cisJointCoarseFromEnv() -> int
     }();
     return v;
 }
-
 inline void computeCisNllEnsembleJointCoarse(std::vector<CisCell> const& cells,
                                              std::vector<std::vector<double>> const& memberEnergy,
                                              double& fitness, bool& ok)
@@ -674,7 +621,6 @@ inline void computeCisNllEnsembleJointCoarse(std::vector<CisCell> const& cells,
     for (auto const& c : cells) { maxLevel = std::max(maxLevel, c.level); }
     std::vector<std::vector<std::size_t>> blocks(static_cast<std::size_t>(maxLevel) + 1);
     for (std::size_t c = 0; c < n; ++c) { blocks[static_cast<std::size_t>(cells[c].level)].push_back(c); }
-
     std::vector<double> totalM(M, 0.0);
     for (std::size_t m = 0; m < M; ++m) {
         double nllM = 0.0;
@@ -702,7 +648,6 @@ inline void computeCisNllEnsembleJointCoarse(std::vector<CisCell> const& cells,
     fitness = cisLseNegMean(totalM);
     if (std::isnan(fitness)) { ok = false; }
 }
-
 inline auto cisAbsDataNllEnsemble(std::vector<CisCell> const& cells,
                                   std::vector<std::vector<double>> const& memberEnergy,
                                   std::vector<double>& memberNll,
@@ -734,9 +679,7 @@ inline auto cisAbsDataNllEnsemble(std::vector<CisCell> const& cells,
         memberNll[m] = sum;
     }
     if (!ok) { return kInf; }
-
     double const total = cisLseNegMean(memberNll);
-
     double mn = memberNll[0];
     for (double v : memberNll) { mn = std::min(mn, v); }
     double wsum = 0.0;
@@ -753,7 +696,6 @@ inline auto cisAbsDataNllEnsemble(std::vector<CisCell> const& cells,
     if (std::isnan(total)) { ok = false; }
     return total;
 }
-
 inline void computeCisNll(std::vector<CisCell>& cells, double& shapeNll, double& scaleNll, bool& ok)
 {
     ok = true;
@@ -764,7 +706,6 @@ inline void computeCisNll(std::vector<CisCell>& cells, double& shapeNll, double&
         ok = false;
         return;
     }
-
     std::vector<double> ratio(n);
     double sumRatio = 0.0;
     for (std::size_t i = 0; i < n; ++i) {
@@ -780,7 +721,6 @@ inline void computeCisNll(std::vector<CisCell>& cells, double& shapeNll, double&
     }
     double const meanRatio = sumRatio / static_cast<double>(n);
     double const meanRatioSafe = (std::isfinite(meanRatio) && meanRatio > detail::kCisEnergyEps) ? meanRatio : 1.0;
-
     double sumExtraVar = 0.0;
     int epiCount = 0;
     for (auto const& c : cells) {
@@ -791,7 +731,6 @@ inline void computeCisNll(std::vector<CisCell>& cells, double& shapeNll, double&
     }
     double const avgExtraVar = (epiCount > 0) ? (sumExtraVar / epiCount) : 0.0;
     scaleNll = cisLognormalNllOfRatio(meanRatioSafe, static_cast<double>(n), avgExtraVar);
-
     shapeNll = 0.0;
     for (std::size_t i = 0; i < n; ++i) {
         double const rNorm = ratio[i] / meanRatioSafe;
@@ -801,10 +740,8 @@ inline void computeCisNll(std::vector<CisCell>& cells, double& shapeNll, double&
         shapeNll += cellNll;
         if (!std::isfinite(cellNll)) { ok = false; }
     }
-
     if (!std::isfinite(shapeNll) || !std::isfinite(scaleNll)) { ok = false; }
 }
-
 inline auto evaluateCisScoring(
     std::vector<double> const& residual,
     std::vector<double> const& sigma2,
@@ -817,11 +754,9 @@ inline auto evaluateCisScoring(
         out.ok = false;
         return out;
     }
-
     auto const dec = cfg.useSavitzkyGolayBoundary ? haarForwardSgBoundary(residual) : haarForward(residual);
     out.cells = buildCisCells(dec, sigma2, logVar, cfg.scoreDcCell);
     applyDirectCellEnergyStub(out.cells, directEnergy);
-
     bool ok = true;
     int const dispatchMode = (cfg.exactLikelihood == 4) ? 3 : cfg.exactLikelihood;
     if (cfg.exactLikelihood == 4) {
@@ -865,10 +800,8 @@ inline auto evaluateCisScoring(
         if (ensembleOn) { cisGrid48Counters().ensembleSkipped.fetch_add(1, std::memory_order_relaxed); }
         computeCisNll(out.cells, out.shapeNll, out.scaleNll, ok);
     }
-
     out.fitness = cfg.useScaleInvariantFitness ? out.shapeNll : (out.shapeNll + out.scaleNll);
     out.ok = ok && std::isfinite(out.fitness);
     return out;
 }
-
 }

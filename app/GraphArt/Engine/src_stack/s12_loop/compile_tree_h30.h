@@ -1,13 +1,10 @@
 #pragma once
 #include "compile_tree_h14.h"
 #include "corder_su_h30.h"
-
 namespace h30 {
 using h14::MAXN; using h14::MAXQ; using h14::MAXM; using h14::NWD;
 enum { MODE_SU = 0, MODE_EXACT = 1, MODE_STATIC = 2 };
-
 struct PrepBuf { int opnd[MAXN + 1]; int rep[MAXN]; };
-
 static void prepare(const View& V, PrepBuf& P) {
   const int n = V.n();
   for (int i = 0; i < n; i++) {
@@ -35,7 +32,6 @@ static void prepare(const View& V, PrepBuf& P) {
   }
   h14::build_tables(h14::tab, V, P.rep, P.opnd, n);
 }
-
 static bool order_mode(int mode, int* ord) {
   const h14::Tab& C = h14::tab;
   if (mode == MODE_EXACT) return h14::corder_h14(h14::tab, ord);
@@ -43,7 +39,6 @@ static bool order_mode(int mode, int* ord) {
   su30::G g{C.n, C.Q, C.opnd, C.OP, C.CA, C.CB, C.rr};
   return su30::order(g, ord);
 }
-
 static bool compile_tree_mode(const View& V, Tree& T, int mode, int* ordOut = nullptr, int* mxOut = nullptr, int* mOut = nullptr) {
   if (V.Q > 17 || V.n() > MAXN) return compile_tree_corder_h12(V, T);
   T.Q = V.Q; T.nth = V.nth; T.nS = V.nS; T.prog.clear(); T.sp.clear(); T.th.clear();
@@ -59,7 +54,6 @@ static bool compile_tree_mode(const View& V, Tree& T, int mode, int* ordOut = nu
   for (int q = 0; q < V.Q; q++) ord[q] = q;
   if (V.Q > 1 && !order_mode(mode, ord)) return compile_tree_corder_h12(V, T);
   if (ordOut) for (int q = 0; q < V.Q; q++) ordOut[q] = ord[q];
-
   int ns[MAXM + 1], as[MAXM + 1], bs[MAXM + 1]; const h14::Seq S{ns, as, bs};
   int reads[MAXN + 1], lastread[MAXN + 1];
   for (int x = 0; x <= n; x++) { reads[x] = 0; lastread[x] = -1; }
@@ -77,7 +71,6 @@ static bool compile_tree_mode(const View& V, Tree& T, int mode, int* ordOut = nu
     if (ns[k] == n) ns[k] = -1;
     if (bs[k] == n) bs[k] = -1;
   }
-
   int pos[MAXN]; unsigned char chain[MAXN];
   for (int x = 0; x < n; x++) { pos[x] = -1; chain[x] = 0; }
   for (int k = 0; k < m; k++) if (ns[k] >= 0) pos[ns[k]] = k;
@@ -87,7 +80,6 @@ static bool compile_tree_mode(const View& V, Tree& T, int mode, int* ordOut = nu
     const int r1 = (as[k + 1] == x) + (bs[k + 1] == x);
     if (r1 == reads[x]) chain[x] = 1;
   }
-
   int slot[MAXN], freeS[MAXM]; int nf = 0, nsl = 0;
   for (int x = 0; x < n; x++) slot[x] = -1;
   uint16_t capt[18]; for (int q = 0; q < 18; q++) capt[q] = 1022;
@@ -115,7 +107,6 @@ static bool compile_tree_mode(const View& V, Tree& T, int mode, int* ordOut = nu
     T.prog.push_back((uint32_t)C.OP[node] | (uint32_t)d << 6 | (uint32_t)A << 12 | (uint32_t)B << 22);
     newend[k + 1] = (int)T.prog.size();
   }
-
   for (int q = 0; q < 36; q++) T.segs[q] = 0;
   T.segs[0] = 0; for (int q = 0; q < V.Q; q++) T.segs[q + 1] = (uint16_t)newend[segend[q]];
   for (int q = 0; q < 18; q++) T.segs[18 + q] = 1022;
@@ -125,6 +116,5 @@ static bool compile_tree_mode(const View& V, Tree& T, int mode, int* ordOut = nu
   for (int s = 0; s < V.nth; s++) T.th.push_back(V.th(s));
   return true;
 }
-
 static bool compile_tree_h30(const View& V, Tree& T) { return compile_tree_mode(V, T, MODE_SU); }
 }

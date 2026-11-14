@@ -9,7 +9,6 @@
 #include <thread>
 #include <atomic>
 #include <chrono>
-
 extern int engine_main(int argc, char** argv);
 extern "C" { void* sketch_ui_ring_create(void); void sketch_ui_attach(void*); void sketch_ui_set_budget(double); int sketch_ui_pop(void*, void*); unsigned long sketch_ui_burst_bytes(void); }
 namespace stb { constexpr int PAIRS = 9, PTS = 120, MAXLEN = 256;
@@ -17,9 +16,7 @@ struct Tree { uint8_t len; uint8_t op[MAXLEN]; int16_t cid[MAXLEN]; float c[MAXL
 struct Fit { uint8_t kind, ovf; uint8_t q[2], nth[2]; uint8_t drv[2]; uint8_t pad[3]; float u[10]; float th[2][32]; float a[2][16]; };
 struct Pair { Tree x, y; float score; uint16_t cx; uint8_t champion; uint8_t fitted; float xs[PTS], ys[PTS]; Fit fit; };
 struct Burst { uint32_t seq; int32_t step; int32_t n_pairs; int32_t final_pick; double wall_ms; int64_t candidates; float t_lo, t_hi; Pair pairs[PAIRS]; }; }
-
 static void setenv_if_unset(const char* k, const char* v) { if (!getenv(k)) setenv(k, v, 1); }
-
 int main(int argc, char** argv) {
   @autoreleasepool {
     if (const char* ef = getenv("APP_ENV_FILE")) {
@@ -35,6 +32,7 @@ int main(int argc, char** argv) {
     setvbuf(stdout, nullptr, _IOLBF, 0);
     if (argc < 9) { fprintf(stderr, "usage: %s cands kdir outdir prims label steps threads check\n", argv[0]); return 2; }
     std::vector<char*> av = { argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8] };
+    if (char* rs_ = getenv("RSEED")) av.push_back(rs_);
     if (getenv("RING_TEST")) {
       void* ring = sketch_ui_ring_create(); sketch_ui_attach(ring); sketch_ui_set_budget(0);
       static std::atomic<bool> stop{false}; const auto t0 = std::chrono::steady_clock::now();

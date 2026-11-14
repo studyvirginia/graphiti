@@ -4,9 +4,7 @@
 #include <cstddef>
 #include <limits>
 #include <vector>
-
 namespace S1 {
-
 inline double pointSegmentSoftMin(double px, double py, const double* cx, const double* cy, std::size_t n, double softScale)
 {
     const double kEps = 1.1920929e-7;
@@ -37,7 +35,6 @@ inline double pointSegmentSoftMin(double px, double py, const double* cx, const 
     const double sgn = (std::abs(blended) > gN * blendedAbs && blended < 0.0) ? -1.0 : 1.0;
     return sumExp > 0 ? sgn * blendedAbs / sumExp : 0.0;
 }
-
 inline double meanSegLen(const double* cx, const double* cy, std::size_t n)
 {
     const double lenSqEps = 1.1920929e-7 * 100.0;
@@ -49,11 +46,9 @@ inline double meanSegLen(const double* cx, const double* cy, std::size_t n)
     }
     return cnt > 0 ? sum / (double)cnt : 0.0;
 }
-
 inline void s1Residual(const double* sx, const double* sy, const double* fx, const double* fy, std::size_t N, double* out)
 {
     const double sc = std::max(meanSegLen(fx, fy, N), 1.1920929e-7);
     for (std::size_t i = 0; i < N; ++i) out[i] = pointSegmentSoftMin(sx[i], sy[i], fx, fy, N, sc);
 }
-
 }

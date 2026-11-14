@@ -3,9 +3,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <vector>
-
 namespace stroke_in {
-
 inline bool load_raw(const char* path, std::vector<float>& xs, std::vector<float>& ys) {
   FILE* f = fopen(path, "r"); if (!f) return false;
   char line[512];
@@ -17,7 +15,6 @@ inline bool load_raw(const char* path, std::vector<float>& xs, std::vector<float
   fclose(f);
   return true;
 }
-
 inline double g_cx = 0, g_cy = 0, g_span = 1;
 inline bool resample_normalize(const float* in_x, const float* in_y, int n_in, int target_n,
                                std::vector<double>& out_x, std::vector<double>& out_y) {
@@ -51,5 +48,4 @@ inline bool resample_normalize(const float* in_x, const float* in_y, int n_in, i
   }
   return true;
 }
-
 }

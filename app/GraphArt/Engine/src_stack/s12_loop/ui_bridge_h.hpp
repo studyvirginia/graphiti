@@ -5,22 +5,18 @@
 #include <cstring>
 #include <cstdio>
 #include <cstddef>
-
 namespace uib {
-
 constexpr int RING = 64;
 constexpr int PAIRS = 9;
 constexpr int PTS = 120;
 constexpr int GENLEN = 24;
 constexpr int MAXLEN = 256;
-
 struct Tree {
   uint8_t len;
   uint8_t op[MAXLEN];
   int16_t cid[MAXLEN];
   float c[MAXLEN];
 };
-
 struct Fit {
   uint8_t kind, ovf;
   uint8_t q[2], nth[2];
@@ -30,7 +26,6 @@ struct Fit {
   float th[2][32];
   float a[2][16];
 };
-
 struct Pair {
   Tree x, y;
   float score;
@@ -40,7 +35,6 @@ struct Pair {
   float xs[PTS], ys[PTS];
   Fit fit;
 };
-
 struct Burst {
   uint32_t seq;
   int32_t step;
@@ -51,7 +45,6 @@ struct Burst {
   float t_lo, t_hi;
   Pair pairs[PAIRS];
 };
-
 struct Ring {
   Burst slot[RING];
   std::atomic<uint64_t> head{0};
@@ -59,7 +52,6 @@ struct Ring {
   std::atomic<uint64_t> dropped{0};
   uint32_t seq = 0;
 };
-
 inline Ring* g_ring = nullptr;
 inline double g_budget_s = 0.0;
 inline double g_t0 = 0.0;
@@ -68,7 +60,6 @@ inline int g_xf_on = 0, g_xf_drv = 0;
 inline double g_xf_a = 1, g_xf_b = 0;
 inline double g_smap[4] = {1, 0, 1, 0};
 inline volatile int g_stop = 0;
-
 inline double op_eval(uint8_t o, double a, double b, double t, double c) {
   switch (o) {
     case 1: return c;
@@ -89,7 +80,6 @@ inline double op_eval(uint8_t o, double a, double b, double t, double c) {
     default: return NAN;
   }
 }
-
 inline double eval_tree(const Tree& g, double t) {
   double st[MAXLEN]; int sp = 0;
   for (int k = 0; k < g.len; k++) {
@@ -101,7 +91,6 @@ inline double eval_tree(const Tree& g, double t) {
   }
   return sp == 1 ? st[0] : NAN;
 }
-
 inline bool to_xframe(Tree& T, int side) {
   if (!g_xf_on || T.len == 0 || T.len > MAXLEN - 1) return true;
   struct N { uint8_t op; int l, r; double c, A, B; bool af; };
@@ -136,7 +125,6 @@ inline bool to_xframe(Tree& T, int side) {
   if (ovf) return false;
   R.len = (uint8_t)len; T = R; return true;
 }
-
 template <class Fill>
 inline void push_burst(int step, double wall_ms, int64_t candidates, int n_pairs, const float* score,
                        const uint16_t* cx, Fill fill, int final_pick, float t_lo, float t_hi) {
@@ -162,7 +150,6 @@ inline void push_burst(int step, double wall_ms, int64_t candidates, int n_pairs
   }
   R->head.store(h + 1, std::memory_order_release);
 }
-
 template <class Cand>
 inline void fill_from_cand(const Cand& g, Pair& P) {
   for (int t = 0; t < 2; t++) {
@@ -174,7 +161,6 @@ inline void fill_from_cand(const Cand& g, Pair& P) {
     }
   }
 }
-
 inline bool pop(Ring* R, Burst& out) {
   const uint64_t t = R->tail.load(std::memory_order_relaxed);
   if (t == R->head.load(std::memory_order_acquire)) return false;
@@ -182,9 +168,7 @@ inline bool pop(Ring* R, Burst& out) {
   R->tail.store(t + 1, std::memory_order_release);
   return true;
 }
-
 }
-
 extern "C" {
 void* sketch_ui_ring_create(void);
 void sketch_ui_ring_destroy(void* ring);
@@ -198,7 +182,6 @@ int sketch_ui_pop(void* ring, void* out);
 unsigned long sketch_ui_burst_bytes(void);
 unsigned long long sketch_ui_dropped(void* ring);
 }
-
 extern "C" {
 void* sketch_ui_ring_create(void) { return new uib::Ring(); }
 void sketch_ui_ring_destroy(void* ring) { delete static_cast<uib::Ring*>(ring); }

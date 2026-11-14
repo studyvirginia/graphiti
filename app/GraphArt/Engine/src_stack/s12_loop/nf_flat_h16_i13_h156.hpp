@@ -7,15 +7,15 @@
 #include <sys/mman.h>
 #include <cstdio>
 #include <vector>
-
 namespace nf16 {
 using namespace skn;
-
-constexpr uint32_t TB = 1u << 22;
+#ifndef NF_TBLOG
+#define NF_TBLOG 22
+#endif
+constexpr uint32_t TB = 1u << NF_TBLOG;
 constexpr size_t   ARENA_BYTES = (size_t)1 << 30;
 constexpr uint32_t MAXENT_H16 = 1u << 21;
 constexpr uint64_t RSV_BYTES = 1u << 20;
-
 struct BHdr {
   NFMemo::Key key;
   uint8_t status, Q, wide;
@@ -26,7 +26,6 @@ struct BHdr {
   uint16_t slot_root[MAXTH];
 };
 static_assert(sizeof(BHdr) % 8 == 0, "block header must keep 8-byte alignment");
-
 static inline uint64_t sm(uint64_t x) {
   x += 0x9e3779b97f4a7c15ull; x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ull; x = (x ^ (x >> 27)) * 0x94d049bb133111ebull;
   return x ^ (x >> 31);
@@ -41,7 +40,6 @@ static inline uint64_t chain_prefix(const uint32_t* w, size_t nabs, uint32_t nw)
   for (size_t i = 0; i < nabs; i++) h = sm(h ^ w[i]);
   return h;
 }
-
 struct Shared {
   std::atomic<uint64_t>* tab;
   char* ar;
@@ -59,7 +57,6 @@ struct Shared {
   Shared& operator=(const Shared&) = delete;
   void prefault(size_t bytes) { memset(ar, 0, std::min(bytes, ARENA_BYTES)); }
 };
-
 static inline void replay_to(const PNode* nd, int pn_len, const uint16_t* slot_root, int nth, const float* c, uint32_t* th) {
   double v[MAXNODES];
   for (int i = 0; i < pn_len; ++i) {
@@ -103,7 +100,6 @@ static inline void replay_to(const PNode* nd, int pn_len, const uint16_t* slot_r
     memcpy(th + s, &f, 4);
   }
 }
-
 struct alignas(128) Handle {
   Shared& S;
   Ctx* C;
@@ -113,7 +109,6 @@ struct alignas(128) Handle {
   long hits = 0, misses = 0, fails = 0, bigskip = 0;
   Handle(Shared& s, Ctx* c) : S(s), C(c) {}
 };
-
 static inline bool find(const Shared& S, const NFMemo::Key& k, uint64_t h, uint64_t& boff) {
   const uint32_t tag = (uint32_t)(h >> 32);
   uint32_t p = (uint32_t)(h & (TB - 1));
@@ -128,7 +123,6 @@ static inline bool find(const Shared& S, const NFMemo::Key& k, uint64_t h, uint6
     p = (p + 1) & (TB - 1);
   }
 }
-
 static inline void publish(Handle& H, uint64_t h, const NFMemo::Key& k, const BHdr& X, const char* body, size_t nbody) {
   Shared& S = H.S;
   if (S.nent.load(std::memory_order_relaxed) >= MAXENT_H16) { S.drops.fetch_add(1); return; }
@@ -154,7 +148,6 @@ static inline void publish(Handle& H, uint64_t h, const NFMemo::Key& k, const BH
     p = (p + 1) & (TB - 1);
   }
 }
-
 static inline bool miss_compute(Handle& H, const NFMemo::Key& k, uint64_t h, const uint8_t* op, const float* c, int n) {
   H.misses++;
   NFOut out;
@@ -188,7 +181,6 @@ static inline bool miss_compute(Handle& H, const NFMemo::Key& k, uint64_t h, con
   } else publish(H, h, k, X, nullptr, 0);
   return good;
 }
-
 struct Block { std::vector<uint32_t> w; };
 struct Child {
   uint32_t koff = 0, klen = 0;
@@ -196,7 +188,6 @@ struct Child {
   uint8_t ok[2] = {0, 0};
   uint64_t r0 = 0, r1 = 0, kh = 0;
 };
-
 static const uint64_t KEYMASK[25][3] = {
 #define KM(n) {n >= 8 ? ~0ull : (n <= 0 ? 0ull : (~0ull >> (8 * (8 - n)))), \
                n >= 16 ? ~0ull : (n <= 8 ? 0ull : (~0ull >> (8 * (16 - n)))), \
@@ -218,7 +209,6 @@ static inline bool key_eq(const NFMemo::Key& a, const NFMemo::Key& b) {
   memcpy(x, &a, sizeof a); memcpy(y, &b, sizeof b);
   return ((x[0] ^ y[0]) | (x[1] ^ y[1]) | (x[2] ^ y[2]) | ((x[3] ^ y[3]) & 0xFFu)) == 0;
 }
-
 static inline bool find2(const Shared& S, const NFMemo::Key& k, uint64_t h, uint64_t& boff) {
   const uint32_t tag = (uint32_t)(h >> 32);
   uint32_t p = (uint32_t)(h & (TB - 1));
@@ -232,7 +222,6 @@ static inline bool find2(const Shared& S, const NFMemo::Key& k, uint64_t h, uint
     p = (p + 1) & (TB - 1);
   }
 }
-
 static inline bool tree_seg(Handle& H, const skn::Cand& cd, int t, const NFMemo::Key& k, uint64_t hk, Block& B, Child& ch, uint64_t& r) {
   const size_t t0 = B.w.size();
   const int n = cd.len[t];
@@ -279,7 +268,6 @@ static inline bool tree_seg(Handle& H, const skn::Cand& cd, int t, const NFMemo:
   }
   return ok;
 }
-
 static void chunk(Handle& H, const skn::Cand* cands, const uint8_t* valid, int b0, int b1, Block& B, Child* out) {
   B.w.clear();
   const int m = b1 - b0;
@@ -333,5 +321,4 @@ static void chunk(Handle& H, const skn::Cand* cands, const uint8_t* valid, int b
     ch.kh = sm(r[0] ^ sm(r[1] + ch.klen));
   }
 }
-
 }

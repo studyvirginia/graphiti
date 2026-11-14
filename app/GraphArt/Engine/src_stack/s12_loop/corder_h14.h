@@ -2,20 +2,17 @@
 #include <cstdint>
 #include <cstring>
 #include "../s02_nf/sk_nf_h2b.hpp"
-
 #ifdef H14_PROF
 void h14_probe(int id);
 #define H14_P(id) h14_probe(id)
 #else
 #define H14_P(id) ((void)0)
 #endif
-
 namespace h14 {
 constexpr int MAXN = 512, MAXQ = 64, MAXM = MAXN + MAXQ + 4, NWD = MAXN / 64;
 constexpr int INF = 1 << 30, NOCUT = 0x7fffffff;
 enum { PR_TABLES = 0, PR_STEP, PR_TRIAL_EMIT, PR_TRIAL_SCAN, PR_COMMIT,
        PR_HDR, PR_CSE, PR_EMIT, PR_PREP, PR_SLOT, PR_SEGS, PR_NSEC };
-
 struct Tab {
   int n, Q;
   const int* opnd;
@@ -27,10 +24,8 @@ struct Tab {
   int gb[MAXQ], ge[MAXQ];
 };
 static thread_local Tab tab;
-
 static inline bool tst(const uint64_t* b, int x) { return (b[x >> 6] >> (x & 63)) & 1ull; }
 static inline void put(uint64_t* b, int x) { b[x >> 6] |= 1ull << (x & 63); }
-
 static inline int build_F(const Tab& C, int r, int* out, unsigned char* vis) {
   int stx[MAXN], sts[MAXN];
   int sp = 1, cnt = 0;
@@ -46,7 +41,6 @@ static inline int build_F(const Tab& C, int r, int* out, unsigned char* vis) {
   }
   return cnt;
 }
-
 static inline void build_tables(Tab& C, const skn::View& V, const int* rep, const int* opnd, int n) {
   C.n = n; C.Q = V.Q; C.opnd = opnd;
   for (int x = 0; x < n; x++) {
@@ -64,9 +58,7 @@ static inline void build_tables(Tab& C, const skn::View& V, const int* rep, cons
   }
   C.fo[V.Q] = fill;
 }
-
 struct Seq { int* sn; int* sa; int* sb; };
-
 static inline int emit_q(const Tab& C, int q, uint64_t* D, const Seq& S, int* rd, int* lr, int m) {
   const int n = C.n, m0 = m;
   const int e = C.fo[q + 1];
@@ -83,7 +75,6 @@ static inline int emit_q(const Tab& C, int q, uint64_t* D, const Seq& S, int* rd
   if (m == m0) { const int r = C.rr[q]; S.sn[m] = n; S.sa[m] = r; S.sb[m] = n; rd[r]++; lr[r] = m; ++m; }
   return m;
 }
-
 static inline int emit_g(const Tab& C, int b, int e, int r, uint64_t* Dt, const Seq& S, int* rd, int* lr, int m) {
   const int n = C.n, m0 = m;
   const int* gl = C.gl;
@@ -104,7 +95,6 @@ static inline int emit_g(const Tab& C, int b, int e, int r, uint64_t* Dt, const 
   if (m == m0) { S.sn[m] = n; S.sa[m] = r; S.sb[m] = n; rd[r]++; lr[r] = m; ++m; }
   return m;
 }
-
 static inline int scan_two(const Tab& C, const Seq& S, const int* rd, const int* lr, int m, int lim, int thr,
                            int* chv, int* posOf) {
   const int* opnd = C.opnd;
@@ -126,7 +116,6 @@ static inline int scan_two(const Tab& C, const Seq& S, const int* rd, const int*
   }
   return mx;
 }
-
 static bool corder_h14(Tab& C, int* out) {
   const int Q = C.Q, n = C.n;
   if (Q < 2 || Q > MAXQ || n < 1 || n > MAXN) return false;

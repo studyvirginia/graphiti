@@ -2,7 +2,6 @@
 #include "compile_memo_i17_h156.h"
 #include "h313a_view.hpp"
 #include "h313b.hpp"
-
 #ifndef C308_TS
 #define C308_TS(k) ((void)0)
 #endif
@@ -24,10 +23,8 @@ constexpr int kN = 512, kQ = 64;
 using h14::NWD;
 using f38::rec_fields;
 using f38::Scratch;
-
 struct ColT { int ia[h14::MAXQ * (h14::MAXN + 1)]; int ib[h14::MAXQ * (h14::MAXN + 1)]; int io[h14::MAXQ + 1]; int pos[h14::MAXN]; };
 static thread_local ColT ct;
-
 static inline int build_F_c(const h14::Tab& C, int r, int* out, uint64_t* fbq, int* pend, const int* EA, const int* EB, int NN, int* ia, int* ib) {
   using namespace h42;
   if (C.opnd[r] >= 0) { ia[0] = -1; ib[0] = -1; return 0; }
@@ -92,7 +89,6 @@ static inline int build_F_c(const h14::Tab& C, int r, int* out, uint64_t* fbq, i
   return cnt;
 #endif
 }
-
 static void prepare(const View& V, h42::PrepBuf& P) {
   using namespace h42;
   OrdScratch& s = os;
@@ -146,7 +142,6 @@ static void prepare(const View& V, h42::PrepBuf& P) {
   C.fo[V.Q] = fill; H720_CNT(cn_fill, fill); H720_CNT(cn_n, n); H720_CNT(cn_rec, 1);
   for (int q = 0; q < V.Q; q++) { const int r = C.rr[q]; s.pend[opnd[r] < 0 ? r : NN]++; }
 }
-
 #if H720_V & 4
 static inline void trial(const h42::OrdScratch& s, const h14::Tab& C, int q, int& peakR, int& endR) {
   constexpr int DUM = h14::MAXN + 1;
@@ -183,7 +178,6 @@ static inline void trial(const h42::OrdScratch& s, const h14::Tab& C, int q, int
   H720_CNT(cn_tnl, nl);
   peakR = peak; endR = cur;
 }
-
 #else
 static inline void trial(const h42::OrdScratch& s, const h14::Tab& C, int q, int& peakR, int& endR) {
   constexpr int DUM = h14::MAXN + 1;
@@ -217,7 +211,6 @@ static inline void trial(const h42::OrdScratch& s, const h14::Tab& C, int q, int
   }
   peakR = peak; endR = cur;
 }
-
 #endif
 static inline void cap_node(Scratch& scr, const h14::Tab& C, int x, int m) {
   const int A = C.CA[x], op = C.OP[x], B = (op >= 3 && op <= 6) ? C.CB[x] : -1;
@@ -231,7 +224,6 @@ static inline void cap_mov(Scratch& scr, const h14::Tab& C, int q, int qi, int m
   scr.sn[m] = -1; scr.sa[m] = r; scr.sb[m] = -1;
   scr.reads[r]++; scr.lastread[r] = m; scr.qof[m] = qi;
 }
-
 static inline int commit_cap(h42::OrdScratch& s, const h14::Tab& C, Scratch& scr, int q, int qi, int n, int m) {
   const int NN = n;
   const int* opnd = C.opnd;
@@ -265,7 +257,6 @@ static inline int commit_cap(h42::OrdScratch& s, const h14::Tab& C, Scratch& scr
   if (len == 0) { cap_mov(scr, C, q, qi, m); return m + 1; }
   return m + len;
 }
-
 static int order(const h14::Tab& C, int* out, Scratch& scr) {
   using namespace h42;
   const int n = C.n, Q = C.Q;
@@ -339,14 +330,12 @@ static int order(const h14::Tab& C, int* out, Scratch& scr) {
 #endif
   return m;
 }
-
 template <class E>
 static inline void segs_emit2(uint32_t* sg, const Tree& T, const uint32_t* segmap, const E& e) {
   const uint32_t e1022 = e.enc(1022);
   for (int q = 0; q < 18; q++) sg[q] = (q <= T.Q) ? segmap[q] : (uint32_t)T.segs[q];
   for (int q = 0; q < 18; q++) sg[18 + q] = q < T.Q ? e.enc(T.segs[18 + q]) : e1022;
 }
-
 struct ScanB {
   uint32_t SL, TT, TWO;
   inline uint32_t enc(uint32_t c) const {
@@ -388,7 +377,6 @@ static inline bool stage_impl(const View& V, Tree& T, cmi6::TreeEnc& te) {
   T.sp.reserve((size_t)V.nS);
   for (int i = 0; i < V.nS; i++) { int o = V.op(i), a = V.a(i), b = V.b(i); if (a > 31 || b > 31) return false; T.sp.push_back((uint16_t)(o | (a << 6) | (b << 11))); }
 #endif
-
   C308_TS(4);
   h42::PrepBuf P;
   c720::prepare(V, P);
@@ -492,7 +480,6 @@ static inline bool stage_impl(const View& V, Tree& T, cmi6::TreeEnc& te) {
 #endif
   C308_TS(10);
   if (decFail) { f38::Grid g; return f42::compile_fused_stage(V, T, te, g, 3, nullptr); }
-
   const int SS = T.nth == 0 ? 2 : 16;
   #if H720_V & 1
   const enc34::ScanE es0 = enc34::make_scan(T, SS); const ScanB es{es0.SL, es0.TT, es0.TWO};
@@ -559,7 +546,6 @@ static inline bool stage_impl(const View& V, Tree& T, cmi6::TreeEnc& te) {
   C308_TS(12);
   return true;
 }
-
 static inline void fix_b1(const Tree& T, cmi6::TreeEnc& te) {
   if (!cmi6::g_b1 || (te.sp4.empty() && te.gp4.empty())) return;
   bool ok = true;
@@ -581,7 +567,6 @@ static inline bool stage(const View& V, Tree& T, cmi6::TreeEnc& te) {
   if (r) fix_b1(T, te);
   return r;
 }
-
 static inline uint32_t publish_idx(cc14::Handle& H, uint64_t h, cc14::Ent X, const uint32_t* kw, size_t nk, const uint32_t* pw, size_t np, const uint16_t* spw, size_t ns) {
   using cc14::Shared; cc14::Shared& S = H.S;
   uint32_t idx, koff, poff, soff;
@@ -622,13 +607,11 @@ static inline uint32_t publish_idx(cc14::Handle& H, uint64_t h, cc14::Ent X, con
     p = (p + 1) & (Shared::TB - 1);
   }
 }
-
 static inline void tok_to_vec(cmi6::TreeEnc& te) {
   if (te.tkp) { te.tk.assign(te.tkp, te.tkp + te.ntkp); te.tkp = nullptr; te.ntkp = 0; }
   if (te.sp4p) { te.sp4.assign(te.sp4p, te.sp4p + te.nsp4p); te.sp4p = nullptr; te.nsp4p = 0; }
   if (te.gp4p) { te.gp4.assign(te.gp4p, te.gp4p + te.ngp4p); te.gp4p = nullptr; te.ngp4p = 0; }
 }
-
 static inline bool compile_enc(cmi6::Handle& H, const View& V, Tree& T, cmi6::TreeEnc& te, double& enc_ms, const uint64_t* hpre = nullptr) {
   const size_t nk = (size_t)(V.theta - V.w);
   const uint64_t h = hpre ? *hpre : cc14::hkey(V.w, nk);

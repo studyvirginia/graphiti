@@ -1,12 +1,10 @@
 #pragma once
-
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstdint>
 #include <vector>
-
 enum { H128P_MIG, H128P_POOL, H128P_KEYS, H128P_PASSA, H128P_PASSB, H128P_FREE, H128P_COPY, H128P_NS };
 struct H128Prof { double ms[H128P_NS] = {0}; long n = 0; };
 static H128Prof g_h128_prof;
@@ -30,7 +28,6 @@ inline void h128_print_sub(double nc) {
   printf("H128 POOL SUB (thread-summed per call, ms): fill %.3f | rank_crowd (NDS+crowd) %.3f | survivors %.3f | hot %.3f\n",
          s[0] / nc, s[1] / nc, s[2] / nc, s[3] / nc);
 }
-
 struct SelH92 {
   struct MK { uint16_t rank; uint32_t idx; double crowd; };
   struct Slot { uint64_t h; uint32_t t; uint32_t gen; };
@@ -50,7 +47,6 @@ struct SelH92 {
 };
 static SelH92 g_sel_h92;
 static int g_h117_bit4 = 0;
-
 inline evo::Ind& XA(evo::State& S, uint32_t s) {
   const uint32_t NP = (uint32_t)evo::NPOP;
   return s < NP ? S.par[s] : (s < 2 * NP ? S.chi[s - NP] : S.nxt[s - 2 * NP]);
@@ -59,7 +55,6 @@ inline const evo::Ind& XC(const evo::State& S, uint32_t s) {
   const uint32_t NP = (uint32_t)evo::NPOP;
   return s < NP ? S.par[s] : (s < 2 * NP ? S.chi[s - NP] : S.nxt[s - 2 * NP]);
 }
-
 #include <atomic>
 static const int g_h740 = getenv("H740") ? atoi(getenv("H740")) : 0;
 struct H740E { float err; uint16_t cx; uint8_t valid; uint8_t pad; };
@@ -92,7 +87,6 @@ inline float h740_perr(const evo::State& S, uint32_t slot) {
   if (g_h740 == 2 && std::memcmp(&g_h740e[slot].err, &P.err, sizeof(float))) g_h740_bad.fetch_add(1);
   return P.err;
 }
-
 inline void next_children_h92(const uint32_t* pidx, uint32_t* cs) {
   const size_t NS3 = (size_t)3 * evo::NPOP;
   SelH92& H = g_sel_h92;
@@ -102,7 +96,6 @@ inline void next_children_h92(const uint32_t* pidx, uint32_t* cs) {
   for (size_t s = 0; s < NS3 && c < (size_t)evo::NPOP; s++) if (!H.used[s]) cs[c++] = (uint32_t)s;
   if (c != (size_t)evo::NPOP) { fprintf(stderr, "next_children_h92: only %zu free slots\n", c); exit(1); }
 }
-
 inline void breed_h92(evo::Pool& pool, evo::State& S, const uint32_t* pidx, const uint32_t* cs, evo::BreedBuf& BB,
                       uint64_t seed, uint64_t step, uint32_t* rebreeds, uint32_t* failed) {
   using namespace evo;
@@ -118,7 +111,6 @@ inline void breed_h92(evo::Pool& pool, evo::State& S, const uint32_t* pidx, cons
     rebreeds[d] = rb; failed[d] = fl;
   });
 }
-
 inline void migrants_h92(int d, const evo::State& S, const uint32_t* pidx, uint32_t* out, std::vector<SelH92::MK>& mk) {
   using namespace evo;
   mk.resize((size_t)DECK);
@@ -135,7 +127,6 @@ inline void migrants_h92(int d, const evo::State& S, const uint32_t* pidx, uint3
   });
   for (int k = 0; k < MIGR; k++) out[k] = mk[(size_t)k].idx;
 }
-
 inline void h117_keyids(evo::Pool& pool, SelH92& H, const std::vector<Meta>& pm, const std::vector<Meta>& cm, uint32_t NP,
                         const std::vector<int>& mlen, size_t HMAX) {
   using namespace evo;
@@ -174,7 +165,6 @@ inline void h117_keyids(evo::Pool& pool, SelH92& H, const std::vector<Meta>& pm,
   for (int s = 0; s < NSh; s++) { H.kbase[(size_t)s] = acc; acc += H.shN[(size_t)s]; }
   H.keyseen.assign(acc, 0);
 }
-
 static std::vector<uint32_t> g_h128_slist;
 static std::vector<size_t> g_h128_sbase;
 static std::vector<size_t> g_h128_doff;
@@ -239,7 +229,6 @@ inline void h128_keyids2(evo::Pool& pool, SelH92& H, const std::vector<Meta>& pm
   for (int s = 0; s < NSh; s++) { H.kbase[(size_t)s] = acc; acc += H.shN[(size_t)s]; }
   H.keyseen.assign(acc, 0);
 }
-
 inline void select_h92(evo::Pool& pool, evo::State& S, const uint32_t* pidx, const uint32_t* cs, uint32_t* pidx_out,
                        std::vector<Meta>& pm, std::vector<Meta>& cm, const uint8_t* admit, std::vector<Meta>& nm, Times& T,
                        bool move_mode) {
@@ -252,7 +241,6 @@ inline void select_h92(evo::Pool& pool, evo::State& S, const uint32_t* pidx, con
   }
   if (H.mk.size() != (size_t)NDEME) H.mk.resize(NDEME);
   H.mstart.assign(NDEME, 0); H.cur.assign(NDEME, 0); H.fillA.assign(NDEME, 0);
-
   auto tq = h128_now();
   pool.run(NDEME, [&](int d) { migrants_h92(d, S, pidx, S.migtab.data() + d * MIGR, H.mk[(size_t)d]); });
   h128_add(H128P_MIG, tq);
@@ -299,7 +287,6 @@ inline void select_h92(evo::Pool& pool, evo::State& S, const uint32_t* pidx, con
     }
     h128_sub(d, 3, tA);
   });
-
   h128_add(H128P_POOL, tq);
   const bool dk = g_h117_bit4 != 0;
   if (dk) {
@@ -364,7 +351,6 @@ inline void select_h92(evo::Pool& pool, evo::State& S, const uint32_t* pidx, con
   h128_add(H128P_PASSB, tq);
   const size_t NPL = H.plist.size();
   if (NPL != (size_t)NP) { fprintf(stderr, "select_h92: %zu placements, expected %u\n", NPL, NP); exit(1); }
-
   if (!move_mode) {
     const size_t NS3 = (size_t)3 * NP;
     H.used.assign(NS3, 0);
@@ -374,7 +360,6 @@ inline void select_h92(evo::Pool& pool, evo::State& S, const uint32_t* pidx, con
     if (H.freeF.size() != (size_t)NP) { fprintf(stderr, "select_h92: %zu free slots, expected %u\n", H.freeF.size(), NP); exit(1); }
   }
   h128_add(H128P_FREE, tq);
-
   const size_t CHK = 1024;
   pool.run((int)((NPL + CHK - 1) / CHK), [&](int c) {
     const size_t r1 = std::min(NPL, (size_t)(c + 1) * CHK);

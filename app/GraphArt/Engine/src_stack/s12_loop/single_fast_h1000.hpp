@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <algorithm>
-
 struct SingleFastDecision {
   int axis = 0;
   double margin = 0;
@@ -12,7 +11,6 @@ struct SingleFastDecision {
   double backtrack_x = 0, backtrack_y = 0;
   bool closed = false;
 };
-
 static double sf_worst_backtrack(const std::vector<double>& v, double eps) {
   if (v.size() < 3) return 0;
   const double dir = v.back() >= v.front() ? 1.0 : -1.0;
@@ -24,7 +22,6 @@ static double sf_worst_backtrack(const std::vector<double>& v, double eps) {
   }
   return worst / eps;
 }
-
 static double g_sf_a0 = 0, g_sf_a1 = 1;
 static void single_fast_resample(const std::vector<double>& X, const std::vector<double>& Y, int axis, int npt,
                                  std::vector<double>& ox, std::vector<double>& oy) {
@@ -45,7 +42,6 @@ static void single_fast_resample(const std::vector<double>& X, const std::vector
   }
   if (axis == 1) { ox = ga; oy = gb; } else { ox = gb; oy = ga; }
 }
-
 static SingleFastDecision single_fast_detect(const std::vector<double>& X, const std::vector<double>& Y) {
   SingleFastDecision D;
   const size_t n = X.size();

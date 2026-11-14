@@ -4,7 +4,6 @@
 #include <cmath>
 #include <cstring>
 #include <algorithm>
-
 #include <cstdlib>
 #include <map>
 #include <cstdio>
@@ -85,7 +84,6 @@ constexpr int G250_MAXQ = 16;
 constexpr int G250_MAXC = 25;
 constexpr float G250_INF_ = INFINITY;
 constexpr int G250_MAXN = 24, G250_MAXN1 = G250_MAXN + 1;
-
 inline float G250_dot48(const float* x, const float* y) {
   float32x4_t a0 = vdupq_n_f32(0.f), a1 = vdupq_n_f32(0.f), a2 = vdupq_n_f32(0.f);
   for (int k = 0; k < G250_NP; k += 12) {
@@ -131,9 +129,7 @@ inline float G250_und(int op, float m, float r) {
   }
 }
 }
-
 GNWork::GNWork() {}
-
 const float* GNWork::load(uint32_t w, float* buf, int C) {
   if (w >> 31) return accp_;
   const uint32_t off = w & 0x1FFFFFFFu;
@@ -144,7 +140,6 @@ const float* GNWork::load(uint32_t w, float* buf, int C) {
   if ((w >> 29) & 1u) return TS_.data() + off;
   return R_.data() + vslot(off);
 }
-
 void GNWork::exec(const uint32_t* w4, int C) {
   if (g421_on()) { exec421(w4, C); return; }
   if (g417_on()) { exec417(w4, C); return; }
@@ -205,7 +200,6 @@ void GNWork::exec(const uint32_t* w4, int C) {
   accp_ = acc;
   if (dst != 0xFFFFFFFFu) std::memcpy(R_.data() + vslot(dst), acc, sizeof(float) * (size_t)C * G250_NP);
 }
-
 void GNWork::exec417(const uint32_t* w4, int C) {
   const uint32_t op = w4[0], dst = w4[1];
   const float* a = nullptr; const float* b = nullptr; float as[G250_MAXC], bs[G250_MAXC]; bool sa = false, sb = false;
@@ -225,7 +219,6 @@ void GNWork::exec417(const uint32_t* w4, int C) {
   accp_ = acc;
   if (R && acc != R) std::memcpy(R, acc, sizeof(float) * (size_t)C * G250_NP);
 }
-
 template <bool SA, bool SBB>
 __attribute__((noinline)) static void H836_unary(uint32_t op, const float* a, const float* asp, const float* b, const float* bsp, float* acc, int C, size_t ns) {
   float as[G250_MAXC], bs[G250_MAXC];
@@ -270,7 +263,6 @@ static inline void H836_simple(uint32_t op, const float* a, const float* asp, co
 #undef LA
 #undef LB
 }
-
 void GNWork::exec421(const uint32_t* w4, int C) {
   P836_START(xt_);
   const uint32_t op = w4[0], dst = w4[1];
@@ -301,7 +293,6 @@ void GNWork::exec421(const uint32_t* w4, int C) {
 #endif
   }
 }
-
 void GNWork::exec836(const uint32_t* w4, int C) {
   const uint32_t op = w4[0], dst = w4[1];
   const float *a = nullptr, *b = nullptr, *asp = nullptr, *bsp = nullptr; bool sa = false, sb = false;
@@ -327,7 +318,6 @@ void GNWork::exec836(const uint32_t* w4, int C) {
   accp_ = acc;
   if (R && acc != R) g836_copy(R, acc, (size_t)C * G250_NP);
 }
-
 alignas(16) static const float g941_zrow[48] = {0};
 #define H941_PA(c) (((am >> ((c) - 1)) & 1u) ? a + (c) * NP : g941_zrow)
 #define H941_PB(c) (((bm >> ((c) - 1)) & 1u) ? b + (c) * NP : g941_zrow)
@@ -417,7 +407,6 @@ __attribute__((noinline)) static bool H941_unary(uint32_t op, const float* a, co
 #undef LAC
 #undef LBC
 #undef H941_COMP_SETUP
-
 #define H941_SID(off) (cd_ == 1u ? (off) / 48u : cd_ == 2u ? (off) / 96u : cd_ == 3u ? (off) / 144u : (off) / (cd_ * 48u))
 inline bool GNWork::opmask941(uint32_t w, uint32_t& m) {
   if (w >> 31) { m = accm_; return true; }
@@ -472,7 +461,6 @@ bool GNWork::exec940(const uint32_t* w4, int C) {
   }
   return true;
 }
-
 void GNWork::eval(const GNInputs& in, const Tree& T, const uint32_t* sg, const float* TH, const float* tvec, int C, int Q) {
   rootm_valid_ = false;
   if (C > 1 && C == (int)T.nth + 1 && (g941_bits() & 4) && (g941_bits() & 1) && !g644_on() && !h313b::g_on && (g836_bits() & 16) && g421_on() && !g_h790 && T.nth <= 24 && Q <= 16) {
@@ -493,7 +481,6 @@ void GNWork::eval(const GNInputs& in, const Tree& T, const uint32_t* sg, const f
   }
   eval_impl(in, T, sg, TH, tvec, C, Q, false);
 }
-
 bool GNWork::eval_impl(const GNInputs& in, const Tree& T, const uint32_t* sg, const float* TH, const float* tvec, int C, int Q, bool masked) {
   P836_START(pt_);
   const int pb_ = C == 1 ? 0 : 8; (void)pb_;
@@ -576,7 +563,6 @@ bool GNWork::eval_impl(const GNInputs& in, const Tree& T, const uint32_t* sg, co
   }
   return true;
 }
-
 void GNWork::eval644(const GNInputs& in, const Tree& T, const uint32_t* sg, int C, int Q) {
   K644& K = k644_[C == 1 ? 0 : 1];
   if (K.tok != in.tok || K.sg != sg || K.C != C || K.Q != Q || K.x != T.x || K.cd != cd_ || K.nsc2 != nsc2_ || K.SB != SB_ || K.R != R_.data() ||
@@ -632,7 +618,6 @@ void GNWork::eval644(const GNInputs& in, const Tree& T, const uint32_t* sg, int 
   }
   accp_ = K.accp_end;
 }
-
 inline void H941_dual_setup(int Q, int nth, const float* roots, int rstride, const float* a, const float* E, float* V, float* on, const uint32_t* rootm) {
   const float32x4_t vinf = vdupq_n_f32(INFINITY);
   for (int j = 0; j < nth; j++) {
@@ -718,7 +703,6 @@ void G250_mgs(int n, float* cols, float* tr, int L, float tau, bool dual, const 
   }
 }
 }
-
 namespace {
 struct G250_PassS { float E[G250_MAXQ * G250_NP]; float Y[G250_NP]; float a[G250_MAXQ]; float rss; };
 }
@@ -748,7 +732,6 @@ void GNWork::polish(const GNInputs& in, uint32_t tree, int Q, float tau, float f
 #ifdef H941_CENSUS
   g941_cells[{Q, nth}].items++;
 #endif
-
   const void* tang_of = nullptr;
   auto plain_impl = [&](const float* TH, G250_PassS& P, int Cev) {
     tang_of = nullptr;
@@ -962,7 +945,6 @@ void GNWork::polish(const GNInputs& in, uint32_t tree, int Q, float tau, float f
     for (int j = 0; j < nth; j++) d[j] = -tr[nth * nth + j];
     if (!G250_fin(rss)) pred = -1.0f;
   };
-
   float th[32] = {0}, cand0[32] = {0}, cand1[32] = {0}, d[32] = {0};
   for (int j = 0; j < nth; j++) th[j] = in.th0[32 * tree + j];
   G250_PassS PB[3];
@@ -1020,7 +1002,6 @@ void GNWork::polish(const GNInputs& in, uint32_t tree, int Q, float tau, float f
   if (fused_init) { g941_st[4]++; if (ndp == 0) g941_st[5]++; }
   g941_st[6] += npp; g941_st[7] += ndp;
 }
-
 void GNWork::roots_debug(const GNInputs& in, uint32_t tree, const float* TH, int C, int Q, float* out) {
   const uint32_t* h = in.hdr + 4 * tree;
   Tree T{h[0], h[1] >> 16, h[2], h[3] & 255u, (h[3] >> 8) & 0xFFFFu, h[3] >> 24};

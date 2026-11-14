@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 #include <vector>
-
 struct GNInputs {
   const uint32_t* tok;
   const uint32_t* hdr;
@@ -12,16 +11,13 @@ struct GNInputs {
   const float* th0;
   uint32_t per;
 };
-
 struct GNResult {
   float th[32];
   float a[16];
   float rss0, rcur;
   uint32_t steps, npp, ndp;
 };
-
 inline void gn_tlin(float* t) { for (int i = 0; i < 48; i++) t[i] = (float)i * (1.0f / 47); }
-
 class GNWork {
  public:
   GNWork();

@@ -6,6 +6,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <mutex>
+#include <thread>
+#include <deque>
+#include <functional>
+#include <atomic>
+#include <condition_variable>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -14,9 +19,7 @@
 #include "fjn_h950.hpp"
 #include "ui_bridge_h.hpp"
 #include "disp_simplify_h.hpp"
-
 namespace fitx {
-
 struct Node { uint8_t op; uint16_t a, b; float c; };
 struct Side {
   int Q = 0, nth = 0; bool drv = false;
@@ -27,9 +30,7 @@ struct Rec {
   uint64_t key = 0; float err = INFINITY; int kind = 0;
   Side s[2]; float u[10] = {0};
 };
-
 inline bool on() { static const int v = (getenv("FIT_EXPORT") || getenv("FINAL_PICK")) ? 1 : 0; return uib::g_ring != nullptr || v; }
-
 inline int g_pin_t = -1; inline int g_pin_op = -1;
 template <class Cand>
 inline uint64_t gkey(const Cand& g) {
@@ -42,7 +43,6 @@ inline uint64_t gkey(const Cand& g) {
   }
   return h;
 }
-
 inline bool tiny_on() { static const bool v = getenv("TINY_FIX") && atoi(getenv("TINY_FIX")) != 0; return v; }
 template <class R>
 inline bool build_side(const R& T, const float* th, const float* a, Side& S) {
@@ -80,7 +80,6 @@ inline bool build_side(const R& T, const float* th, const float* a, Side& S) {
   }
   return !bad;
 }
-
 inline double eval_side(const Side& S, double t, double* v) {
   if (S.drv) return t;
   const size_t N = S.n.size();
@@ -108,7 +107,6 @@ inline double eval_side(const Side& S, double t, double* v) {
   double s = 0; for (int q = 0; q < S.Q; q++) s += (double)S.a[q] * v[S.root[(size_t)q]];
   return s;
 }
-
 inline void eval_side_vec(const Side& S, const double* t, int M, double* out, std::vector<double>& W) {
   if (S.drv) { for (int m = 0; m < M; m++) out[m] = t[m]; return; }
   const size_t N = S.n.size(); W.resize(N * (size_t)M + 1);
@@ -134,7 +132,6 @@ inline void eval_side_vec(const Side& S, const double* t, int M, double* out, st
   }
   for (int m = 0; m < M; m++) { double s = 0; for (int q = 0; q < S.Q; q++) s += (double)S.a[q] * W[(size_t)S.root[(size_t)q] * M + m]; out[m] = s; }
 }
-
 inline void ls_fit(Side& S, const double* t, const float* Y, double tau = 1e-5) {
   const int Q = S.Q, N = 48; std::vector<double> v(S.n.size() + 1); std::vector<std::vector<double>> E((size_t)Q, std::vector<double>(N)), T((size_t)Q, std::vector<double>((size_t)Q, 0.0));
   Side u = S; for (int q = 0; q < Q; q++) { for (int j = 0; j < 16; j++) u.a[j] = j == q ? 1.f : 0.f; for (int i = 0; i < N; i++) E[(size_t)q][(size_t)i] = eval_side(u, t[i], v.data()); T[(size_t)q][(size_t)q] = 1.0; }
@@ -152,7 +149,6 @@ inline void ls_fit(Side& S, const double* t, const float* Y, double tau = 1e-5) 
   }
   for (int c = 0; c < Q; c++) S.a[c] = (float)(-ty[(size_t)c]);
 }
-
 inline void warp_t(const float* u, int n, double* t) {
   static std::vector<double> kn; if (kn.empty()) { const int deg = 3, M = 10, ni = M - deg - 1; kn.assign(deg + 1, 0.0); for (int i = 1; i <= ni; i++) kn.push_back((double)i / (ni + 1)); for (int i = 0; i <= deg; i++) kn.push_back(1.0); }
   double U = 0; for (int k = 0; k < 9; k++) U += (double)u[k] * u[k];
@@ -162,7 +158,6 @@ inline void warp_t(const float* u, int n, double* t) {
     t[j] = (double)u[9] + (U > 0 ? s / U : 0.0);
   }
 }
-
 inline bool emit_tree(const Rec& r, int side, uib::Tree& T) {
   const Side& S = r.s[side]; int len = 0; bool ovf = false;
   auto put = [&](uint8_t op, float c) { if (len >= uib::MAXLEN) { ovf = true; return; } T.op[len] = op; T.c[len] = c; T.cid[len] = op == 1 ? (int16_t)(side * uib::MAXLEN + len) : (int16_t)-1; len++; };
@@ -183,7 +178,6 @@ inline bool emit_tree(const Rec& r, int side, uib::Tree& T) {
   T.len = (uint8_t)std::min(len, uib::MAXLEN);
   return !ovf;
 }
-
 inline float g_target[2][48];
 inline const float* g_yv1 = nullptr;
 inline bool display_pair(const Rec& r, uib::Tree T[2], uib::ds::Stats* st, double ink[2][120], bool simp = true) {
@@ -199,7 +193,6 @@ inline bool display_pair(const Rec& r, uib::Tree T[2], uib::ds::Stats* st, doubl
   double dummy[2][120]; uib::ds::simplify_pair(T, x48, x120, Yp, uib::g_xf_on ? uib::g_xf_drv : -1, S, ink ? ink : dummy);
   return true;
 }
-
 template <class Cand>
 inline void fill_pair(const Rec& r, uib::Pair& P, const Cand& g) {
   uib::fill_from_cand(g, P);
@@ -223,7 +216,6 @@ inline void fill_pair(const Rec& r, uib::Pair& P, const Cand& g) {
   }
   P.fitted = (uint8_t)r.kind;
 }
-
 inline float g_gate = INFINITY;
 inline int topn(int ft = 0) { static const int v = getenv("FIT_TOPN") ? atoi(getenv("FIT_TOPN")) : 1024; static const int w = getenv("FIT_TOPN_FT") ? atoi(getenv("FIT_TOPN_FT")) : 0; return ft ? w : v; }
 template <class F> inline float batch_gate(size_t n, F errat, int ft = 0) {
@@ -261,8 +253,13 @@ template <class R> inline std::shared_ptr<const Side> proto_of(const R& T, uint6
   if (!r) { float z[32] = {0}; auto sd = std::make_shared<Side>(); if (build_side(T, z, z, *sd)) { r = sd; S.intern[h] = r; } else S.nbuildfail++; }
   return r;
 }
-inline void begin(int n) { Store& S = st(); std::lock_guard<std::mutex> lk(S.mx); S.got.assign((size_t)n, 0); S.pc.clear(); S.cur.clear(); }
-inline bool was_captured(int c) { Store& S = st(); return c >= 0 && (size_t)c < S.got.size() && S.got[(size_t)c]; }
+inline std::thread g_rt_thr; inline std::mutex g_rt_mx;
+inline void cap_join();
+inline void begin(int n) {
+  cap_join(); Store& S = st(); static const bool ss1 = !(getenv("SS1") && atoi(getenv("SS1")) == 0);
+  if (ss1 && g_rt_thr.joinable()) { S.got.assign((size_t)n, 0); S.pc.clear(); S.cur.clear(); return; }
+  std::lock_guard<std::mutex> lk(S.mx); S.got.assign((size_t)n, 0); S.pc.clear(); S.cur.clear(); }
+inline bool was_captured(int c) { cap_join(); Store& S = st(); return c >= 0 && (size_t)c < S.got.size() && S.got[(size_t)c]; }
 inline bool capture_p(int child, uint64_t key, float err, int kind, const std::shared_ptr<const Side>& p0, const std::shared_ptr<const Side>& p1, const float* thx, const float* ax, const float* thy, const float* ay, const float* u) {
   Store& S = st(); Cap c; c.key = key; c.err = err; c.kind = kind;
   c.p[0] = p0; c.p[1] = p1;
@@ -287,30 +284,67 @@ inline void materialize(const Cap& c, Rec& r) {
     for (int q = 0; q < d.Q; q++) d.a[q] = pl[o + (size_t)q]; o += (size_t)d.Q;
     for (auto& tr : d.thref) d.n[tr.first].c = d.th[tr.second]; }
 }
+inline void commit_nj();
 inline void commit() {
+  cap_join(); commit_nj(); }
+inline void commit_nj() {
   const auto t0 = std::chrono::steady_clock::now(); struct T_ { std::chrono::steady_clock::time_point t; ~T_() { g_ms_commit += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t).count(); } } tm_{t0};
   Store& S = st(); std::lock_guard<std::mutex> lk(S.mx); if (S.all.size() + S.cur.size() + 16 > (size_t)(S.all.bucket_count() * S.all.max_load_factor())) S.all.reserve(2 * (S.all.size() + S.cur.size()) + 16);
   for (Cap& c : S.cur) { auto it = S.all.find(c.key); if (it == S.all.end()) S.all.emplace(c.key, std::move(c)); else if (c.err <= it->second.err) it->second = std::move(c); }
   S.cur.clear(); S.pc.clear();
 }
 inline bool g_lazy_retain = false;
+inline std::thread g_ret_dtor;
+inline struct RetDtorJoin { ~RetDtorJoin() { if (g_ret_dtor.joinable()) g_ret_dtor.join(); } } g_ret_dtor_join;
 inline void retain(const std::vector<uint64_t>& popkeys, bool force = false) {
   if (g_lazy_retain && !force) { Store& S0 = st(); std::lock_guard<std::mutex> lk0(S0.mx); if (S0.all.size() < 2 * popkeys.size() + 4096) return; }
-  const auto t0 = std::chrono::steady_clock::now(); struct T_ { std::chrono::steady_clock::time_point t; ~T_() { g_ms_retain += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t).count(); } } tm_{t0};
-  Store& S = st(); std::lock_guard<std::mutex> lk(S.mx);
-  std::unordered_map<uint64_t, Cap> keep; keep.reserve(popkeys.size() * 2);
+  static const int rprof = getenv("RET_PROF") ? atoi(getenv("RET_PROF")) : 0;
+  static const int rfast = getenv("RET_FAST") ? atoi(getenv("RET_FAST")) : 0;
+  using clk_ = std::chrono::steady_clock; auto msd = [](clk_::time_point a, clk_::time_point b) { return std::chrono::duration<double, std::milli>(b - a).count(); };
+  const auto t0 = clk_::now(); struct T_ { std::chrono::steady_clock::time_point t; ~T_() { g_ms_retain += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t).count(); } } tm_{t0};
+  if (rfast && g_ret_dtor.joinable()) g_ret_dtor.join();
+  Store& S = st();
+  std::unordered_map<uint64_t, Cap> keep;
+  double t_keep = 0, t_nar = 0, t_swap = 0, t_sweep = 0, t_lock = 0, t_dtor = 0;
+  {
+  const auto tl0 = clk_::now(); std::lock_guard<std::mutex> lk(S.mx); t_lock = msd(tl0, clk_::now());
+  const auto ta = clk_::now();
+  keep.reserve(popkeys.size() * 2);
   for (uint64_t k : popkeys) { auto it = S.all.find(k); if (it != S.all.end() && !keep.count(k)) keep.emplace(k, std::move(it->second)); }
+  const auto tb = clk_::now(); t_keep = msd(ta, tb);
   { std::vector<float> nar; nar.reserve(keep.size() * 24);
     for (auto& kv : keep) { Cap& c = kv.second; size_t n = 0; for (int s = 0; s < 2; s++) if (!c.p[s]->drv) n += (size_t)c.p[s]->nth + (size_t)c.p[s]->Q;
       const size_t no = nar.size(); nar.insert(nar.end(), S.ar.begin() + (long)c.off, S.ar.begin() + (long)(c.off + n)); c.off = no; }
     S.ar.swap(nar); }
+  const auto tc = clk_::now(); t_nar = msd(tb, tc);
   S.all.swap(keep);
+  t_swap = msd(tc, clk_::now());
+  const auto td = clk_::now();
   for (auto it = S.intern.begin(); it != S.intern.end();) { if (it->second.expired()) it = S.intern.erase(it); else ++it; }
+  t_sweep = msd(td, clk_::now());
+  if (!rfast) { const auto tx = clk_::now(); keep = std::unordered_map<uint64_t, Cap>(); t_dtor = msd(tx, clk_::now()); }
+  }
+  if (rfast) { auto* old = new std::unordered_map<uint64_t, Cap>(std::move(keep)); g_ret_dtor = std::thread([old]() { delete old; }); }
+  const auto te = clk_::now();
+  if (rprof) printf("RET_PROF retain: lockwait %.1f keep %.1f nar %.1f swap %.1f sweep %.1f dtor-under-lock %.1f | total %.1f ms (pop %zu)\n", t_lock, t_keep, t_nar, t_swap, t_sweep, t_dtor, msd(t0, te), popkeys.size());
 }
-inline void present_mask(const std::vector<uint64_t>& keys, size_t lo, size_t hi, uint8_t* out) { Store& S = st(); for (size_t i = lo; i < hi; i++) out[i - lo] = S.all.find(keys[i]) != S.all.end() ? 1 : 0; }
-inline void reset() { Store& S = st(); std::lock_guard<std::mutex> lk(S.mx); g_gate = INFINITY; S.cur.clear(); S.all.clear(); S.ar.clear(); S.got.clear(); S.pc.clear(); S.intern.clear(); S.ncap = S.nlook = S.nhit = S.nbuildfail = 0; }
+inline double g_rt_join_ms = 0;
+inline void retain_join() { std::lock_guard<std::mutex> lk(g_rt_mx); if (g_rt_thr.joinable()) { const auto t0 = std::chrono::steady_clock::now(); g_rt_thr.join(); g_rt_join_ms += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count(); } }
+struct CapQ { std::mutex m; std::condition_variable cv, cvd; std::deque<std::function<void()>> q; int pend = 0; bool started = false; double work_ms = 0, wait_ms = 0; };
+inline CapQ& capq() { static CapQ* c = new CapQ; return *c; }
+inline std::atomic<int> g_cap_pend{0};
+inline void cap_worker() { CapQ& Q = capq(); for (;;) { std::function<void()> f; { std::unique_lock<std::mutex> lk(Q.m); Q.cv.wait(lk, [&] { return !Q.q.empty(); }); f = std::move(Q.q.front()); Q.q.pop_front(); }
+    const auto t0 = std::chrono::steady_clock::now(); f(); const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+    { std::lock_guard<std::mutex> lk(Q.m); Q.work_ms += ms; Q.pend--; g_cap_pend.store(Q.pend, std::memory_order_release); if (Q.pend == 0) Q.cvd.notify_all(); } } }
+inline void cap_submit(std::function<void()> f) { CapQ& Q = capq(); { std::lock_guard<std::mutex> lk(Q.m); if (!Q.started) { Q.started = true; std::thread(cap_worker).detach(); } Q.q.push_back(std::move(f)); Q.pend++; g_cap_pend.store(Q.pend, std::memory_order_release); } Q.cv.notify_one(); }
+inline void cap_wait() { CapQ& Q = capq(); const auto t0 = std::chrono::steady_clock::now(); std::unique_lock<std::mutex> lk(Q.m); Q.cvd.wait(lk, [&] { return Q.pend == 0; }); Q.wait_ms += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count(); }
+inline void cap_join() { if (g_cap_pend.load(std::memory_order_acquire) != 0) cap_wait(); }
+inline void retain_async(std::vector<uint64_t>&& pk) { cap_join(); retain_join(); std::lock_guard<std::mutex> lk(g_rt_mx); g_rt_thr = std::thread([k = std::move(pk)]() { retain(k); }); }
+inline void present_mask(const std::vector<uint64_t>& keys, size_t lo, size_t hi, uint8_t* out) { cap_join(); Store& S = st(); for (size_t i = lo; i < hi; i++) out[i - lo] = S.all.find(keys[i]) != S.all.end() ? 1 : 0; }
+inline void reset() { cap_join(); retain_join(); if (g_ret_dtor.joinable()) g_ret_dtor.join(); Store& S = st(); std::lock_guard<std::mutex> lk(S.mx); g_gate = INFINITY; S.cur.clear(); S.all.clear(); S.ar.clear(); S.got.clear(); S.pc.clear(); S.intern.clear(); S.ncap = S.nlook = S.nhit = S.nbuildfail = 0; }
 template <class Cand>
 inline bool find(const Cand& g, Rec& out) {
+  cap_join();
   Store& S = st(); std::lock_guard<std::mutex> lk(S.mx); S.nlook++;
   auto it = S.all.find(gkey(g)); if (it == S.all.end()) return false; materialize(it->second, out); S.nhit++;
   if (out.kind == 2) {
@@ -321,15 +355,16 @@ inline bool find(const Cand& g, Rec& out) {
 }
 template <class Cand>
 inline bool qnth(const Cand& g, int* q, int* nth, int need_kind = 0) {
+  cap_join();
   Store& S = st(); std::lock_guard<std::mutex> lk(S.mx);
   auto it = S.all.find(gkey(g)); if (it == S.all.end()) return false;
   if (need_kind && it->second.kind != need_kind) return false;
   for (int s = 0; s < 2; s++) { q[s] = it->second.p[s]->Q; nth[s] = it->second.p[s]->nth; }
   return true;
 }
-
 struct GeoPack { std::vector<uint32_t> proto, mrec, moff; std::vector<uint8_t> st; long npacked = 0, nunk = 0; size_t maxnodes = 0; };
 inline void pack_geo(const std::vector<uint64_t>& keys, int nodecap, GeoPack& P) {
+  cap_join();
   Store& S = st(); std::lock_guard<std::mutex> lk(S.mx);
   const size_t nm = keys.size(); P.proto.clear(); P.mrec.clear(); P.moff.assign(nm, 0u); P.st.assign(nm, 0); P.npacked = P.nunk = 0; P.maxnodes = 0;
   P.proto.push_back(0u);

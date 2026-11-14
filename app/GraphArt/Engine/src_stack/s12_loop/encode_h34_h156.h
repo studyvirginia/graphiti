@@ -3,20 +3,15 @@
 #include <cstring>
 #include <vector>
 #include "compile_memo_i13_h156.h"
-
 namespace enc34 {
-
 struct Dec { uint16_t zo, d, A, B; uint8_t d63, fuse; };
-
 struct Scratch {
   std::vector<Dec> dec;
   std::vector<uint32_t> ob, ob2;
   uint32_t segmap[18];
   size_t nout = 0;
 };
-
 enum PlanResult { PLAN_OK = 0, PLAN_DECODE_FAIL = 1, PLAN_FALLBACK = 2 };
-
 struct DecTab { uint8_t cls[64], zN[64], zB[64], zBoth[64]; uint16_t bothB[64]; };
 static constexpr DecTab make_dectab() {
   DecTab t{};
@@ -30,7 +25,6 @@ static constexpr DecTab make_dectab() {
   return t;
 }
 static constexpr DecTab kDec = make_dectab();
-
 static inline bool decode_one(uint32_t w, Dec& x) {
   const uint32_t op = w & 63, d = (w >> 6) & 63, a = (w >> 12) & 1023, b = w >> 22;
   const uint32_t cls = kDec.cls[op];
@@ -43,7 +37,6 @@ static inline bool decode_one(uint32_t w, Dec& x) {
   x.d = (uint16_t)d; x.d63 = d == 63; x.fuse = 0;
   return true;
 }
-
 static inline int plan(const Tree& T, Scratch& S) {
   if (T.Q < 0 || T.Q > 17) return PLAN_FALLBACK;
   const size_t n = T.prog.size();
@@ -74,7 +67,6 @@ static inline int plan(const Tree& T, Scratch& S) {
   S.nout = out;
   return PLAN_OK;
 }
-
 struct ScanE {
   uint32_t SL, TT, TWO;
   inline uint32_t enc(uint32_t c) const {
@@ -87,7 +79,6 @@ struct ScanE {
   }
   inline uint32_t dscale(uint32_t d) const { return d * SL; }
 };
-
 struct GnE {
   uint32_t CD48, SB, NS, TWO;
   inline uint32_t enc(uint32_t c) const {
@@ -100,7 +91,6 @@ struct GnE {
   }
   inline uint32_t dscale(uint32_t d) const { return d * CD48; }
 };
-
 template <class E>
 static inline void emit(std::vector<uint32_t>& outv, Scratch& S, size_t n, const E& e) {
   const Dec* D = S.dec.data();
@@ -122,7 +112,6 @@ static inline void emit(std::vector<uint32_t>& outv, Scratch& S, size_t n, const
   }
   outv.assign(o, o + 4 * nout);
 }
-
 static inline void emit_both(Scratch& S, size_t n, const ScanE& es, const GnE* eg, std::vector<uint32_t>& outS, std::vector<uint32_t>* outG) {
   const Dec* D = S.dec.data();
   const size_t nout = S.nout;
@@ -146,13 +135,11 @@ static inline void emit_both(Scratch& S, size_t n, const ScanE& es, const GnE* e
   outS.assign(os, os + 4 * nout);
   if (eg) outG->assign(og, og + 4 * nout);
 }
-
 template <class E>
 static inline void segs_emit(uint32_t* sg, const Tree& T, const uint32_t* segmap, const E& e) {
   for (int q = 0; q < 18; q++) sg[q] = (q <= T.Q) ? segmap[q] : (uint32_t)T.segs[q];
   for (int q = 0; q < 18; q++) sg[18 + q] = e.enc(T.segs[18 + q]);
 }
-
 static inline ScanE make_scan(const Tree& T, int SS) {
   const uint32_t SL = (uint32_t)SS * 48;
   const int nsc = T.nS <= 4 ? 4 : T.nS <= 8 ? 8 : T.nS <= 16 ? 16 : 32;
@@ -163,13 +150,11 @@ static inline GnE make_gn(const Tree& T, int CD) {
   const uint32_t SB = (uint32_t)T.nslot * (uint32_t)CD * 48;
   return GnE{(uint32_t)CD * 48, SB, (uint32_t)T.nS, (1u << 30) | (SB + (uint32_t)T.nS + 1)};
 }
-
 static inline void scan_h34(const Tree& T, Scratch& S, int SS, std::vector<uint32_t>& p4, uint32_t* segs) {
   const ScanE e = make_scan(T, SS);
   emit(p4, S, T.prog.size(), e);
   segs_emit(segs, T, S.segmap, e);
 }
-
 static inline bool gn_h34(const Tree& T, Scratch& S, int CD, std::vector<uint32_t>& p4, uint32_t* segs, uint32_t& hw, size_t& per) {
   const uint32_t NSC = (uint32_t)T.nS + 2, SB = (uint32_t)T.nslot * (uint32_t)CD * 48;
   if (SB >= 65536) return false;
@@ -180,7 +165,6 @@ static inline bool gn_h34(const Tree& T, Scratch& S, int CD, std::vector<uint32_
   per = (size_t)SB + 2 * (size_t)CD * NSC;
   return true;
 }
-
 static inline void encode_tree_h34(const Tree& tr, cmi6::TreeEnc& te, Scratch& S) {
   std::memset(te.sg, 0, sizeof te.sg); std::memset(te.gg, 0, sizeof te.gg);
   if (plan(tr, S) != PLAN_OK) { cmi6::encode_tree_i6(tr, te); return; }
@@ -202,10 +186,8 @@ static inline void encode_tree_h34(const Tree& tr, cmi6::TreeEnc& te, Scratch& S
     te.g_ok = 1;
   }
 }
-
 static inline void encode_tree_h34(const Tree& tr, cmi6::TreeEnc& te) {
   static thread_local Scratch S;
   encode_tree_h34(tr, te, S);
 }
-
 }

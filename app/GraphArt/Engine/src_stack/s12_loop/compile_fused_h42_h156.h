@@ -1,12 +1,10 @@
 #pragma once
 #include "compile_fused_h38_h156.h"
 #include "prepare_h42.h"
-
 namespace f42 {
 using h14::MAXN; using h14::MAXQ; using h14::MAXM; using h14::NWD;
 using f38::Grid; using f38::rec_fields; using f38::compile_composed; using f38::zgconv14_ref;
 using f38::Scratch;
-
 static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, f38::Grid& g, int upto, int* path) {
   Scratch& scr = f38::scr;
   const int Q = V.Q, n = V.n();
@@ -17,7 +15,6 @@ static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, f38::
   if (V.nS > NSV || V.nth > 32) return false;
   T.sp.reserve((size_t)V.nS);
   for (int i = 0; i < V.nS; i++) { int o = V.op(i), a = V.a(i), b = V.b(i); if (a > 31 || b > 31) return false; T.sp.push_back((uint16_t)(o | (a << 6) | (b << 11))); }
-
   h42::PrepBuf P;
   h42::prepare(V, P);
   const int* opnd = P.opnd;
@@ -25,7 +22,6 @@ static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, f38::
   for (int q = 0; q < Q; q++) ord[q] = q;
   if (Q > 1 && !h42::order(h14::tab, ord)) { if (path) *path = 1; return compile_composed(V, T, te, g); }
   if (upto <= 1) return true;
-
   h14::Tab& C = h14::tab;
   const h14::Seq S{scr.sn, scr.sa, scr.sb};
   for (int x = 0; x <= n; x++) { scr.reads[x] = 0; scr.lastread[x] = -1; }
@@ -81,14 +77,12 @@ static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, f38::
   T.th.reserve((size_t)V.nth);
   for (int s = 0; s < V.nth; s++) T.th.push_back(V.th(s));
   if (upto <= 2) return true;
-
   if (decFail) {
     if (path) *path = 2;
     cmi6::encode_tree_i6(T, te);
     g.ok = zgconv14_ref(T, g.p4, g.sg, g.hw) ? 1 : 0;
     return true;
   }
-
   const int SS = T.nth == 0 ? 2 : 16;
   const enc34::ScanE es = enc34::make_scan(T, SS);
   const bool gin = T.nth >= 1 && T.nth <= GN_TH_MAX;
@@ -136,7 +130,6 @@ static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, f38::
     te.g_ok = 1;
   }
   if (upto <= 3) return true;
-
   const uint32_t SB1 = (uint32_t)T.nslot * 48u;
   const uint32_t NSC1 = (uint32_t)T.nS + 2;
   g.ok = SB1 < 65536 ? 1 : 0;
@@ -156,7 +149,6 @@ static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, f38::
   if (path) *path = 0;
   return true;
 }
-
 static bool compile_fused(const View& V, Tree& T, cmi6::TreeEnc& te, f38::Grid& g, int* path = nullptr) {
   return f42::compile_fused_stage(V, T, te, g, 4, path);
 }

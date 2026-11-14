@@ -3,7 +3,6 @@
 inline bool g641_on() { static const bool v = getenv("H641") && atoi(getenv("H641")) != 0; return v; }
 inline bool g642_on() { static const bool v = getenv("H642") && atoi(getenv("H642")) != 0; return v; }
 inline int g643_bits() { static const int v = getenv("H643") ? atoi(getenv("H643")) : 0; return v; }
-
 template <int NP, bool SA, bool SBB>
 inline void H642_body(uint32_t op, const float* a, const float* as, const float* b, const float* bs, float* acc, int C) {
   if (C == 1 || !(op == 0u || op == 4u || op == 5u || (op >= 7u && op <= 15u))) { H421_body<NP, SA, SBB>(op, a, as, b, bs, acc, C); return; }
@@ -66,7 +65,6 @@ template <int NP, bool SA, bool SBB>
 inline void H641X_body(uint32_t op, const float* a, const float* as, const float* b, const float* bs, float* acc, int C) {
   if (g642_on()) H642_body<NP, SA, SBB>(op, a, as, b, bs, acc, C); else H421_body<NP, SA, SBB>(op, a, as, b, bs, acc, C);
 }
-
 inline float H64_dot48r(const float32x4_t* x, const float32x4_t* y) {
   float32x4_t a0 = vdupq_n_f32(0.f), a1 = vdupq_n_f32(0.f), a2 = vdupq_n_f32(0.f);
   for (int u = 0; u < 12; u += 3) { a0 = vfmaq_f32(a0, x[u], y[u]); a1 = vfmaq_f32(a1, x[u + 1], y[u + 1]); a2 = vfmaq_f32(a2, x[u + 2], y[u + 2]); }

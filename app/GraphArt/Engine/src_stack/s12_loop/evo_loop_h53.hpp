@@ -1,8 +1,5 @@
-
 #pragma once
-
 #include <chrono>
-
 struct SelH53 {
   struct MK { uint16_t rank; uint32_t idx; double crowd; };
   struct Slot { uint64_t h; uint32_t t; uint32_t gen; };
@@ -16,7 +13,6 @@ struct SelH53 {
   std::vector<std::vector<MK>> mk;
 };
 static SelH53 g_sel_h53;
-
 #ifdef H53_PROF
 #define H53_T0 auto _h53t = std::chrono::steady_clock::now();
 #define H53_LAP(name) { auto _h53n = std::chrono::steady_clock::now(); \
@@ -25,7 +21,6 @@ static SelH53 g_sel_h53;
 #define H53_T0
 #define H53_LAP(name)
 #endif
-
 inline void migrants_h53(int d, const evo::Ind* par, uint32_t* out, std::vector<SelH53::MK>& mk) {
   mk.resize((size_t)evo::DECK);
   for (int i = 0; i < evo::DECK; i++) {
@@ -39,7 +34,6 @@ inline void migrants_h53(int d, const evo::Ind* par, uint32_t* out, std::vector<
   });
   for (int k = 0; k < evo::MIGR; k++) out[k] = mk[(size_t)k].idx;
 }
-
 inline void choose_survivors_h53(int n, const double* crowd, evo::RankScratch& sc, uint32_t* surv, std::vector<uint32_t>& tmp) {
   int k = 0;
   const int R = (int)sc.off.size() - 2;
@@ -59,7 +53,6 @@ inline void choose_survivors_h53(int n, const double* crowd, evo::RankScratch& s
     }
   }
 }
-
 static void select_h53(evo::Pool& pool, evo::State& S, const std::vector<Meta>& pm, const std::vector<Meta>& cm,
                        const uint8_t* admit, std::vector<Meta>& nm, Times& T) {
   using namespace evo;
@@ -72,7 +65,6 @@ static void select_h53(evo::Pool& pool, evo::State& S, const std::vector<Meta>& 
   }
   if (H.mk.size() != (size_t)NDEME) H.mk.resize(NDEME);
   H.mstart.assign(NDEME, 0); H.cur.assign(NDEME, 0); H.fillA.assign(NDEME, 0);
-
   pool.run(NDEME, [&](int d) { migrants_h53(d, S.par.data(), S.migtab.data() + d * MIGR, H.mk[(size_t)d]); });
   H53_LAP("migrants")
   pool.run(NDEME, [&](int d) {
@@ -106,7 +98,6 @@ static void select_h53(evo::Pool& pool, evo::State& S, const std::vector<Meta>& 
     }
   });
   H53_LAP("prep+rank")
-
   size_t cap = 1024; while (cap < 2 * (size_t)NP + 2) cap <<= 1;
   if (H.tab.size() != cap) { H.tab.assign(cap, SelH53::Slot{0, 0, 0}); H.gen = 0; }
   if (++H.gen == 0) { std::fill(H.tab.begin(), H.tab.end(), SelH53::Slot{0, 0, 0}); H.gen = 1; }
@@ -159,7 +150,6 @@ static void select_h53(evo::Pool& pool, evo::State& S, const std::vector<Meta>& 
   { size_t pool_n = 0, visits = 0; for (int d = 0; d < NDEME; d++) { pool_n += S.sel[d].pidx.size(); visits += (size_t)H.cur[d]; }
     fprintf(stderr, "h53 select: pool entries %zu, visited %zu, placed %zu (children %.0f), skips %.0f (migrant %.0f), xfill %.0f\n", pool_n, visits, H.plist.size(), T.surv_child, T.sel_skip, T.sel_skip_mig, T.xfill); }
 #endif
-
   const size_t NPL = H.plist.size(), CHK = 1024;
   pool.run((int)((NPL + CHK - 1) / CHK), [&](int c) {
     const size_t r1 = std::min(NPL, (size_t)(c + 1) * CHK);

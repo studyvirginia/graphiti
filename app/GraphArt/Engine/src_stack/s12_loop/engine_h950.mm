@@ -1,6 +1,3 @@
-
-
-
 #include "app_env_early.hpp"
 #include "s1_twin_h950.hpp"
 #import <Metal/Metal.h>
@@ -21,7 +18,6 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-
 #include <functional>
 #include <memory>
 static thread_local bool tl_in_fitw = false;
@@ -67,11 +63,9 @@ struct FitHandle {
     if (t) { t->join(); t.reset(); }
   }
 };
-
 struct CpuSpan265 { std::mutex m; std::chrono::steady_clock::time_point s, e; bool any = false; };
 static CpuSpan265* g_fit_span = nullptr;
 static void h401_fitjob(const std::function<void()>& f);
-
 #include <atomic>
 static const int g_h873 = getenv("H873") ? atoi(getenv("H873")) : 0;
 struct H873Team {
@@ -146,14 +140,13 @@ static const int g_h890 = (getenv("H890") ? atoi(getenv("H890")) : 0) | ((getenv
 #include "memo_retain_h156.hpp"
 #include <thread>
 #include "scan_cpu_h290.hpp"
+#include "kcap_sg.hpp"
 using cmi6::TreeEnc;
-
 using clk = std::chrono::steady_clock;
 static double ms_since(clk::time_point t) { return std::chrono::duration<double, std::milli>(clk::now() - t).count(); }
 static uint64_t splitmix64(uint64_t x) { x += 0x9e3779b97f4a7c15ull; x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ull; x = (x ^ (x >> 27)) * 0x94d049bb133111ebull; return x ^ (x >> 31); }
 static uint64_t hash_rec(const std::vector<uint32_t>& r) { uint64_t h = 0x243f6a8885a308d3ull ^ r.size(); for (uint32_t w : r) h = splitmix64(h ^ w); return h; }
 static const float DEAD = 1.0e30f;
-
 #define TFIELDS(X) X(uq) X(breed) X(nf_only) X(cmp_only) X(nf) X(dedup) X(comp) X(scan_enc) X(scan_wall) X(scan_gpu) X(gn_enc) X(gn_wall) X(gn_gpu) \
   X(glue) X(select) X(dump) X(check) X(nchild) X(admitted) X(rej_within) X(rej_pop) X(shortfall) X(nuniq) X(nfit0) X(nfit1) \
   X(nf_fail) X(cmp_fail) X(scan_fail) X(gn_drop) X(gn_kmiss) X(s_alive) X(g_alive) X(nf_hit) X(nf_miss) X(nf_drop) \
@@ -163,8 +156,6 @@ static const float DEAD = 1.0e30f;
   X(h_s_alloc) X(h_s_pre) X(h_s_sort) X(h_s_bins) X(h_s_fill) X(h_s_cmd) X(h_s_pipe) X(h_g_alloc) X(h_g_pre) X(h_g_sort) X(h_g_plan) X(h_g_fill) X(h_g_cmd) X(h_g_pipe) \
   X(h131_iter) X(h131_pre) X(h131_alloc) X(h131_bind) X(h131_enc) X(h131_inst) X(h131_h4wait) X(h131_h4) \
   X(u_p1) X(u_find) X(u_pref) X(u_ctor) X(u_comp) X(u_ids) X(u_ct) X(c_runs) X(c_recs) X(c_wall) X(c_busy) X(c_cpu) X(c_lat) X(c_tail) X(c_ord)
-
-
 static const int g_h257 = getenv("H257") ? atoi(getenv("H257")) : 0;
 static const int g_h930_memfix = getenv("H930_MEMFIX") ? atoi(getenv("H930_MEMFIX")) : 0;
 static const int g_h899 = getenv("H899") ? atoi(getenv("H899")) : 0;
@@ -172,9 +163,7 @@ static const int g_h898 = getenv("H898") ? atoi(getenv("H898")) : 0;
 static double g_h898_loop_ms = 0, g_h898_fin_ms = 0, g_h898_arr_ms = 0, g_h898_bin_ms = 0, g_h898_grp_ms = 0;
 static int g_h897 = getenv("H897") ? atoi(getenv("H897")) : 0;
 static const int g_h894 = getenv("H894") ? atoi(getenv("H894")) : 0;
-
 static const int g_h900 = getenv("H900") ? atoi(getenv("H900")) : 0;
-
 #include <malloc/malloc.h>
 typedef uint64_t mach_vm_address_t; typedef uint64_t mach_vm_size_t;
 static inline kern_return_t mach_vm_region(...) { return KERN_FAILURE; }
@@ -232,24 +221,17 @@ static id<MTLBuffer> h900_nbb(id<MTLDevice> dev, int line, const void* p, size_t
   if (g_h900 & 1) h900_note("nbb", line, n, !(o & MTLResourceStorageModePrivate), b);
   return b;
 }
-
 static const int g_h262 = getenv("H262") ? atoi(getenv("H262")) : 0;
-
-
 static const int g_h263_raw = getenv("H263") ? atoi(getenv("H263")) : 0;
 static const int g_h263 = g_h263_raw == 1 ? 7 : (g_h263_raw & 7);
-
-
 static const int g_h264 = (getenv("H264") ? atoi(getenv("H264")) : 0) || (getenv("H308") ? atoi(getenv("H308")) != 0 : 0);
 static const int g_h308 = getenv("H308") ? atoi(getenv("H308")) : 0;
-
 static const int g_h843 = getenv("H843") ? atoi(getenv("H843")) : 0;
 static inline bool compile_enc_sel(cmi6::Handle& H, const View& V, Tree& T, cmi6::TreeEnc& te, double& em, const uint64_t* hp) {
   if (g_h843 && g_h308 >= 3) return c720::compile_enc(H, V, T, te, em, hp);
   return g_h308 >= 3 ? c308::compile_enc(H, V, T, te, em, hp) : cmi6i17::compile_enc_i17(H, V, T, te, em, hp);
 }
 static const double g_h257f = getenv("H257F") ? atof(getenv("H257F")) : -1.0;
-
 struct Times {
 #define DECL(f) double f = 0;
   TFIELDS(DECL)
@@ -266,8 +248,6 @@ static void scaleT(Times& a, double s) {
   TFIELDS(SC)
 #undef SC
 }
-
-
 struct Stroke { std::string id, label; std::vector<double> xs, ys; };
 static bool load_strokes(const char* path, std::vector<Stroke>& out) {
   std::ifstream f(path); if (!f) return false;
@@ -282,8 +262,6 @@ static bool load_strokes(const char* path, std::vector<Stroke>& out) {
   }
   return true;
 }
-
-
 static void to_npt(const std::vector<double>& X, const std::vector<double>& Y, std::vector<double>& ox, std::vector<double>& oy) {
   if ((int)X.size() == NPT) { ox = X; oy = Y; return; }
   std::vector<double> cx{X[0]}, cy{Y[0]};
@@ -303,19 +281,13 @@ static void to_npt(const std::vector<double>& X, const std::vector<double>& Y, s
     oy[i] = cy[j] + a * (cy[j + 1] - cy[j]);
   }
 }
-
 struct Target { double y[NPT]; float yf[NPT]; double yy; float floor_; };
-
-
+static const bool g_bu_noclk = getenv("BU_NOCLK") && atoi(getenv("BU_NOCLK")) >= 1;
 struct alignas(128) Worker { Ctx* C = nullptr; nf16::Handle* H = nullptr; nf308::St* S308 = nullptr; cmi6::Handle* CH = nullptr; double nf_only = 0, nf_fail = 0, cmp_only = 0, enc_only = 0; };
-
-
 static int h178_on() { static const int v = getenv("H178") ? atoi(getenv("H178")) : 1; return v; }
 static int h178_pre() { static const int v = getenv("H178P") ? atoi(getenv("H178P")) : h178_on(); return v; }
 static std::string h178_path() { const char* p = getenv("H178F"); return p && *p ? std::string(p) : std::string("./psos_i22.bin"); }
 static id<MTLBinaryArchive> g_h178_arch = nil;
-
-
 static int h876_mask() { static const int v = getenv("H876") ? atoi(getenv("H876")) : 0; return v; }
 static bool g_h178_exists = false, g_h178_dirty = false;
 static long g_h178_created = 0, g_h178_absent = 0, g_h178_hits = 0, g_h178_miss = 0, g_h178_addfail = 0;
@@ -331,7 +303,6 @@ static id<MTLComputePipelineState> h178_make(id<MTLDevice> dev, id<MTLFunction> 
     if (ps) { g_h178_hits++; return ps; }
     g_h178_miss++;
   }
-
   NSError* ea = nil; d.binaryArchives = nil;
   if ([g_h178_arch addComputePipelineFunctionsWithDescriptor:d error:&ea]) g_h178_dirty = true;
   else { g_h178_addfail++; if (g_h178_addfail <= 3) fprintf(stderr, "H178: addComputePipelineFunctions: %s\n", ea.description.UTF8String); }
@@ -341,7 +312,6 @@ static id<MTLComputePipelineState> h178_make(id<MTLDevice> dev, id<MTLFunction> 
     NSError* e3 = nil; ps = [dev newComputePipelineStateWithFunction:fn error:&e3];
     if (!ps) { fprintf(stderr, "pso %s: %s\n", "h178", e3.description.UTF8String); exit(1); } }
   return ps; }
-
 static void h178_flush() {
   if (!g_h178_arch || !g_h178_dirty) return;
   if ((h876_mask() & 2) && g_h178_exists) return;
@@ -370,7 +340,6 @@ static void h178_open(id<MTLDevice> dev) {
   g_h178_dirty = !g_h178_exists;
   printf("H178=1: binary archive %s (%s)\n", h178_path().c_str(), g_h178_exists ? "loaded" : "new, written at exit");
   atexit(h178_flush); }
-
 struct Engine {
   id<MTLDevice> dev; id<MTLCommandQueue> cq; id<MTLLibrary> Ls, Lg, Lp, Lgr, Lb, Lgp, Lpp;
   std::map<std::string, id<MTLComputePipelineState>> pso;
@@ -388,7 +357,7 @@ struct Engine {
       id<MTLFunction> fn = [L newFunctionWithName:[NSString stringWithUTF8String:name.c_str()]];
       id<MTLComputePipelineState> ps = nil;
       if (fn) { auto tc = clk::now(); ps = h178_make(dev, fn); g_h178_created++; g_h178_ms += ms_since(tc); } else g_h178_absent++;
-      pso[name] = ps; return ps; }
+      kcap_sg_reg(ps, name, L); pso[name] = ps; return ps; }
     pso_lk.unlock();
     id<MTLFunction> fn = [L newFunctionWithName:[NSString stringWithUTF8String:name.c_str()]];
     id<MTLComputePipelineState> ps = nil; double cms = 0;
@@ -397,11 +366,9 @@ struct Engine {
     pso_lk.lock();
     auto it2 = pso.find(name); if (it2 != pso.end()) return it2->second;
     if (fn) { g_h178_created++; g_h178_ms += cms; } else g_h178_absent++;
-    pso[name] = ps; return ps; }
+    kcap_sg_reg(ps, name, L); pso[name] = ps; return ps; }
   id<MTLBuffer> B(const void* p, size_t n) { if (!p || n == 0) return h900_nbl(dev, __LINE__, 16, MTLResourceStorageModeShared); return h900_nbb(dev, __LINE__, p, n, MTLResourceStorageModeShared); }
 };
-
-
 static thread_local evo::Pool* tl_pool = nullptr;
 static thread_local std::vector<Worker>* tl_W = nullptr;
 static evo::Pool* g_pool2 = nullptr;
@@ -413,17 +380,10 @@ static const std::vector<Worker>& WK(const Engine& E) { return tl_W ? *tl_W : E.
 static int g_h870 = 0;
 struct Unique { std::vector<Tree> U; std::vector<uint64_t> hash; std::vector<TreeEnc> enc; };
 #include "h308d_take.hpp"
-
-
 static const int g_h301r = getenv("H301R") ? atoi(getenv("H301R")) : 1;
 static std::vector<Tree> g_h301r_t; static std::vector<TreeEnc> g_h301r_e; static std::atomic<size_t> g_h301r_n{0};
-
-
 static thread_local h308d::Walk tl_h308d;
-
 static const int g_h308x = getenv("H308X") ? atoi(getenv("H308X")) : 0;
-
-
 static const int g_h313a_mask = g_h308 >= 5 ? (getenv("H313A") ? atoi(getenv("H313A")) : 7) : 0;
 static const int g_h313x = (g_h308 >= 5 && getenv("H313X")) ? atoi(getenv("H313X")) : 0;
 static const bool g_h313_defer = (g_h313a_mask & 5) != 0;
@@ -447,11 +407,7 @@ struct FitOut {
   void init(int M) { rfin.assign(M, INFINITY); smin.assign(M, INFINITY); sarg.assign(M, -1); is_g.assign(M, 0); }
 };
 struct StepBatch { std::vector<int> ct; Unique UQ; FitOut F[2]; std::vector<int> ids[2]; };
-
-
 static const int g_h874 = getenv("H874") ? atoi(getenv("H874")) : 0;
-
-
 class Key {
   std::vector<uint32_t> v_; const uint32_t* vp_ = nullptr; size_t vn_ = 0; bool view_ = false;
 public:
@@ -474,8 +430,6 @@ public:
 };
 static uint64_t hash_rec(const Key& r) { uint64_t h = 0x243f6a8885a308d3ull ^ r.size(); for (size_t i = 0, n = r.size(); i < n; i++) h = splitmix64(h ^ r.data()[i]); return h; }
 struct KeyHash { size_t operator()(const Key& k) const noexcept { return (size_t)hash_rec(k); } };
-
-
 struct FlatKeySet {
   std::vector<FlatKeySet> sh;
   static unsigned shard_of(uint64_t h) { return (unsigned)(h >> 60); }
@@ -519,7 +473,6 @@ struct FlatKeySet {
     return false;
   }
   bool insert(uint64_t h, const uint32_t* k, uint32_t n) { if (!sh.empty()) return sh[shard_of(h)].insert(h, k, n); bool f = false; find_or_add(h, k, n, f); return f; }
-
   inline void pf_slot(uint64_t h) const { if (!sh.empty()) { sh[shard_of(h)].pf_slot(h); return; } if (!slot.empty()) __builtin_prefetch(&slot[h & (slot.size() - 1)], 0, 3); }
   inline void pf_entry(uint64_t h) const {
     if (!sh.empty()) { sh[shard_of(h)].pf_entry(h); return; }
@@ -533,17 +486,13 @@ struct FlatKeySet {
     if (s && eh[s - 1] == h) { __builtin_prefetch(&elen[s - 1], 0, 3); if (byref) __builtin_prefetch(&eptr[s - 1], 0, 3); else { __builtin_prefetch(&eoff[s - 1], 0, 3); __builtin_prefetch(arena.data() + eoff[s - 1], 0, 3); } }
   }
 };
-
 struct Meta { Key key; uint64_t r0 = 0, r1 = 0, kh = 0; uint8_t kf = 0, nx = 0, ny = 0; };
-
-
 static const int g_sp_env = getenv("SEARCH_PEN") ? atoi(getenv("SEARCH_PEN")) : 0;
 static const int g_sp_diag = getenv("SEARCH_PEN_DIAG") ? atoi(getenv("SEARCH_PEN_DIAG")) : 0;
 static bool g_sp_on = false;
 static std::atomic<long> g_sp_kunk{0};
 static inline int sp_show_cx(const evo::Ind& I) { return g_sp_on ? (int)evo::cplx(I.g) : (int)I.cx; }
 static inline uint16_t sp_cx(const evo::Cand& g, const Meta& m) { return g_sp_on ? sp::level(m.nx, m.ny, m.kf) : (uint16_t)evo::cplx(g); }
-
 static std::atomic<uint64_t> g_h890_key_ns{0}; static std::atomic<uint64_t> g_h890_key_bytes{0};
 struct H890Tm { bool on; clk::time_point t; uint64_t nb = 0; H890Tm() : on(g_h890 != 0) { if (on) t = clk::now(); }
   ~H890Tm() { if (on) { g_h890_key_ns.fetch_add((uint64_t)std::chrono::duration_cast<std::chrono::nanoseconds>(clk::now() - t).count(), std::memory_order_relaxed); g_h890_key_bytes.fetch_add(nb, std::memory_order_relaxed); } } };
@@ -551,15 +500,9 @@ static inline void h890_setkey(Meta& m, const nf16::Block& B, const nf16::Child&
   if (g_h890 & 1) m.key.set_view(B.w.data() + ch.koff, ch.klen); else m.key.assign(B.w.data() + ch.koff, B.w.data() + ch.koff + ch.klen);
   if (tm) tm->nb += (uint64_t)ch.klen * 4;
 }
-
-
 struct NFData { std::vector<nf16::Child> ch; std::vector<nf16::Block> blk; std::vector<skn::Cand> sc; };
 static NFData NFD;
-
-
 static inline size_t al5g(size_t x, size_t a) { return (x + a - 1) / a * a; }
-
-
 static const int g_mem_grow = getenv("MEM_GROW") ? atoi(getenv("MEM_GROW")) : 1;
 static inline size_t mem_grow_cap(size_t bytes, size_t cap) { if (g_mem_grow && bytes >= ((size_t)1 << 20)) return al5g(bytes + bytes / 16, 16384); return std::max(bytes, cap + cap / 2); }
 struct GBuf {
@@ -577,7 +520,6 @@ static void h900_ens(GBuf& g, const char* nm, id<MTLDevice> dev, size_t bytes, M
 }
 static const size_t BIN_ALIGN = 64;
 static size_t al5(size_t x, size_t a) { return (x + a - 1) / a * a; }
-
 static void sort_by_key5(const std::vector<uint32_t>& seq, const std::vector<uint32_t>& key, size_t DN,
                          std::vector<uint32_t>& start, std::vector<uint32_t>& fill, std::vector<uint32_t>& out) {
   start.assign(DN + 1, 0);
@@ -587,16 +529,12 @@ static void sort_by_key5(const std::vector<uint32_t>& seq, const std::vector<uin
   out.resize(seq.size());
   for (uint32_t x : seq) out[fill[key[x]]++] = x;
 }
-
-
 struct Tick { clk::time_point t = clk::now(); double lap() { const auto n = clk::now(); const double d = std::chrono::duration<double, std::milli>(n - t).count(); t = n; return d; } };
 static int g_h916 = 0;
 static int g_h215 = 0;
 static bool g_h93 = true, g_h93_print = true;
 static thread_local std::vector<uint32_t> h93_hist;
-
 static std::mutex h93_pso_m;
-
 static id<MTLComputePipelineState> h93_scan_ps(Engine& E, int s2, int Q) {
   std::lock_guard<std::mutex> lk(h93_pso_m);
   static id<MTLComputePipelineState> cache[2][128]; static bool have[2][128];
@@ -611,8 +549,6 @@ static id<MTLComputePipelineState> h93_gn_ps(Engine& E, int Q, int Tk) {
   if (!have[Q][Tk]) { cache[Q][Tk] = E.pipe(E.Lg, "gnw_q" + std::to_string(Q) + "_t" + std::to_string(Tk)); have[Q][Tk] = true; }
   return cache[Q][Tk];
 }
-
-
 static void sort_by_key5_p(Engine& E, const std::vector<uint32_t>& seq, const std::vector<uint32_t>& key, size_t DN,
                            std::vector<uint32_t>& start, std::vector<uint32_t>& out) {
   const size_t n = seq.size();
@@ -647,8 +583,6 @@ static void sort_by_key5_p(Engine& E, const std::vector<uint32_t>& seq, const st
     for (size_t i = a; i < z; i++) { const uint32_t x = seq[i]; out[h[key[x]]++] = x; }
   });
 }
-
-
 static int sort_count_h263(Engine& E, const std::vector<uint32_t>& seq, const std::vector<uint32_t>& key, size_t DN, std::vector<uint32_t>& start) {
   const size_t n = seq.size();
   const int NB = std::max(1, (int)std::min<size_t>((size_t)(4 * E.W.size()), n / 1024));
@@ -679,14 +613,11 @@ static void sort_scatter_h263(Engine& E, const std::vector<uint32_t>& seq, const
     for (size_t i = a; i < z; i++) { const uint32_t x = seq[i]; const uint32_t k = key[x]; dst[(size_t)((int64_t)(h[k]++) + shift[k])] = x; }
   });
 }
-
 struct H263ScanScr { std::vector<uint32_t> bti, bsi, bhi, bns, oti, osi, ohi, osq; std::vector<int> bq; std::vector<double> bfl; std::vector<int64_t> shv; };
 struct H263GnScr { std::vector<uint32_t> bgi, bgs, bns, ogt, ogs, osq; std::vector<int> bqg, bcg, blm; std::vector<double> bal, bkm;
                    std::vector<size_t> ne, perb, perb2; };
 static H263ScanScr h263_keep_scan;
 static H263GnScr h263_keep_gn;
-
-
 struct H263Bind {
   bool on = false; const void* ps = nullptr; const void* lb[16] = {}; size_t lo[16] = {}; bool hv[16] = {};
   void buf(id<MTLComputeCommandEncoder> en, id<MTLBuffer> b, size_t off, int k) {
@@ -700,10 +631,7 @@ struct H263Bind {
   void forget(int k) { hv[k] = false; }
   void forget_pipe() { ps = nullptr; }
 };
-
 struct SBin5 { int Q, ns, nc; bool s2; size_t off, cnt, sst; };
-
-
 static int h150p_on() { static const int v = getenv("H150P") ? atoi(getenv("H150P")) : 1; return v; }
 static int h150s_on() { static const int v = getenv("H150S") ? atoi(getenv("H150S")) : 0; return v; }
 static int h150c_on() { static const int v = getenv("H150C") ? atoi(getenv("H150C")) : 0; return v; }
@@ -712,7 +640,6 @@ struct H150Acc { long gnDisp = 0, gnLaunch = 0, gnOcc = 0, polDisp = 0, polLaunc
 static H150Acc g_h150;
 static void h150_step_reset() { g_h150 = H150Acc(); }
 static size_t h150_count_tl(const std::vector<uint32_t>& tl) { size_t c = 0; for (size_t k = 1; k < tl.size(); k++) if (tl[k] != 0xFFFFFFFFu) c++; return c; }
-
 static long h150_sim_pol(size_t pers, int t) {
   const size_t g = ((size_t)t * pers * 4 + 15) & ~(size_t)15;
   return std::min<long>(96, (long)(65536 / std::max<size_t>(g, 1)) * (long)t);
@@ -736,13 +663,9 @@ static void h150_step_print(int st) {
          st, h150p_on(), h150s_on(), h150c_on(), a.gnDisp, a.gnLaunch, a.gnOcc, gE, a.polDisp, a.polLaunch, a.polOcc, pE,
          a.polBins, a.polChanged, a.scDisp, a.scTG, a.scThr, a.scSimd);
 }
-
 struct GBin5 { int side, Q, nth, tpg; size_t cnt, nt, ntg, tgb, per, per32 = 0, sst, tl_off, eb_off, eb_bytes; uint32_t wix; id<MTLComputePipelineState> ps; };
-
-
+static bool h182_dg(void) { static const bool v = !(getenv("H182_DG") && getenv("H182_DG")[0] == '0'); return v; }
 static int h182_on(void) { static int v = -1; if (v < 0) { const char* e = getenv("H182"); v = (e && e[0] == '0') ? 0 : 1; } return v; }
-
-
 static const int g_h301 = getenv("H301") ? atoi(getenv("H301")) : 0;
 static std::mutex g_h301_m;
 static std::vector<std::pair<double, double>> g_h301_cb;
@@ -750,7 +673,6 @@ static std::vector<std::pair<const char*, double>> g_h301_mk;
 static std::thread::id g_h301_main;
 static double h301_now() { static const mach_timebase_info_data_t tb = [] { mach_timebase_info_data_t t; mach_timebase_info(&t); return t; }();
   return (double)mach_absolute_time() * (double)tb.numer / (double)tb.denom * 1e-9; }
-
 static const int g_h401 = getenv("H401") ? atoi(getenv("H401")) : 0;
 static std::atomic<int> g_h401_on{0};
 static std::mutex g_h401_m;
@@ -759,7 +681,6 @@ static std::vector<H401Rec> g_h401_r;
 static std::atomic<int> g_h401_tn{0};
 static int h401_tid() { static thread_local int t = -1; if (t < 0) t = g_h401_tn.fetch_add(1); return t; }
 static std::atomic<const char*> g_h401_cur{"(none)"};
-
 static const int g_h892 = getenv("H892") ? atoi(getenv("H892")) : 0;
 static const size_t g_h892_cap = (size_t)1 << 20;
 static double g_h892_t0 = 0; static H401Rec* g_h892_ring = nullptr; static std::atomic<size_t> g_h892_n{0};
@@ -769,7 +690,6 @@ static void h401_push(int kind, const char* lab, double a, double b) { const int
 struct H401S { const char* l; double a = 0; bool on; explicit H401S(const char* l_) : l(l_), on(g_h401_on.load(std::memory_order_relaxed) != 0) { if (on) a = h301_now(); }
   ~H401S() { if (on) h401_push(2, l, a, h301_now()); } };
 #include <sys/resource.h>
-
 static const int g_h657 = getenv("H657") ? atoi(getenv("H657")) : 0;
 static struct rusage g_h657_ru0; static bool g_h657_init = false;
 static void h657_step(int st) {
@@ -783,10 +703,8 @@ static void h657_step(int st) {
   }
   g_h657_ru0 = r; g_h657_init = true;
 }
-
 static const int g_h651 = getenv("H651") ? atoi(getenv("H651")) : 0;
 static const int g_h652 = getenv("H652") ? atoi(getenv("H652")) : 0;
-
 static const char* g_h650d = getenv("H650D");
 static const double g_h650ms = getenv("H650MS") ? atof(getenv("H650MS")) : 10.0;
 static const double g_h650ns = getenv("H650NS") ? atof(getenv("H650NS")) : 1000.0;
@@ -797,7 +715,6 @@ static void h650_spin_ns(double ns) {
   while (std::chrono::duration<double, std::nano>(std::chrono::steady_clock::now() - t0).count() < ns) { }
 }
 static std::atomic<uint64_t> g_h650_items{0};
-
 static const int g_h891 = getenv("H891") ? atoi(getenv("H891")) : 0;
 static const double g_h891_cpu_us = getenv("H891_CPU_US") ? atof(getenv("H891_CPU_US")) : 0;
 static const int g_h891_site = getenv("H891_CPU_SITE") ? atoi(getenv("H891_CPU_SITE")) : 1;
@@ -839,33 +756,68 @@ static void h892_dump(double t0) {
   for (size_t i = 0; i < n; i++) { const H401Rec& r = g_h892_ring[i]; fprintf(f, "%d,%d,\"%s\",%.4f,%.4f\n", r.kind, r.tid, r.lab, (r.a - t0) * 1e3, (r.b - t0) * 1e3); }
   fclose(f); printf("H892: %zu records%s written to %s\n", n, g_h892_n.load() > g_h892_cap ? " (RING OVERFLOW)" : "", fn);
 }
+static const int g_tm2 = getenv("TM_PROF") ? (atoi(getenv("TM_PROF")) >= 2) : 0;
+struct TmSegAcc { double w = 0, c = 0; long n = 0; };
+static std::map<std::string, TmSegAcc> g_tm_seg;
+static void tm_seg_flush(int stepno) {
+  std::vector<std::pair<double, std::string>> v; double sw = 0, sc = 0; for (auto& kv : g_tm_seg) { v.push_back({kv.second.w, kv.first}); sw += kv.second.w; sc += kv.second.c; }
+  std::sort(v.rbegin(), v.rend());
+  for (auto& p : v) { const TmSegAcc& a = g_tm_seg[p.second]; if (a.w >= 0.02) printf("TMSEG step %d | %9.3f | %9.3f | %5ld | %s\n", stepno, a.w, a.c, a.n, p.second.c_str()); }
+  printf("TMSEG step %d | %9.3f | %9.3f | total (sum of marks, main thread)\n", stepno, sw, sc);
+  g_tm_seg.clear();
+}
+static void tm_seg_mark(const char* lab) {
+  static const char* cur = nullptr; static double w0 = 0, c0 = 0;
+  struct timespec ts; clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts); const double c = (double)ts.tv_sec + 1e-9 * (double)ts.tv_nsec, w = h301_now();
+  if (cur) { TmSegAcc& a = g_tm_seg[cur]; a.w += (w - w0) * 1e3; a.c += (c - c0) * 1e3; a.n++; }
+  cur = lab; w0 = w; c0 = c;
+}
 static void h301_mark(const char* lab) {
+  if (g_tm2 && std::this_thread::get_id() == g_h301_main) {
+    if (!strcmp(lab, "step boundary (memo)")) { static int nb = 0; tm_seg_mark(lab); if (nb > 0) tm_seg_flush(nb); g_tm_seg.clear(); nb++; }
+    tm_seg_mark(lab); }
   if (std::this_thread::get_id() == g_h301_main) { g_h401_cur.store(lab, std::memory_order_relaxed); if (g_h401_on.load(std::memory_order_relaxed)) { const double t = h301_now(); h401_push(0, lab, t, t); } }
   if (!g_h301 || std::this_thread::get_id() != g_h301_main) return;
   std::lock_guard<std::mutex> lk(g_h301_m); g_h301_mk.push_back({lab, h301_now()}); }
-
-
+static uint64_t g_h301_main_tid = 0;
+static const int g_tm = getenv("TM_PROF") ? atoi(getenv("TM_PROF")) : 0;
+static inline void tm_mark(const char* lab) { if (g_tm) h301_mark(lab); }
+struct TmScope { const char* prev = nullptr; bool on = false;
+  explicit TmScope(const char* lab) { if (g_tm && std::this_thread::get_id() == g_h301_main) { on = true; prev = g_h401_cur.load(std::memory_order_relaxed); h301_mark(lab); } }
+  ~TmScope() { if (on && prev) h301_mark(prev); } };
+static void tm_thr_snapshot(int st) {
+  static std::map<uint64_t, double> last; static double wall0 = 0; const double now = h301_now();
+  uint64_t main_tid = 0; pthread_threadid_np(nullptr, &main_tid); if (!g_h301_main_tid) g_h301_main_tid = main_tid;
+  thread_act_array_t th = nullptr; mach_msg_type_number_t nt = 0; if (task_threads(mach_task_self(), &th, &nt) != KERN_SUCCESS) return;
+  std::vector<std::pair<double, std::string>> rows; double tot = 0, mainms = 0; int nact = 0;
+  for (mach_msg_type_number_t i = 0; i < nt; i++) {
+    thread_identifier_info_data_t id; mach_msg_type_number_t ic = THREAD_IDENTIFIER_INFO_COUNT; thread_basic_info_data_t bi; mach_msg_type_number_t bc = THREAD_BASIC_INFO_COUNT;
+    if (thread_info(th[i], THREAD_IDENTIFIER_INFO, (thread_info_t)&id, &ic) == KERN_SUCCESS && thread_info(th[i], THREAD_BASIC_INFO, (thread_info_t)&bi, &bc) == KERN_SUCCESS) {
+      const double cpu = (bi.user_time.seconds + bi.system_time.seconds) * 1e3 + (bi.user_time.microseconds + bi.system_time.microseconds) * 1e-3;
+      const double d = cpu - last[id.thread_id]; last[id.thread_id] = cpu; tot += d; if (d >= 2.0) nact++;
+      if (id.thread_id == g_h301_main_tid) mainms = d; else if (d >= 5.0) { char b[64]; snprintf(b, sizeof b, "t%llu", (unsigned long long)id.thread_id); rows.push_back({d, b}); } }
+    mach_port_deallocate(mach_task_self(), th[i]); }
+  vm_deallocate(mach_task_self(), (vm_address_t)th, nt * sizeof(thread_t));
+  std::sort(rows.rbegin(), rows.rend());
+  printf("TM_THR step %2d: process cpu %.1f ms in %.1f ms wall (%.2f cores) | main %.1f | threads>=2ms %d | other>=5ms:", st, tot, wall0 > 0 ? (now - wall0) * 1e3 : 0.0, wall0 > 0 ? tot / ((now - wall0) * 1e3) : 0.0, mainms, nact);
+  for (size_t i = 0; i < rows.size() && i < 16; i++) printf(" %s %.0f;", rows[i].second.c_str(), rows[i].first);
+  printf("\n"); wall0 = now; }
 static const int g_h301d = getenv("H301D") ? atoi(getenv("H301D")) : 0;
-
-
 static const int g_h301t = getenv("H301T") ? atoi(getenv("H301T")) : 0;
-
 static const int g_h402 = getenv("H402") ? atoi(getenv("H402")) : 0;
 static const double g_h402r = getenv("H402R") ? atof(getenv("H402R")) : 0.0;
 static const int g_h402v = getenv("H402V") ? atoi(getenv("H402V")) : 0;
 static double g_h402_rho = 1.4;
-
-
 static const int g_h302 = getenv("H302") ? atoi(getenv("H302")) : 0;
 static const int g_h301mb = getenv("H301M") ? atoi(getenv("H301M")) : 0;
-
-
 static std::function<void()> g_h301_after_front;
+static std::function<void()> g_ss_join;
+static const int g_ss3 = getenv("SS3") ? atoi(getenv("SS3")) : 0;
+static const int g_ss2 = getenv("SS2") ? atoi(getenv("SS2")) : 0;
 static void h301_track(id<MTLCommandBuffer> cb) {
   if (!g_h301) return;
   [cb addCompletedHandler:^(id<MTLCommandBuffer> c) { std::lock_guard<std::mutex> lk(g_h301_m); g_h301_cb.push_back({c.GPUStartTime, c.GPUEndTime}); }];
 }
-
 static std::map<std::string, double> g_h301_all;
 static double h301_window(double t0, double t1, std::map<std::string, double>& acc, double& idle) {
   std::vector<std::pair<double, double>> iv; std::vector<std::pair<const char*, double>> mk;
@@ -876,6 +828,11 @@ static double h301_window(double t0, double t1, std::map<std::string, double>& a
     std::vector<std::pair<const char*, double>> km; for (auto& m : g_h301_mk) if (m.second >= t1) km.push_back(m); g_h301_mk.swap(km); }
   for (size_t i = 0; i < mk.size(); i++) g_h301_all[mk[i].first] += ((i + 1 < mk.size() ? mk[i + 1].second : t1) - mk[i].second) * 1e3;
   std::sort(iv.begin(), iv.end());
+  static const bool ss_mk = getenv("SS_MK") != nullptr;
+  if (ss_mk) { double cur2 = t0; std::vector<std::pair<double,double>> g2; for (auto& q : iv) { if (q.first > cur2) g2.push_back({cur2, q.first}); if (q.second > cur2) cur2 = q.second; } if (cur2 < t1) g2.push_back({cur2, t1});
+    printf("SS_MK window %.1f ms\n", (t1 - t0) * 1e3);
+    for (size_t i = 0; i < mk.size(); i++) { const double a = mk[i].second, b = i + 1 < mk.size() ? mk[i + 1].second : t1; double idl = 0; for (auto& g : g2) { const double o = std::min(b, g.second) - std::max(a, g.first); if (o > 0) idl += o; }
+      if ((b - a) * 1e3 >= 0.5) printf("SS_MK  @%7.1f dur %6.1f idle %6.1f %s\n", (a - t0) * 1e3, (b - a) * 1e3, idl * 1e3, mk[i].first); } }
   std::vector<std::pair<double, double>> gaps; double busy = 0, cur = t0;
   for (auto& q : iv) { if (q.first > cur) gaps.push_back({cur, q.first}); if (q.second > cur) { busy += q.second - std::max(q.first, cur); cur = q.second; } }
   if (cur < t1) gaps.push_back({cur, t1});
@@ -890,7 +847,6 @@ static double h301_window(double t0, double t1, std::map<std::string, double>& a
   }
   return busy * 1e3;
 }
-
 static bool tl_on() { static const bool on = getenv("TL_LABELS") && getenv("TL_LABELS")[0] == '1'; return on; }
 static id<MTLComputeCommandEncoder> tl_enc(id<MTLCommandBuffer> cb, MTLDispatchType t = MTLDispatchTypeSerial,
                                            const char* f = __builtin_FUNCTION(), int l = __builtin_LINE()) {
@@ -898,6 +854,7 @@ static id<MTLComputeCommandEncoder> tl_enc(id<MTLCommandBuffer> cb, MTLDispatchT
   if (tl_on()) en.label = [NSString stringWithFormat:@"%s@%d", f, l];
   return en;
 }
+static const bool g_cbx = getenv("FJN_CBLOG") && atoi(getenv("FJN_CBLOG")) != 0; static int g_cbx_step = 1;
 static id<MTLCommandBuffer> h182_cb(id<MTLCommandQueue> q, const char* tlf = __builtin_FUNCTION(), int tll = __builtin_LINE()) {
   id<MTLCommandBuffer> cb;
   if (!h182_on()) cb = [q commandBuffer];
@@ -906,6 +863,7 @@ static id<MTLCommandBuffer> h182_cb(id<MTLCommandQueue> q, const char* tlf = __b
     cb = [q commandBufferWithDescriptor:d]; }
   if (tl_on()) cb.label = [NSString stringWithFormat:@"%s@%d", tlf, tll];
   h301_track(cb);
+  if (g_cbx) { const int stp = g_cbx_step; [cb addCompletedHandler:^(id<MTLCommandBuffer> c) { printf("CBX S%d %s@%d start %.4f end %.4f\n", stp, tlf, tll, c.GPUStartTime, c.GPUEndTime); }]; }
   if (g_h401_on.load(std::memory_order_relaxed)) { const char* lab = g_h401_cur.load(std::memory_order_relaxed); const int tid = h401_tid();
     [cb addCompletedHandler:^(id<MTLCommandBuffer> c) { if (g_h892) { const size_t i = g_h892_n.fetch_add(1, std::memory_order_relaxed); if (i < g_h892_cap) g_h892_ring[i] = {3, tid, lab, c.GPUStartTime, c.GPUEndTime}; } else { std::lock_guard<std::mutex> lk(g_h401_m); g_h401_r.push_back({3, tid, lab, c.GPUStartTime, c.GPUEndTime}); } }]; }
   return cb;
@@ -952,6 +910,96 @@ static void h182_dump(id<MTLCommandBuffer> cb, const char* site) {
             (long)info.errorState, h182_estate(info.errorState), [info.debugSignposts componentsJoinedByString:@" | "].UTF8String);
   }
 }
+enum { WD_SCAN = 0, WD_GN, WD_POL, WD_GRID, WD_BAND, WD_HGRID, WD_HBAND, WD_HPOL, WD_NK };
+struct WdState {
+  static constexpr const char* NAME[WD_NK] = {"scan", "GN", "I14 polish", "I14 grid", "I14 band", "H117 grid", "H117 band", "H117 polish"};
+  int max_try = 3; long inj[WD_NK]; bool norestore = false, stat = false;
+  std::atomic<long> cbs[WD_NK], retries[WD_NK], injected[WD_NK]; std::atomic<long> snap_us{0}, snap_rows{0}, snap_n{0};
+  WdState() {
+    for (int k = 0; k < WD_NK; k++) { inj[k] = -1; cbs[k] = 0; retries[k] = 0; injected[k] = 0; }
+    if (const char* e = getenv("FJN_WD_RETRIES")) max_try = std::max(0, atoi(e));
+    if (const char* e = getenv("FJN_FAILINJ")) { std::string v(e); size_t p = 0;
+      while (p < v.size()) { size_t q = v.find(',', p); if (q == std::string::npos) q = v.size(); const std::string it = v.substr(p, q - p); p = q + 1;
+        const size_t c = it.find(':'); const std::string kn = it.substr(0, c); const long n = c == std::string::npos ? 0 : atol(it.c_str() + c + 1);
+        const char* nm[WD_NK] = {"scan", "gn", "pol", "grid", "band", "hgrid", "hband", "hpol"}; for (int k = 0; k < WD_NK; k++) if (kn == nm[k]) inj[k] = n; }
+      stat = true; }
+    norestore = getenv("FJN_FAILINJ_NORESTORE") && atoi(getenv("FJN_FAILINJ_NORESTORE")) != 0;
+    if (getenv("FJN_WDSTAT") && atoi(getenv("FJN_WDSTAT"))) stat = true;
+  }
+  ~WdState() {
+    long r = 0; for (int k = 0; k < WD_NK; k++) r += retries[k];
+    if (!stat && !r) return;
+    fprintf(stderr, "WD stat:"); for (int k = 0; k < WD_NK; k++) fprintf(stderr, " | %s: CBs %ld retries %ld injected %ld", NAME[k], cbs[k].load(), retries[k].load(), injected[k].load());
+    fprintf(stderr, " | GN/polish snapshots %ld, rows %ld, %.3f ms total\n", snap_n.load(), snap_rows.load(), snap_us.load() * 1e-3);
+  }
+};
+static WdState g_wd;
+static const int g_wd_test_itmax = getenv("FJN_WD_TEST_ITMAX") ? atoi(getenv("FJN_WD_TEST_ITMAX")) : -1;
+static const bool g_wd_ck = getenv("FJN_WD_CKSUM") && atoi(getenv("FJN_WD_CKSUM")) != 0;
+static uint64_t wd_fnv(uint64_t h, const void* p, size_t n) { const unsigned char* c = (const unsigned char*)p; for (size_t i = 0; i < n; i++) { h ^= c[i]; h *= 1099511628211ull; } return h; }
+struct WdRows { std::vector<uint32_t> rows; std::vector<uint8_t> rq; std::vector<float> sth; id<MTLBuffer> th = nil; };
+static void wd_snap(WdRows& R, id<MTLBuffer> th) {
+  const auto t0 = std::chrono::steady_clock::now(); const size_t n = R.rows.size();
+  R.th = th;
+  if (n) {
+    R.sth.resize(n * 32);
+    const float* T = (const float*)th.contents;
+    for (size_t k = 0; k < n; k++) std::memcpy(&R.sth[k * 32], T + 32 * (size_t)R.rows[k], 128);
+  }
+  g_wd.snap_us += (long)std::chrono::duration<double, std::micro>(std::chrono::steady_clock::now() - t0).count(); g_wd.snap_rows += (long)n; g_wd.snap_n += 1;
+}
+static void wd_restore(const WdRows& R) {
+  if (g_wd.norestore || R.rows.empty()) return;
+  float* T = (float*)R.th.contents;
+  for (size_t k = 0; k < R.rows.size(); k++) std::memcpy(T + 32 * (size_t)R.rows[k], &R.sth[k * 32], 128);
+}
+template <class RC, class RS, class CK = std::nullptr_t> static id<MTLCommandBuffer> wd_resolve(int kind, id<MTLCommandBuffer> cb, RC recommit, RS restore, bool can = true, CK ck = nullptr) {
+  const long idx = ++g_wd.cbs[kind]; const bool inj = g_wd.inj[kind] >= 0 && (g_wd.inj[kind] == 0 || g_wd.inj[kind] == idx);
+  for (int att = 0;; att++) {
+    const bool injected = att == 0 && inj;
+    if (!injected && cb.status == MTLCommandBufferStatusCompleted) return cb;
+    if (injected) { g_wd.injected[kind]++; fprintf(stderr, "WD inject: treating the completed %s CB #%ld as failed\n", WdState::NAME[kind], idx); }
+    else { fprintf(stderr, "%s command buffer failed\n", WdState::NAME[kind]); h182_dump(cb, WdState::NAME[kind]); }
+    const long code = (!injected && cb.error) ? (long)cb.error.code : 0;
+    if (!can || g_wd.max_try <= att || code == 7 || code == 11) { fprintf(stderr, "WD: %s CB failed, no retry (%s, attempt %d of %d, error code %ld)\n", WdState::NAME[kind], !can ? "not available for this kernel variant" : "limit or non-retryable error", att, g_wd.max_try, code); gpu_fail(); }
+    g_wd.retries[kind]++;
+    fprintf(stderr, "WD retry: %s CB #%ld attempt %d of %d: restoring the in-place buffers, re-encoding the same dispatches\n", WdState::NAME[kind], idx, att + 1, g_wd.max_try);
+    uint64_t c0 = 0; const bool vf = injected && g_wd_ck; if constexpr (!std::is_same_v<CK, std::nullptr_t>) { if (vf) c0 = ck(); }
+    if constexpr (!std::is_same_v<RS, std::nullptr_t>) restore();
+    cb = recommit(); [cb waitUntilCompleted];
+    if constexpr (!std::is_same_v<CK, std::nullptr_t>) { if (vf) { const uint64_t c1 = ck(); fprintf(stderr, "WD verify: %s CB #%ld first-attempt outputs %016llx, retry outputs %016llx: %s\n", WdState::NAME[kind], idx, (unsigned long long)c0, (unsigned long long)c1, c0 == c1 ? "MATCH" : "MISMATCH"); } }
+  }
+}
+template <class EN, class RS> static id<MTLCommandBuffer> wd_run(int kind, EN enc, RS restore) { id<MTLCommandBuffer> cb = enc(); [cb waitUntilCompleted]; return wd_resolve(kind, cb, enc, restore); }
+static bool wd_bad(int kind, id<MTLCommandBuffer> cb) {
+  const long idx = ++g_wd.cbs[kind]; const bool inj = g_wd.inj[kind] >= 0 && (g_wd.inj[kind] == 0 || g_wd.inj[kind] == idx);
+  if (inj) { g_wd.injected[kind]++; fprintf(stderr, "WD inject: treating the completed %s CB #%ld as failed\n", WdState::NAME[kind], idx); return true; }
+  if (cb.status == MTLCommandBufferStatusCompleted) return false;
+  fprintf(stderr, "%s command buffer failed\n", WdState::NAME[kind]); h182_dump(cb, WdState::NAME[kind]);
+  const long code = cb.error ? (long)cb.error.code : 0;
+  if (code == 7 || code == 11) { fprintf(stderr, "WD: %s CB failed with non-retryable error code %ld\n", WdState::NAME[kind], code); gpu_fail(); }
+  return true;
+}
+static std::atomic<long> g_wd_pf{getenv("FJN_WD_PIECEFAIL") ? atol(getenv("FJN_WD_PIECEFAIL")) : 0};
+static bool wd_piece_run(id<MTLCommandBuffer> cb, const char* what) {
+  [cb commit]; [cb waitUntilCompleted];
+  if (g_wd_pf.load() > 0 && g_wd_pf.fetch_sub(1) > 0) { fprintf(stderr, "WD inject: treating a completed %s retry piece as failed\n", what); return false; }
+  if (cb.status == MTLCommandBufferStatusCompleted) return true;
+  fprintf(stderr, "WD: %s retry piece failed\n", what); h182_dump(cb, what);
+  const long code = cb.error ? (long)cb.error.code : 0;
+  if (code == 7 || code == 11) { fprintf(stderr, "WD: %s retry failed with non-retryable error code %ld\n", what, code); gpu_fail(); }
+  return false;
+}
+template <class PRE, class PCS> static void wd_stage_retry(int kind, const char* what, PRE pre, PCS pieces) {
+  for (int att = 1; att <= g_wd.max_try; att++) {
+    const int np = 1 << (2 * (att - 1));
+    g_wd.retries[kind]++;
+    fprintf(stderr, "WD retry: %s attempt %d of %d: restoring the in-place buffers, re-encoding the same dispatches as %d piece(s)\n", what, att, g_wd.max_try, np);
+    pre();
+    if (pieces(np)) return;
+  }
+  fprintf(stderr, "WD: %s CB failed, retries exhausted (%d attempts)\n", what, g_wd.max_try); gpu_fail();
+}
 struct Side5 {
   std::vector<uint32_t> cpuJ; FitHandle cpuT; double cpu_ms = 0;
   GBuf tok, hdr, sp, th, seg, bl, out;
@@ -977,8 +1025,6 @@ struct Persist5 {
   GBuf h139scr;
   std::vector<GBin5> gbins;
 };
-
-
 struct UqRep { const uint32_t* rec; uint32_t nrec; uint64_t h; };
 struct PipeStep {
   int n = 0, NCH = 0;
@@ -992,12 +1038,9 @@ struct PipeStep {
   std::vector<int> allids[2];
   std::vector<std::pair<double, double>> iv;
 };
-
-
 static int g_h139 = 2;
 static id<MTLLibrary> g_h139L = nil;
 static size_t g_h139_viol = 0;
-
 static size_t h139_tgb(const SBin5& b) {
   size_t t = (size_t)b.ns * (b.s2 ? 96 : 768) * 4 + (b.s2 ? 2 : 16) * (size_t)b.nc * 4 + 56 * 4;
   return (t + 15) & ~(size_t)15;
@@ -1005,12 +1048,10 @@ static size_t h139_tgb(const SBin5& b) {
 static id<MTLComputePipelineState> h139_ps(Engine& E, int s2, int Q) {
   return E.pipe(g_h139L, s2 ? "rcscand_s2_q" + std::to_string(Q) : "rcscand_q" + std::to_string(Q));
 }
-
 static int g_h335 = 0; static id<MTLLibrary> g_h335L = nil;
 static double g_h335_n = 0, g_h335_mis = 0, g_h335_kept = 0, g_h335_lr = 0, g_h335_bins = 0, g_h335_trees = 0;
 static const int g_h802 = getenv("H802") ? atoi(getenv("H802")) : 0;
 static const int g_h803 = getenv("H803") ? atoi(getenv("H803")) : 0;
-
 static inline int h335_thr(int four, int Q) { const int G = (Q <= 5 || (four ? g_h803 : g_h802)) ? 6 : 3; return (four ? 192 : 384) / G; }
 static id<MTLComputePipelineState> h335_ps(Engine& E, int four, int Q) {
   static id<MTLComputePipelineState> c[2][17]; if (Q < 1 || Q > 16) return nil;
@@ -1020,11 +1061,9 @@ static id<MTLComputePipelineState> h335_ps(Engine& E, int four, int Q) {
       if (mt < th) { fprintf(stderr, "H802/H803: %s_q%d maxTotalThreadsPerThreadgroup %d < %d\n", four ? "rcscan4x" : "rcscan24", Q, mt, th); exit(1); } } }
   return c[four][Q];
 }
-
 static int g_h333 = 0; static GBuf g_h333hand[3][2], g_h333hoff[3][2]; static double g_h333_trees = 0, g_h333_mb = 0;
 static inline size_t h333_hstr(int Q) { return (size_t)(Q + 1) * 48 + 20; }
 static size_t h335_tgb(const SBin5& b, int four) { size_t t = (size_t)b.ns * (four ? 192 : 384) * 4 + (four ? 4 : 16) * (size_t)b.nc * 4 + 56 * 4; return (t + 15) & ~(size_t)15; }
-
 static void h139_cmp(const Side5& X, int s, const Unique& UQ) {
   (void)UQ;
   const float* SO = (const float*)X.out.b.contents; const float* O2 = (const float*)X.h139o.b.contents;
@@ -1052,12 +1091,9 @@ static void h139_cmp(const Side5& X, int s, const Unique& UQ) {
   printf("H139 cmp side %d: over-limit TGs %ld, bit-differing trees %ld, finite-mismatch values %ld, max abs %.6g, max rel %.6g, argmin mismatches %ld\n",
          s, nt, nbit, nfin, mabs, mrel, narg);
 }
-
-
 #define private public
 #include "gn_cpu_h940.hpp"
 #undef private
-
 static const int g_h779 = getenv("H779") ? atoi(getenv("H779")) : 0;
 static const int g_h771 = getenv("H771") ? atoi(getenv("H771")) : 0;
 static const int g_h770_raw = g_h771 ? 7 : (getenv("H770") ? atoi(getenv("H770")) : 0);
@@ -1085,8 +1121,6 @@ static const int g_h250a = getenv("H250A") ? atoi(getenv("H250A")) : 0;
 static int g_freet = 0;
 static const int g_postlin = getenv("POST_LIN") ? atoi(getenv("POST_LIN")) : 0;
 static int g_sf_axis = 0;
-
-
 static const int g_sf_pin = getenv("SINGLE_FAST_PIN") ? atoi(getenv("SINGLE_FAST_PIN")) : 1;
 static void sf_pin_driver(evo::Cand& c) {
   if (!g_sf_axis || !g_sf_pin) return;
@@ -1096,12 +1130,9 @@ static void sf_pin_driver(evo::Cand& c) {
 static const int g_pinfix = getenv("PIN_FIX") ? atoi(getenv("PIN_FIX")) : 1;
 static const int g_pincensus = getenv("PIN_CENSUS") ? atoi(getenv("PIN_CENSUS")) : 0;
 static inline bool sf_is_driver(const evo::Cand& c) { const int t = g_sf_axis == 1 ? 0 : 1; return c.len[t] == 1 && c.op[t][0] == evo::TVAR; }
-
 static inline bool postlin_on(int s) { return g_postlin || (g_pinfix && g_sf_axis && g_sf_pin && s == (g_sf_axis == 1 ? 0 : 1)); }
 static const int g_h250at = getenv("H250AT") ? std::max(1, atoi(getenv("H250AT"))) : 6;
 static double g_h250a_rg = 0, g_h250a_rc = 0;
-
-
 static const int g_h300b = getenv("H300B") ? atoi(getenv("H300B")) : 0;
 static double g_h300b_rg[16] = {0}, g_h300b_rc[16] = {0};
 struct H250aItem { int side, Q, nth; float floor_; uint32_t tree, per; };
@@ -1111,6 +1142,7 @@ struct Batch {
   std::vector<int> need[2];
   id<MTLCommandBuffer> cbS = nil, cbG = nil;
   unsigned long long t882S = 0, t882G = 0;
+  std::function<void()> wdScan, wdGn; WdRows wdGrows[2];
   double scan_gpu = 0, gn_gpu = 0;
   bool sdone = false, gdone = false, gbegun = false;
   bool egn = false;
@@ -1124,8 +1156,6 @@ struct Batch {
 };
 static Persist5 PP[3];
 static int g_chunks = 8;
-
-
 static void nf_range(Engine& E, PipeStep& PS, int b0, int b1, Times& T) {
   auto t0 = clk::now();
   for (Worker& Wk : WK(E)) { Wk.nf_only = 0; Wk.nf_fail = 0; }
@@ -1155,8 +1185,6 @@ static void nf_range(Engine& E, PipeStep& PS, int b0, int b1, Times& T) {
   for (Worker& Wk : WK(E)) { T.nf_only += Wk.nf_only; T.nf_fail += Wk.nf_fail; }
   T.nf += ms_since(t0);
 }
-
-
 static const char* g_h660d = getenv("H660D");
 static const double g_h660ns = getenv("H660NS") ? atof(getenv("H660NS")) : 500.0;
 static const int g_h660 = getenv("H660") ? atoi(getenv("H660")) : 0;
@@ -1179,7 +1207,6 @@ static void h660_spin_ns(double ns) {
 static void h660_burn() {
   for (int i = 0; i < 8; i++) std::thread([] { pthread_set_qos_class_self_np(QOS_CLASS_UTILITY, 0); h660_spin_ns(g_h660cpu * 1e6); }).detach();
 }
-
 static const int g_h680 = getenv("H680") ? atoi(getenv("H680")) : 0;
 static const double g_h680cpu = getenv("H680CPU") ? atof(getenv("H680CPU")) : 466.0;
 static const double g_h680g = getenv("H680G") ? atof(getenv("H680G")) : 55.0;
@@ -1287,8 +1314,6 @@ static void nf_range_h264(Engine& E, PipeStep& PS, int b0, int b1, Times& T) {
   for (Worker& Wk : WK(E)) { T.nf_only += Wk.nf_only; T.nf_fail += Wk.nf_fail; }
   T.nf += ms_since(t0);
 }
-
-
 static const int g_h896 = getenv("H896") ? atoi(getenv("H896")) : 0;
 static const int g_h921 = getenv("H921") ? atoi(getenv("H921")) : 0;
 static bool g_h921_have = false;
@@ -1300,7 +1325,6 @@ struct H896Pop {
 };
 static H896Pop* g_h896p = nullptr;
 static inline void h896_join() { if (g_h896p && !g_h896p->th.empty()) { const auto tj = clk::now(); g_h896p->join(); if (g_h896 & 2) fprintf(stderr, "H896 join wait %.3f ms\n", ms_since(tj)); } }
-
 static void dedup_range(PipeStep& PS, int b0, int b1, Times& T) {
   h896_join();
   auto t0 = clk::now();
@@ -1316,11 +1340,7 @@ static void dedup_range(PipeStep& PS, int b0, int b1, Times& T) {
   }
   T.dedup += ms_since(t0);
 }
-
-
 static int g_h98 = 1;
-
-
 static void build_unique_range(Engine& E, PipeStep& PS, int b0, int b1, Times& T) {
   auto t0 = clk::now();
   Unique& UQ = PS.SB->UQ; const std::vector<Meta>& M = *PS.M; const std::vector<uint8_t>& admit = *PS.admit;
@@ -1352,7 +1372,6 @@ static void build_unique_range(Engine& E, PipeStep& PS, int b0, int b1, Times& T
       const size_t b0k = nxt.fetch_add(32);
       if (b0k >= K) break;
       const size_t b1k = std::min(K, b0k + 32);
-
       uint64_t hb[32];
       {
         const uint32_t* wv[32]; size_t nkv[32]; int nbt = 0;
@@ -1364,10 +1383,10 @@ static void build_unique_range(Engine& E, PipeStep& PS, int b0, int b1, Times& T
       }
       for (size_t k = b0k; k < b1k; k++) {
         View V(PS.rep[rep_b + k].rec);
-        auto c0 = clk::now();
+        const auto c0 = g_bu_noclk ? clk::time_point{} : clk::now();
         double em = 0;
         cok[k] = compile_enc_sel(*Wk.CH, V, ctree[k], cenc[k], em, (g_h98 & 1) ? &hb[k - b0k] : nullptr) ? 1 : 0;
-        Wk.cmp_only += ms_since(c0);
+        if (!g_bu_noclk) Wk.cmp_only += ms_since(c0);
         Wk.enc_only += em;
       }
     }
@@ -1386,11 +1405,8 @@ static void build_unique_range(Engine& E, PipeStep& PS, int b0, int b1, Times& T
   for (Worker& Wk : WK(E)) { T.cmp_only += Wk.cmp_only; T.enc_tree += Wk.enc_only; }
   T.comp += ms_since(t0);
 }
-
-
 static const int g_h842 = getenv("H842") ? atoi(getenv("H842")) : 0;
 static inline uint32_t shard_h92(uint64_t h, int NS) { return (uint32_t)((h >> 32) % (uint64_t)NS); }
-
 static void dedup_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) {
   h896_join();
   auto t0 = clk::now();
@@ -1399,7 +1415,6 @@ static void dedup_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) {
   const int NS = (int)PS.stepSh.size();
   struct C4 { double nchild = 0, rej_pop = 0, rej_within = 0, admitted = 0; };
   std::vector<C4> cnt((size_t)NS);
-
   const int n = b1 - b0;
   std::vector<uint32_t> shard_count((size_t)NS, 0);
   std::vector<uint8_t> shard_id((size_t)n, 0xFF);
@@ -1409,7 +1424,6 @@ static void dedup_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) {
     shard_id[(size_t)(i - b0)] = (uint8_t)s;
     shard_count[(size_t)s]++;
   }
-
   std::vector<uint32_t> shard_offset((size_t)NS + 1, 0);
   for (int s = 0; s < NS; s++) {
     shard_offset[(size_t)s + 1] = shard_offset[(size_t)s] + shard_count[(size_t)s];
@@ -1422,7 +1436,6 @@ static void dedup_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) {
       shard_cand[shard_pos[(size_t)s]++] = i;
     }
   }
-
   PL(E).run(NS, [&](int s) {
     C4& C = cnt[(size_t)s]; FlatKeySet& SS = PS.stepSh[(size_t)s];
     const uint32_t start_idx = shard_offset[(size_t)s];
@@ -1452,15 +1465,25 @@ static void dedup_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) {
   for (const C4& C : cnt) { T.nchild += C.nchild; T.rej_pop += C.rej_pop; T.rej_within += C.rej_within; T.admitted += C.admitted; }
   T.dedup += ms_since(t0);
 }
-
-
 static const int g_h864 = getenv("H864") ? atoi(getenv("H864")) : 0;
 static inline void h864_lap(Tick& tk, double& f) { if (g_h864 & 1) f += tk.lap(); }
-
 static const int g_h879 = getenv("H879") ? atoi(getenv("H879")) : 0;
 static int g_h879_lanes = 8; static std::mutex g_h879_m; static double g_h879_wb[64]; static double g_h879_wc[64]; static long g_h879_wn[64];
 static inline double h879_cpu_ms() { return (double)clock_gettime_nsec_np(CLOCK_THREAD_CPUTIME_ID) * 1e-6; }
 static inline uint64_t h864_mix(uint64_t h, uint64_t v) { return splitmix64(h ^ v); }
+#ifdef H308_TRACE
+static std::mutex g_h308t_m; static FILE* g_h308t_f = nullptr;
+static inline void h308t_line(char stage, uint64_t k1, uint64_t k2, const float* v, size_t n) {
+  uint64_t h = 0x308; for (size_t i = 0; i < n; i++) { uint32_t w; std::memcpy(&w, v + i, 4); h = h864_mix(h, w); }
+  std::lock_guard<std::mutex> lk(g_h308t_m);
+  if (!g_h308t_f) { const char* p = getenv("H308_TRACE"); g_h308t_f = fopen(p ? p : "/dev/null", "w"); }
+  if (stage == 'I' || stage == 'J') { fprintf(g_h308t_f, "I %016llx %016llx", (unsigned long long)k1, (unsigned long long)k2); for (size_t i = 0; i < n; i++) fprintf(g_h308t_f, " %d", (int)v[i]); fprintf(g_h308t_f, "\n"); return; }
+  fprintf(g_h308t_f, "%c %016llx %016llx %016llx\n", stage, (unsigned long long)k1, (unsigned long long)k2, (unsigned long long)h);
+}
+#define H308T(...) h308t_line(__VA_ARGS__)
+#else
+#define H308T(...) ((void)0)
+#endif
 template <class V> static inline uint64_t h864_vec(uint64_t h, const V& v) {
   h = h864_mix(h, (uint64_t)v.size());
   const unsigned char* p = (const unsigned char*)v.data(); const size_t nb = v.size() * sizeof(v[0]);
@@ -1494,7 +1517,6 @@ static void build_unique_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) 
   std::vector<uint8_t> evFresh(NE, 0);
   const size_t rep_b = PS.rep.size();
   auto tu = clk::now();
-
   std::vector<uint32_t> ev_shard_count((size_t)NS, 0);
   std::vector<uint8_t> ev_shard_id(NE, 0xFF);
   for (int i = b0; i < b1; i++) {
@@ -1509,7 +1531,6 @@ static void build_unique_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) 
       ev_shard_count[(size_t)s]++;
     }
   }
-
   std::vector<uint32_t> ev_shard_offset((size_t)NS + 1, 0);
   for (int s = 0; s < NS; s++) {
     ev_shard_offset[(size_t)s + 1] = ev_shard_offset[(size_t)s] + ev_shard_count[(size_t)s];
@@ -1522,7 +1543,6 @@ static void build_unique_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) 
       ev_shard_events[ev_shard_pos[(size_t)s]++] = (uint32_t)e;
     }
   }
-
   h864_lap(tk864, T.u_p1);
   PL(E).run(NS, [&](int s) {
     FlatKeySet& U = PS.uidxSh[(size_t)s];
@@ -1541,7 +1561,6 @@ static void build_unique_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) 
     }
   });
   h864_lap(tk864, T.u_find);
-
   for (int i = b0; i < b1; i++) {
     if (!admit[i]) continue;
     const nf16::Child& ch = NFD.ch[i];
@@ -1564,7 +1583,6 @@ static void build_unique_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) 
   T.uq += ms_since(tu);
   const size_t K = PS.rep.size() - rep_b;
   const bool b2 = (g_h864 & 2) != 0, b4 = (g_h864 & 4) != 0, b8 = (g_h864 & 8) != 0;
-
   const size_t U0 = UQ.U.size();
   std::vector<Tree> ctree; std::vector<TreeEnc> cenc; std::vector<char> cok(K, 0);
   std::vector<uint64_t> vfp;
@@ -1615,7 +1633,6 @@ static void build_unique_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) 
         for (size_t k = b0k; k < b1k; k++) kk[nb++] = k;
       }
       nclaim++;
-
       uint64_t hb[64];
       {
         const uint32_t* wv[64]; size_t nkv[64];
@@ -1629,12 +1646,12 @@ static void build_unique_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) 
       for (size_t j = 0; j < nb; j++) {
         const size_t k = kk[j];
         View V(PS.rep[rep_b + k].rec);
-        auto c0 = clk::now();
+        const auto c0 = g_bu_noclk ? clk::time_point{} : clk::now();
         double em = 0;
         Tree& trk = b4 ? UQ.U[U0 + k] : ctree[k]; TreeEnc& enk = b4 ? UQ.enc[U0 + k] : cenc[k];
         if (g_h301r) h301r_take(trk, enk);
         cok[k] = compile_enc_sel(*Wk.CH, V, trk, enk, em, (g_h98 & 1) ? &hb[j] : nullptr) ? 1 : 0;
-        Wk.cmp_only += ms_since(c0);
+        if (!g_bu_noclk) Wk.cmp_only += ms_since(c0);
         Wk.enc_only += em;
         if (b4) {
           const UqRep& r = PS.rep[rep_b + k];
@@ -1665,7 +1682,6 @@ static void build_unique_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) 
       UQ.U.push_back(std::move(tr)); UQ.hash.push_back(r.h); UQ.enc.push_back(std::move(cenc[k]));
     }
   } else if (!b4) {
-
     PS.fid.resize(fidB + K);
     const size_t BKr = 256, NBk = (K + BKr - 1) / BKr;
     std::vector<size_t> okc(NBk, 0);
@@ -1693,7 +1709,6 @@ static void build_unique_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) 
     });
     T.cmp_fail += (double)(K - nok);
   } else {
-
     PS.fid.resize(fidB + K);
     for (size_t k = 0; k < K; k++) nokK += cok[k] ? 1 : 0;
     if (nokK == K) {
@@ -1746,9 +1761,8 @@ static void build_unique_h92(Engine& E, PipeStep& PS, int b0, int b1, Times& T) 
   for (Worker& Wk : WK(E)) { T.cmp_only += Wk.cmp_only; T.enc_tree += Wk.enc_only; }
   T.comp += ms_since(t0);
 }
-
-
 static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T) {
+  TmScope tm_bu_("bu: entry");
   auto t0 = clk::now();
   Tick tk864;
   Unique& UQ = PS.SB->UQ; const std::vector<Meta>& M = *PS.M; const std::vector<uint8_t>& admit = *PS.admit;
@@ -1762,8 +1776,6 @@ static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T)
   const int BK = 256, NB = (b1 - b0 + BK - 1) / BK;
   auto tu = clk::now();
   if (g_h264) {
-
-
     std::vector<uint8_t> evS1(NE, 0);
     std::vector<uint64_t> evH(NE, 0);
     PL(E).run(NB, [&](int bi) {
@@ -1792,7 +1804,6 @@ static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T)
       }
     });
   } else
-
   PL(E).run(NS, [&](int s) {
     FlatKeySet& U = PS.uidxSh[(size_t)s];
     for (int i = b0; i < b1; i++) {
@@ -1810,8 +1821,7 @@ static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T)
       }
     }
   });
-  h864_lap(tk864, T.u_find);
-
+  h864_lap(tk864, T.u_find); tm_mark("bu: after u_find");
   std::vector<size_t> cntF((size_t)NB, 0), cntS((size_t)NB * NS, 0);
   PL(E).run(NB, [&](int bi) {
     const int i1 = std::min(b1, b0 + (bi + 1) * BK);
@@ -1824,7 +1834,6 @@ static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T)
       }
     }
   });
-
   std::vector<size_t> offF((size_t)NB + 1, 0), shBeg((size_t)NS, 0), shBase((size_t)NB * NS, 0), shTot((size_t)NS, 0);
   for (int bi = 0; bi < NB; bi++) offF[(size_t)bi + 1] = offF[(size_t)bi] + cntF[(size_t)bi];
   for (int s = 0; s < NS; s++) {
@@ -1835,7 +1844,6 @@ static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T)
   }
   PS.rep.resize(rep_b + offF[(size_t)NB]);
   for (int s = 0; s < NS; s++) PS.shMap[(size_t)s].resize(shBeg[(size_t)s] + shTot[(size_t)s]);
-
   PL(E).run(NB, [&](int bi) {
     size_t rf = rep_b + offF[(size_t)bi];
     std::vector<size_t> nx((size_t)NS);
@@ -1858,7 +1866,6 @@ static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T)
       }
     }
   });
-
   PL(E).run(NB, [&](int bi) {
     const int i1 = std::min(b1, b0 + (bi + 1) * BK);
     for (int i = b0 + bi * BK; i < i1; i++) {
@@ -1871,12 +1878,11 @@ static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T)
       }
     }
   });
-  h864_lap(tk864, T.u_pref);
+  h864_lap(tk864, T.u_pref); tm_mark("bu: after u_pref");
   T.uq += ms_since(tu);
   const size_t K = PS.rep.size() - rep_b;
-
   std::vector<Tree> ctree(K); std::vector<char> cok(K, 0); std::vector<TreeEnc> cenc(K);
-  h864_lap(tk864, T.u_ctor);
+  h864_lap(tk864, T.u_ctor); tm_mark("bu: after u_ctor");
   for (Worker& Wk : WK(E)) { Wk.cmp_only = 0; Wk.enc_only = 0; }
   std::atomic<size_t> nxt(0);
   PL(E).run((int)WK(E).size(), [&](int w) {
@@ -1885,7 +1891,6 @@ static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T)
       const size_t b0k = nxt.fetch_add(32);
       if (b0k >= K) break;
       const size_t b1k = std::min(K, b0k + 32);
-
       uint64_t hb[32];
       {
         const uint32_t* wv[32]; size_t nkv[32]; int nbt = 0;
@@ -1898,17 +1903,16 @@ static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T)
       if (g_h301r && g_t4) h308d_claim(b1k - b0k);
       for (size_t k = b0k; k < b1k; k++) {
         View V(PS.rep[rep_b + k].rec);
-        auto c0 = clk::now();
+        const auto c0 = g_bu_noclk ? clk::time_point{} : clk::now();
         double em = 0;
         if (g_h301r) h301r_take(ctree[k], cenc[k]);
         cok[k] = compile_enc_sel(*Wk.CH, V, ctree[k], cenc[k], em, (g_h98 & 1) ? &hb[k - b0k] : nullptr) ? 1 : 0;
-        Wk.cmp_only += ms_since(c0);
+        if (!g_bu_noclk) Wk.cmp_only += ms_since(c0);
         Wk.enc_only += em;
       }
     }
   });
-  h864_lap(tk864, T.u_comp);
-
+  h864_lap(tk864, T.u_comp); tm_mark("bu: after u_comp");
   const size_t fidB = PS.fid.size();
   PS.fid.resize(fidB + K);
   const size_t BKr = 256, NBk = (K + BKr - 1) / BKr;
@@ -1936,8 +1940,7 @@ static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T)
     }
   });
   T.cmp_fail += (double)(K - nok);
-  h864_lap(tk864, T.u_ids);
-
+  h864_lap(tk864, T.u_ids); tm_mark("bu: after u_ids");
   PL(E).run(NB, [&](int bi) {
     const int i1 = std::min(b1, b0 + (bi + 1) * BK);
     for (int i = b0 + bi * BK; i < i1; i++) for (int t = 0; t < 2; t++) {
@@ -1945,11 +1948,10 @@ static void build_unique_h257(Engine& E, PipeStep& PS, int b0, int b1, Times& T)
       if (o != NONE) ct[(size_t)i * 2 + (size_t)t] = PS.fid[o];
     }
   });
-  h864_lap(tk864, T.u_ct);
+  h864_lap(tk864, T.u_ct); tm_mark("bu: after u_ct");
   for (Worker& Wk : WK(E)) { T.cmp_only += Wk.cmp_only; T.enc_tree += Wk.enc_only; }
   T.comp += ms_since(t0);
 }
-
 static constexpr uint32_t H99_NONE = 0xFFFFFFFFu;
 static uint32_t h99_find(uint64_t hr, uint32_t t, const uint32_t* k, uint32_t n);
 static void h99_lookup_count();
@@ -1957,13 +1959,10 @@ static void h99_hit_count();
 static int g_h99 = 0;
 static void h99_apply(PipeStep& PS, int t, int id, uint32_t e, Times& T);
 static void h99_put(PipeStep& PS, int t, int j, const FitOut& o, uint32_t steps);
-
-
 static int g_h242 = 0;
 static int g_h413 = 0;
 static const bool g_h413dbg = getenv("H413DBG") != nullptr;
 static uint64_t g_h413_hk = 0, g_h413_ik = 0; static long g_h413_h0 = 0; static uint64_t g_h413_f[6] = {0, 0, 0, 0, 0, 0}; static std::atomic<long> g_h413_tail{0}, g_h413_la{0}, g_h413_lt{0};
-
 static int g_h242d_bal = getenv("H242D_BAL") ? atoi(getenv("H242D_BAL")) : 0;
 static const int g_h410ns = getenv("H410NS") ? atoi(getenv("H410NS")) : 0;
 struct StepBatch; static StepBatch* g_h415_spare = nullptr; static double g_h415_join_ms = 0;
@@ -1971,7 +1970,6 @@ static const int g_h415 = getenv("H415") ? atoi(getenv("H415")) : 0;
 static const int g_h405 = getenv("H405") ? atoi(getenv("H405")) : 0;
 static const double g_h404gn = getenv("H404GN") ? atof(getenv("H404GN")) : -1.0;
 static double g_bal_s = 1.0, g_h242d_union = 0; static int g_h242d_steps = 0;
-
 static const int g_h648 = getenv("H648") ? atoi(getenv("H648")) : 0;
 static const double g_h648t = getenv("H648T") ? atof(getenv("H648T")) : 10.0, g_h648k = getenv("H648K") ? atof(getenv("H648K")) : 0.5;
 static double g_h648_s = getenv("H648S0") ? atof(getenv("H648S0")) : 1.0, g_h648_idle = 0, g_h648_mid = 0;
@@ -1979,8 +1977,6 @@ static double g_h242d_fix = getenv("H242D_FIX") ? atof(getenv("H242D_FIX")) : -1
 static inline double h242d_f(double f) { if (g_h242d_fix >= 0) return std::min(1.0, g_h242d_fix); if (!g_h242d_bal) return std::min(1.0, std::max(0.0, f)); return std::min(0.5, std::max(0.0, f * g_bal_s)); }
 static void h242_schedule(Engine& E, PipeStep& PS, Batch& B, Times& T, const std::vector<std::pair<int, int>>& pr);
 static void h771_schedule(Engine& E, PipeStep& PS, Batch& B, Times& T, const std::vector<std::pair<int, int>>& pr);
-
-
 static void schedule_range(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   const std::vector<uint8_t>& admit = *PS.admit; const std::vector<int>& ct = PS.SB->ct;
   if (!g_h99 && !g_h242 && !g_h771) {
@@ -2028,8 +2024,6 @@ static void schedule_range(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   }
   T.nfit0 += (double)nsch[0]; T.nfit1 += (double)nsch[1];
 }
-
-
 static const int g_h250b = getenv("H250B") ? atoi(getenv("H250B")) : 0;
 static const int g_h334 = getenv("H334") ? atoi(getenv("H334")) : 0;
 static const int g_h250bt = getenv("H250BT") ? std::max(1, atoi(getenv("H250BT"))) : 6;
@@ -2059,8 +2053,6 @@ static void h250b_cpu(H250bIn in, std::vector<H250bTree> v, int nthr, double* ms
   }
   *ms_out = ms_since(t0);
 }
-
-
 static void scan_begin(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   const Unique& UQ = PS.SB->UQ;
   const int M = (int)UQ.U.size();
@@ -2071,7 +2063,6 @@ static void scan_begin(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   for (int s = 0; s < 2; s++) if (!P.S[s].yb) P.S[s].yb = E.B(E.tg[s].yf, sizeof E.tg[s].yf);
   const int NCH = 4 * (int)WK(E).size();
   auto span = [M, NCH](int c, int& j0, int& j1) { j0 = (int)((long)M * c / NCH); j1 = (int)((long)M * (c + 1) / NCH); };
-
   auto t0 = clk::now();
   for (int s = 0; s < 2; s++) {
     Side5& X = P.S[s];
@@ -2096,7 +2087,7 @@ static void scan_begin(Engine& E, PipeStep& PS, Batch& B, Times& T) {
       if (!X.sok[j]) continue;
       const Tree& tr = UQ.U[j];
       const uint32_t cls = (tr.nS <= 4 ? 0u : tr.nS <= 8 ? 1u : tr.nS <= 16 ? 2u : 3u) + (tr.nth == 0 ? 4u : 0u);
-      X.dkey[j] = (uint32_t)(((size_t)tr.Q * 41 + (size_t)tr.nslot) * 8 + cls);
+      X.dkey[j] = (uint32_t)(((size_t)tr.Q * 41 + (size_t)DKEY_NS(tr)) * 8 + cls);
       X.seq.push_back((uint32_t)j);
     }
     T.h_s_pre += tk.lap();
@@ -2165,14 +2156,10 @@ static void scan_begin(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     T.h_s_fill += tk.lap();
   }
   T.scan_enc += ms_since(t0);
-
-
   Tick tc;
   size_t nsb = 0; for (int s = 0; s < 2; s++) nsb += P.S[s].sbins.size();
   if (nsb) {
     h900_ens(P.scr, "P.scr", dev, (size_t)M * 16 * 16 * 4, MPV);
-
-
     id<MTLCommandBuffer> cb = h182_cb(E.cq); id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
     for (int s = 0; s < 2; s++) {
       Side5& X = P.S[s];
@@ -2200,8 +2187,6 @@ static void scan_begin(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   }
   T.h_s_cmd += tc.lap();
 }
-
-
 #include <deque>
 static const int g_h882 = getenv("H882") ? atoi(getenv("H882")) : 0;
 struct H882Q {
@@ -2242,19 +2227,20 @@ static void h882_report() {
   printf("H882: helper busy scan %.2f GN %.2f ms | main wait-for-helper %.2f ms\n", g_h882q->busy[0], g_h882q->busy[1], g_h882q->wait);
   g_h882q->busy[0] = g_h882q->busy[1] = g_h882q->wait = 0;
 }
-
-
 static const int g_kahead = getenv("K_AHEAD") ? atoi(getenv("K_AHEAD")) : 1;
 static const int g_kpopkey = getenv("K_POPKEY") ? atoi(getenv("K_POPKEY")) : 1;
 static const int g_kcap = getenv("K_CAP") ? atoi(getenv("K_CAP")) : 1;
 static const int g_kverb = getenv("K_VERB") ? atoi(getenv("K_VERB")) : 0;
-static std::function<bool()> g_kfill; static std::function<void()> g_kfin; 
+static const int g_cap_async = getenv("CAP_ASYNC") ? atoi(getenv("CAP_ASYNC")) : 0;
+static std::function<bool()> g_kfill; static std::function<void()> g_kfin;
 static std::vector<uint64_t> g_kskey; static std::vector<uint8_t> g_kvalid; static std::vector<uint32_t> g_kcs_prev;
-static inline void k_flush() { if (g_kfill) { while (g_kfill()) {} g_kfill = nullptr; } if (g_kfin) { auto f = std::move(g_kfin); g_kfin = nullptr; f(); } }
+static inline void k_flush() { fitx::retain_join(); if (g_kfill) { while (g_kfill()) {} g_kfill = nullptr; } if (g_kfin) { auto f = std::move(g_kfin); g_kfin = nullptr; f(); } }
 static std::function<bool()> g_tfill;
+static bool (*g_afill_fn)() = nullptr;
 static inline void k_wait(id<MTLCommandBuffer> cb) {
   if (g_tfill) { while (cb.status < MTLCommandBufferStatusCompleted) { if (!g_tfill()) break; } }
   if (g_kfill) { while (cb.status < MTLCommandBufferStatusCompleted) { if (!g_kfill()) break; } }
+  if (g_afill_fn) { while (cb.status < MTLCommandBufferStatusCompleted) { if (!g_afill_fn()) break; } }
   [cb waitUntilCompleted];
 }
 static void scan_finish(Engine& E, PipeStep& PS, Batch& B, Times& T) {
@@ -2262,7 +2248,8 @@ static void scan_finish(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   g_h882q->wait_for(B.t882S);
   if (B.cbS) {
     k_wait(B.cbS);
-    if (B.cbS.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "scan command buffer failed\n"); h182_dump(B.cbS, "scan"); gpu_fail(); }
+    B.cbS = wd_resolve(WD_SCAN, B.cbS, [&B]() { B.wdScan(); return B.cbS; }, nullptr, (bool)B.wdScan, [&B]() { uint64_t h = 0; for (int s = 0; s < 2; s++) { Side5& X = B.P->S[s]; const size_t nr = g_h916 ? (size_t)X.nl : (size_t)B.M; for (size_t r = 0; r < nr; r++) h += wd_fnv(1469598103934665603ull, (const char*)X.out.b.contents + 64 * r, 64); } return h; });
+    B.wdScan = nullptr;
     B.scan_gpu = (B.cbS.GPUEndTime - B.cbS.GPUStartTime) * 1e3;
     PS.iv.push_back({B.cbS.GPUStartTime, B.cbS.GPUEndTime});
   }
@@ -2286,6 +2273,7 @@ static void scan_finish(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     for (int j : B.need[s]) {
       if (!X.sok[j]) continue;
       const float* r = SO + lid916(X, (size_t)j) * 16;
+      H308T('S' + (char)s, UQ.hash[(size_t)j], 0, r, 16);
       if (UQ.U[j].nth == 0) { o.smin[j] = r[0]; o.sarg[j] = 0; }
       else for (int q = 0; q < 16; q++) if (r[q] < o.smin[j]) { o.smin[j] = r[q]; o.sarg[j] = q; }
       T.s_alive += isfinite(o.smin[j]) ? 1 : 0;
@@ -2307,8 +2295,6 @@ static void scan_finish(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   }
   B.sdone = true;
 }
-
-
 static int h94_mode() { static const int m = getenv("H94") ? atoi(getenv("H94")) : 0; return m; }
 static void h94_cap(std::vector<size_t>& ntg, const std::vector<size_t>& nat, const std::vector<size_t>& tgb, const std::vector<size_t>& cnt) {
   static const double cores = getenv("H94_CORES") ? atof(getenv("H94_CORES")) : 7.0;
@@ -2319,8 +2305,6 @@ static void h94_cap(std::vector<size_t>& ntg, const std::vector<size_t>& nat, co
     ntg[b] = std::min<size_t>(nat[b], (size_t)cap);
   }
 }
-
-
 static int h141a_on() { static const int v = getenv("H141A") ? atoi(getenv("H141A")) : 1; return v; }
 static int h141b_on() { static const int v = getenv("H141B") ? atoi(getenv("H141B")) : 1; return v; }
 static std::atomic<long> g_h141_badL{0}, g_h141_badO{0};
@@ -2341,7 +2325,6 @@ static uint32_t h141_pe(const TreeEnc& te, uint32_t gper) {
   for (int q = 18; q < 36; q++) if (!ok(te.gg[q])) { g_h141_badO++; return gper; }
   return full;
 }
-
 static int g_h332 = getenv("H332") ? atoi(getenv("H332")) : 0;
 static uint32_t h332_pe(const TreeEnc& te, uint32_t pe) {
   if (!g_h332) return pe;
@@ -2349,12 +2332,10 @@ static uint32_t h332_pe(const TreeEnc& te, uint32_t pe) {
   const uint32_t CD = nth <= 4 ? 1u + (nth + 1u) / 2u : 3u, Ns = SB / (CD * 48u), SBf = Ns * (48u + (CD - 1u) * 24u);
   return pe == SB + CD * nsc ? SBf + CD * nsc : SBf + 2u * CD * nsc;
 }
-
 static int h141_fit_tpg(size_t shb, size_t pers, int cap) {
   int t = 8; while (t > 1 && (shb + pers * (size_t)t) * 4 > 32768) t--;
   return std::min<int>(t, cap);
 }
-
 static long h141_sim(size_t shb, size_t pers, int t) {
   const size_t g = ((shb + pers * (size_t)t) * 4 + 15) & ~(size_t)15;
   return std::min<long>(96, (long)(65536 / std::max<size_t>(g, 1)) * (long)t);
@@ -2379,7 +2360,6 @@ static void h141_note(size_t shb, size_t pers, size_t persN, size_t cnt, int cap
   g_h141.simB += sB; g_h141.simA += sA; g_h141.wB += sB * (double)cnt; g_h141.wA += sA * (double)cnt; g_h141.trees += (double)cnt;
   if (persN < pers) g_h141.shrunkTrees += (long)cnt;
 }
-
 static size_t h713_xf(int Tk) { return 4 + 2 * (size_t)Tk * 48; }
 static size_t h713_gn(Engine& E, int Qk, int Tk, size_t shb, size_t persN, __strong id<MTLComputePipelineState>& ps, int& tpg) {
   if (!g_h713 || Tk < 9) return 0;
@@ -2395,8 +2375,6 @@ static void h141_step_print(int st) {
          st, h141a_on(), h141b_on(), g_h141.bins, g_h141.changed, g_h141.simB / n, g_h141.simA / n, g_h141.wB / tr, g_h141.wA / tr,
          g_h141.shrunkTrees, g_h141_badL.load(), g_h141_badO.load());
 }
-
-
 struct H874GNPool { std::mutex m; std::vector<GNWork*> v;
   GNWork* get() { { std::lock_guard<std::mutex> l(m); if (!v.empty()) { GNWork* p = v.back(); v.pop_back(); p->k644_[0] = GNWork::K644(); p->k644_[1] = GNWork::K644(); return p; } } return new GNWork(); }
   void put(GNWork* p) { std::lock_guard<std::mutex> l(m); v.push_back(p); } };
@@ -2455,8 +2433,6 @@ static void h250a_join(Batch& B) {
 }
 static void gn_begin(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   const Unique& UQ = PS.SB->UQ;
-
-
   const int M = B.M;
   if ((!g_h217 && (int)PS.SB->UQ.U.size() < M) || (int)B.P->S[0].listed.size() != M || (int)B.P->S[1].listed.size() != M) { fprintf(stderr, "pipeline: slot arrays do not match chunk %d\n", B.b0); exit(1); }
   Persist5& P = *B.P; id<MTLDevice> dev = E.dev;
@@ -2587,15 +2563,13 @@ static void gn_begin(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   T.h_g_alloc += tk.lap();
   T.gn_enc += ms_since(t0);
   Tick tc;
-
-
   if (NB) {
     std::memset(P.ctr.b.contents, 0, P.ctr.cap);
     id<MTLCommandBuffer> cb = h182_cb(E.cq);
     id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
     for (size_t gj779 = 0; gj779 < P.gbins.size(); gj779++) { const GBin5& g = P.gbins[g_h779 ? P.gbins.size() - 1 - gj779 : gj779];
       Side5& X = P.S[g.side];
-      if (h182_on()) [en pushDebugGroup:h182_gname(g)];
+      if (h182_on() && h182_dg()) [en pushDebugGroup:h182_gname(g)];
       [en setComputePipelineState:g.ps];
       id<MTLBuffer> bs[9] = {X.gtok.b, X.ghdr.b, X.gsp.b, X.gseg.b, X.yb, X.gth.b, X.grs.b, X.gst.b, X.gbl.b};
       for (int k = 0; k < 9; k++) [en setBuffer:bs[k] offset:(k == 8 ? g.tl_off * 4 : 0) atIndex:k];
@@ -2609,15 +2583,13 @@ static void gn_begin(Engine& E, PipeStep& PS, Batch& B, Times& T) {
       [en setThreadgroupMemoryLength:g.tgb atIndex:0];
       if (h150c_on()) { g_h150.gnDisp++; g_h150.gnLaunch += (long)(g.ntg * (size_t)g.tpg); g_h150.gnOcc += (long)g.cnt; }
       [en dispatchThreadgroups:MTLSizeMake(g.ntg, 1, 1) threadsPerThreadgroup:MTLSizeMake(32 * (size_t)g.tpg, 1, 1)];
-      if (h182_on()) [en popDebugGroup];
+      if (h182_on() && h182_dg()) [en popDebugGroup];
     }
     [en endEncoding]; [cb commit];
     B.cbG = cb;
   }
   T.h_g_cmd += tc.lap();
 }
-
-
 static int g_kh1 = getenv("KH1") ? atoi(getenv("KH1")) : 0;
 static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   const Unique& UQ = PS.SB->UQ;
@@ -2626,7 +2598,7 @@ static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   Persist5& P = *B.P;
   id<MTLDevice> dev = E.dev;
   auto t0 = clk::now();
-  Tick tk;
+  TmScope tm_sc_("sb: entry"); Tick tk;
   if (!P.bct) { const float ctv[16] = {1,0,0,0, 0,1,1,0, 0,1,-1,0, 0,-1,-1,0}; P.bct = E.B(ctv, sizeof ctv); P.bsob = E.B(SOB_U, sizeof(SOB_U)); }
   for (int s = 0; s < 2; s++) if (!P.S[s].yb) P.S[s].yb = E.B(E.tg[s].yf, sizeof E.tg[s].yf);
   const int NCH = 4 * (int)WK(E).size();
@@ -2650,8 +2622,7 @@ static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     const size_t TBN = g_h916 ? (size_t)X.nl : (size_t)M;
     auto span = [N215, NCH](int c, int& j0, int& j1) { j0 = (int)((long)N215 * c / NCH); j1 = (int)((long)N215 * (c + 1) / NCH); };
     X.sok.resize(M); X.ninst.resize(M); X.toff.resize(M); X.spoff.resize(M); X.thoff.resize(M); X.dkey.resize(M);
-    T.h_s_alloc += tk.lap();
-
+    T.h_s_alloc += tk.lap(); tm_mark("sb: after h_s_alloc#1");
     H263ScanScr ownS; H263ScanScr& sc263 = (g_h263 & 1) ? h263_keep_scan : ownS;
     std::vector<uint32_t>& bti = sc263.bti; std::vector<uint32_t>& bsi = sc263.bsi; std::vector<uint32_t>& bhi = sc263.bhi; std::vector<uint32_t>& bns = sc263.bns;
     std::vector<int>& bq = sc263.bq; std::vector<double>& bfl = sc263.bfl;
@@ -2677,7 +2648,6 @@ static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     }
     X.ti = TI; X.si = SI; X.hi = HI;
     X.seq.resize(NS);
-
     PL(E).run(NCH, [&](int c) {
       int j0, j1; span(c, j0, j1);
       uint32_t ti = oti[c], si = osi[c], hi = ohi[c], sq = osq[c];
@@ -2689,14 +2659,14 @@ static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
         if (te.s_ok) {
           X.sok[j] = 1; X.ninst[j] = (uint32_t)(te.nsp() / 4); ti += X.ninst[j];
           const uint32_t cls = (tr.nS <= 4 ? 0u : tr.nS <= 8 ? 1u : tr.nS <= 16 ? 2u : 3u) + (tr.nth == 0 ? 4u : 0u);
-          X.dkey[j] = (uint32_t)(((size_t)tr.Q * 41 + (size_t)tr.nslot) * 8 + cls);
+          X.dkey[j] = (uint32_t)(((size_t)tr.Q * 41 + (size_t)DKEY_NS(tr)) * 8 + cls);
           X.seq[sq++] = (uint32_t)j;
         }
         si += (uint32_t)tr.sp.size(); hi += (uint32_t)tr.th.size();
       }
     });
     const size_t DN = (size_t)(QM + 1) * 41 * 8;
-    T.h_s_pre += tk.lap();
+    T.h_s_pre += tk.lap(); tm_mark("sb: after h_s_pre#2");
     if (g_h250b) {
       static bool once_p = true; if (once_p) { once_p = false; fprintf(stderr, "H250B active path=p\n"); }
       const double f = h242d_f((g_h250b_rg > 0 && g_h250b_rc > 0) ? g_h250b_rc / (g_h250b_rc + g_h250b_rg) : 0.5);
@@ -2708,7 +2678,7 @@ static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     int nbf263 = 0;
     if (g_h263 & 2) nbf263 = sort_count_h263(E, X.seq, X.dkey, DN, X.start);
     else sort_by_key5_p(E, X.seq, X.dkey, DN, X.start, X.sorted);
-    T.h_s_sort += tk.lap();
+    T.h_s_sort += tk.lap(); tm_mark("sb: after h_s_sort#3");
     X.sbins.clear(); size_t cur = 0;
     if (g_h263 & 2) sc263.shv.assign(DN, 0);
     for (size_t dk = 0; dk < DN; dk++) {
@@ -2718,7 +2688,7 @@ static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
       X.sbins.push_back(b); if (g_h263 & 2) sc263.shv[dk] = (int64_t)cur - (int64_t)X.start[dk]; cur = al5(cur + c, BIN_ALIGN);
     }
     X.bl_words = cur;
-    T.h_s_bins += tk.lap();
+    T.h_s_bins += tk.lap(); tm_mark("sb: after h_s_bins#4");
     h900_ens(X.tok, "X.tok", dev, ((size_t)X.ti * 4 + 8) * 4, MSH);
     h900_ens(X.hdr, "X.hdr", dev, TBN * 16, MSH);
     h900_ens(X.sp, "X.sp", dev, (size_t)X.si * 2, MSH);
@@ -2726,7 +2696,7 @@ static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     h900_ens(X.seg, "X.seg", dev, TBN * 144, MSH);
     h900_ens(X.out, "X.out", dev, TBN * 64, MSH);
     h900_ens(X.bl, "X.bl", dev, X.bl_words * 4, MSH);
-    T.h_s_alloc += tk.lap();
+    T.h_s_alloc += tk.lap(); tm_mark("sb: after h_s_alloc#5");
     uint32_t* tok = (uint32_t*)X.tok.b.contents; uint32_t* hdr = (uint32_t*)X.hdr.b.contents; uint16_t* sp = (uint16_t*)X.sp.b.contents;
     float* th = (float*)X.th.b.contents; uint32_t* seg = (uint32_t*)X.seg.b.contents; float* out = (float*)X.out.b.contents;
     uint32_t* bl = (uint32_t*)X.bl.b.contents;
@@ -2737,7 +2707,7 @@ static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     if (g_h916) PL(E).run((int)X.sbins.size(), [&](int bi) {
       const SBin5& b = X.sbins[bi]; for (size_t k = 0; k < b.cnt; k++) bl[b.off + k] = X.lid[bl[b.off + k]];
     });
-    T.h_s_bins += tk.lap();
+    T.h_s_bins += tk.lap(); tm_mark("sb: after h_s_bins#6");
     PL(E).run(NCH, [&](int c) {
       int j0, j1; span(c, j0, j1);
       for (int jj = j0; jj < j1; jj++) { const int j = l215 ? X.ls[jj] : jj;
@@ -2767,14 +2737,13 @@ static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
                   (const float*)P.bsob.contents, (const float*)X.yb.contents, (const float*)P.bct.contents };
       X.cpu_ms = 0; X.cpuT = fw_submit([in, v, pms = &X.cpu_ms]() mutable { h250b_cpu(in, v, fw_persist() ? 1 : g_h250bt, pms); });
     }
-    T.h_s_fill += tk.lap();
+    T.h_s_fill += tk.lap(); tm_mark("sb: after h_s_fill#7");
   }
   T.scan_enc += ms_since(t0);
-
-
   Tick tc;
   size_t nsb = 0; for (int s = 0; s < 2; s++) nsb += P.S[s].sbins.size();
-  auto h882_scan = [&E, &B, &P, &T, dev, M, nsb]() {
+  const bool kc = kcap_sg_active();
+  auto h882_scan_body = [&E, &B, &P, dev, M, nsb](Times& T, bool kc) {
   if (nsb) {
     const size_t NLM = g_h916 ? (size_t)std::max(P.S[0].nl, P.S[1].nl) : (size_t)M;
     h900_ens(P.scr, "P.scr", dev, NLM * 16 * 16 * 4, MPV);
@@ -2791,7 +2760,7 @@ static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
       h900_ens(g_h333hand[hsl][s], "g_h333hand[hsl][s]", dev, tot * 4, MPV); h900_ens(g_h333hoff[hsl][s], "g_h333hoff[hsl][s]", dev, (size_t)M * 4, MSH);
       std::memset(g_h333hoff[hsl][s].b.contents, 0xFF, (size_t)M * 4); g_h333_mb += (double)tot * 4 / 1048576.0; } }
     size_t h139_off = 0;
-    id<MTLCommandBuffer> cb = h182_cb(E.cq); id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
+    id<MTLCommandBuffer> cb = h182_cb(E.cq); id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent); if (kc) en = kcap_sg_wrap(en, 0, 1);
     H263Bind bc263; bc263.on = (g_h263 & 4) != 0;
     for (int s = 0; s < 2; s++) {
       Side5& X = P.S[s];
@@ -2873,11 +2842,11 @@ static void scan_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
              P.S[0].h139n + P.S[1].h139n, P.S[0].h139t + P.S[1].h139t, (unsigned long long)g_h139_viol);
   }
   };
+  auto h882_scan = [h882_scan_body, &T, kc]() { h882_scan_body(T, kc); };
+  B.wdScan = (g_wd.max_try > 0 && !g_h333) ? std::function<void()>([h882_scan_body]() { Times Tr; h882_scan_body(Tr, false); }) : std::function<void()>();
   if (g_h882 & 1) B.t882S = g_h882q->submit(0, h882_scan); else h882_scan();
   T.h_s_cmd += tc.lap();
 }
-
-
 struct H770Hit { int t, id; uint8_t v; int8_t vs; uint8_t st; unsigned char raw[2][128]; };
 struct H770B { std::vector<H770Hit> hits; std::vector<int32_t> hix[2]; };
 struct H770Stat {
@@ -2886,7 +2855,6 @@ struct H770Stat {
 };
 static H770Stat g_h770s;
 static void h770_apply_raw(PipeStep& PS, int t, int id, const unsigned char* raw, Times& T);
-
 static void h770_list(Persist5& P, H770B& H) {
   for (int s = 0; s < 2; s++) {
     Side5& X = P.S[s]; size_t n0 = X.ls.size(); bool any = false;
@@ -2894,7 +2862,6 @@ static void h770_list(Persist5& P, H770B& H) {
     if (any && (g_h215 & 1)) { std::sort(X.ls.begin() + (long)n0, X.ls.end()); std::inplace_merge(X.ls.begin(), X.ls.begin() + (long)n0, X.ls.end()); }
   }
 }
-
 static bool h770_cpu_hit(H770B& H, int s, uint32_t j, bool verify) {
   if ((size_t)j >= H.hix[s].size() || H.hix[s][j] < 0) return false;
   H770Hit& h = H.hits[(size_t)H.hix[s][j]]; h.vs = 1;
@@ -2902,7 +2869,6 @@ static bool h770_cpu_hit(H770B& H, int s, uint32_t j, bool verify) {
   if (h.v & 2) { h.st = 1; g_h770s.dropc++; return true; }
   h.st = 2; return false;
 }
-
 static void h770_gpu_part(Persist5& P, H770B& H, const std::vector<size_t>& lo, bool verify, size_t& ndrop) {
   for (size_t b = 0; b < P.gbins.size(); b++) {
     const GBin5& g = P.gbins[b]; Side5& X = P.S[g.side];
@@ -2918,7 +2884,6 @@ static void h770_gpu_part(Persist5& P, H770B& H, const std::vector<size_t>& lo, 
     }
   }
 }
-
 static void h770_finish(PipeStep& PS, Batch& B, H770B& H, Times& T) {
   if (g_h770v) return;
   for (H770Hit& h : H.hits) {
@@ -2927,7 +2892,19 @@ static void h770_finish(PipeStep& PS, Batch& B, H770B& H, Times& T) {
     else if (h.st == 2) { B.need[h.t].push_back(h.id); g_h770s.partial++; }
   }
 }
-
+static void wd_gn_snapshot(Batch& B, Persist5& P) {
+  for (int s = 0; s < 2; s++) B.wdGrows[s].rows.clear(), B.wdGrows[s].rq.clear();
+  for (size_t gi = 0; gi < P.gbins.size(); gi++) {
+    const GBin5& g = P.gbins[gi]; Side5& X = P.S[g.side];
+    const size_t gc = (g_h334 && gi < B.h334_gc.size()) ? B.h334_gc[gi] : g.nt;
+    const uint32_t* tl = (const uint32_t*)X.gbl.b.contents + g.tl_off;
+    for (size_t k = 0; k < gc && k < g.nt; k++) if (tl[1 + k] != 0xFFFFFFFFu) { B.wdGrows[g.side].rows.push_back(tl[1 + k]); B.wdGrows[g.side].rq.push_back((uint8_t)g.Q); }
+  }
+  for (int s = 0; s < 2; s++) wd_snap(B.wdGrows[s], P.S[s].gth.b);
+}
+static const bool g_nogn = getenv("NOGN") && atoi(getenv("NOGN")) >= 1;
+static const bool g_nogn_lean = getenv("NOGN_LEAN") && atoi(getenv("NOGN_LEAN")) >= 1;
+static const bool g_nogn2 = getenv("NOGN") && atoi(getenv("NOGN")) == 2;
 static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   const Unique& UQ = PS.SB->UQ;
   const int M = B.M;
@@ -2938,15 +2915,58 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   const int NCH = 4 * (int)WK(E).size();
   auto span = [M, NCH](int c, int& j0, int& j1) { j0 = (int)((long)M * c / NCH); j1 = (int)((long)M * (c + 1) / NCH); };
   auto t0 = clk::now();
-  Tick tk;
+  TmScope tm_sc_("gb: entry"); Tick tk;
   P.gbins.clear();
+  if (g_freet && g_nogn && g_nogn_lean && !H7 && !g_h250a && !g_h333 && h94_mode() == 0) {
+    for (int s = 0; s < 2; s++) {
+      Side5& X = P.S[s]; FitOut& o = PS.SB->F[s];
+      const bool l215 = (g_h215 & 1) != 0; const int N215 = l215 ? (int)X.ls.size() : M;
+      X.gok.resize(M); X.gper.resize(M);
+      int Qg = 0, Cg = 0;
+      for (int jj = 0; jj < N215; jj++) { const int j = l215 ? X.ls[jj] : jj;
+        X.gok[j] = 0; X.gper[j] = 0;
+        if (!X.listed[j]) continue;
+        const Tree& tr = UQ.U[j]; const TreeEnc& te = UQ.enc[j];
+        if (tr.nth >= 1 && tr.nth > GN_TH_MAX) T.gn_kmiss += 1;
+        if (te.g_ok && isfinite(o.smin[j])) { X.gok[j] = 1; o.is_g[j] = 1; X.gper[j] = te.gper; T.g_alive += 1;
+          Qg = std::max(Qg, tr.Q); Cg = std::max(Cg, (int)((X.gper[j] + 63) / 64)); }
+      }
+      if (Qg >= 100) { fprintf(stderr, "GN: Q %d >= 100 breaks the bin key\n", Qg); exit(1); }
+      const size_t DNg = (size_t)(Cg + 1) * (size_t)(Qg + 1) * 25;
+      std::vector<uint32_t> mxp(DNg, 0); std::vector<uint8_t> has(DNg, 0), bad(DNg, 0);
+      auto dkey = [&](int j) { const size_t cls = (X.gper[j] + 63) / 64; return (cls * (size_t)(Qg + 1) + (size_t)UQ.U[j].Q) * 25 + (size_t)UQ.U[j].nth; };
+      for (int jj = 0; jj < N215; jj++) { const int j = l215 ? X.ls[jj] : jj; if (!X.listed[j] || !X.gok[j]) continue;
+        const size_t k = dkey(j); has[k] = 1; mxp[k] = std::max<uint32_t>(mxp[k], X.gper[j]); }
+      for (size_t dk = 0; dk < DNg; dk++) { if (!has[dk]) continue;
+        const int Tk = (int)(dk % 25); const int Qk = (int)((dk / 25) % (size_t)(Qg + 1));
+        Tick tp; id<MTLComputePipelineState> ps = h93_gn_ps(E, Qk, Tk); T.h_g_pipe += tp.lap();
+        if (!ps) { bad[dk] = 1; continue; }
+        const int NPk = std::max(4, (Tk + 3) / 4 * 4), QPk = std::max(4, (Qk + 3) / 4 * 4); const size_t WSk = (4 * NPk + 3 * QPk + 6) / 4 * 4;
+        if ((WSk + 2 * (size_t)mxp[dk]) * 4 > 32768) bad[dk] = 2; }
+      for (int jj = 0; jj < N215; jj++) { const int j = l215 ? X.ls[jj] : jj; if (!X.listed[j] || !X.gok[j]) continue;
+        const uint8_t b = bad[dkey(j)]; if (b) { o.is_g[j] = 0; if (b == 1) T.gn_kmiss += 1; else T.gn_drop += 1; } }
+      if (g_h916) { X.gnl = (uint32_t)X.ls.size(); X.glid.resize((size_t)M); for (size_t k = 0; k < X.ls.size(); k++) X.glid[(size_t)X.ls[k]] = (uint32_t)k; }
+      const size_t TBN = g_h916 ? (size_t)X.gnl : (size_t)M;
+      h900_ens(X.gth, "X.gth", dev, TBN * 128, MSH); h900_ens(X.grs, "X.grs", dev, TBN * 8, MSH);
+      h900_ens(X.gst, "X.gst", dev, TBN * 4, MSH); h900_ens(X.gai, "X.gai", dev, TBN * 64, MSH);
+      float* gth = (float*)X.gth.b.contents; float* grs = (float*)X.grs.b.contents; float* gai = (float*)X.gai.b.contents; uint32_t* gst = (uint32_t*)X.gst.b.contents;
+      PL(E).run(NCH, [&](int c) { const int j0 = (int)((long)N215 * c / NCH), j1 = (int)((long)N215 * (c + 1) / NCH);
+        for (int jj = j0; jj < j1; jj++) { const int j = l215 ? X.ls[jj] : jj; if (!X.listed[j] || !X.gok[j] || !o.is_g[j]) continue;
+          const size_t lj = glid916(X, (size_t)j); const Tree& tr = UQ.U[j]; float* th = gth + 32 * lj;
+          for (int q = 0; q < 32; q++) th[q] = 0.0f;
+          double th2[32]; start_theta(tr.th, tr.nth, o.sarg[j], th2); for (int q = 0; q < tr.nth; q++) th[q] = (float)th2[q];
+          grs[2 * lj] = o.smin[j]; grs[2 * lj + 1] = o.smin[j]; std::memset(gai + 16 * lj, 0, 64); gst[lj] = 0; } });
+    }
+    T.gn_enc += ms_since(t0);
+    B.h250_items.clear(); B.h250_ngpu = 0; B.h250_on = false; B.h250_cpu_ms = 0; B.h334_gc.clear();
+    B.wdGn = nullptr; B.t882G = 0; B.cbG = nil; return;
+  }
   for (int s = 0; s < 2; s++) {
     Side5& X = P.S[s]; FitOut& o = PS.SB->F[s];
     const bool l215 = (g_h215 & 1) != 0; const int N215 = l215 ? (int)X.ls.size() : M;
     auto span = [N215, NCH](int c, int& j0, int& j1) { j0 = (int)((long)N215 * c / NCH); j1 = (int)((long)N215 * (c + 1) / NCH); };
     X.gok.resize(M); X.gninst.resize(M); X.gper.resize(M); X.gtoff.resize(M); X.gspoff.resize(M); X.keyl.resize(M); X.dkey.resize(M);
-    T.h_g_alloc += tk.lap();
-
+    T.h_g_alloc += tk.lap(); tm_mark("gb: after h_g_alloc#1");
     H263GnScr ownG; H263GnScr& sg = (g_h263 & 1) ? h263_keep_gn : ownG;
     std::vector<uint32_t>& bgi = sg.bgi; std::vector<uint32_t>& bgs = sg.bgs; std::vector<uint32_t>& bns = sg.bns;
     std::vector<int>& bqg = sg.bqg; std::vector<int>& bcg = sg.bcg; std::vector<int>& blm = sg.blm;
@@ -2983,7 +3003,6 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     X.gti = GTI; X.gsi = GSI;
     X.seq.resize(NS);
     if (Qg >= 100) { fprintf(stderr, "GN: Q %d >= 100 breaks the bin key\n", Qg); exit(1); }
-
     PL(E).run(NCH, [&](int c) {
       int j0, j1; span(c, j0, j1);
       uint32_t gt = ogt[c], gs = ogs[c], sq = osq[c];
@@ -2995,9 +3014,9 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
         gs += (uint32_t)tr.sp.size();
       }
     });
-    T.h_g_pre += tk.lap();
+    T.h_g_pre += tk.lap(); tm_mark("gb: after h_g_pre#2");
     sort_by_key5_p(E, X.seq, X.keyl, (size_t)LM + 1, X.start, X.seq2);
-    T.h_g_sort += tk.lap();
+    T.h_g_sort += tk.lap(); tm_mark("gb: after h_g_sort#3");
     const size_t DNg = (size_t)(Cg + 1) * (size_t)(Qg + 1) * 25;
     PL(E).run(NCH, [&](int c) {
       const size_t n2 = X.seq2.size(), a = n2 * c / NCH, z = n2 * (c + 1) / NCH;
@@ -3006,10 +3025,9 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
         X.dkey[j] = (uint32_t)((cls * (size_t)(Qg + 1) + (size_t)tr.Q) * 25 + (size_t)tr.nth);
       }
     });
-    T.h_g_plan += tk.lap();
+    T.h_g_plan += tk.lap(); tm_mark("gb: after h_g_plan#4");
     sort_by_key5_p(E, X.seq2, X.dkey, DNg, X.start, X.sorted);
-    T.h_g_sort += tk.lap();
-
+    T.h_g_sort += tk.lap(); tm_mark("gb: after h_g_sort#5");
     std::vector<size_t>& ne = sg.ne; ne.clear(); for (size_t dk = 0; dk < DNg; dk++) if (X.start[dk + 1] > X.start[dk]) ne.push_back(dk);
     std::vector<size_t>& perb = sg.perb; std::vector<size_t>& perb2 = sg.perb2; perb.assign(ne.size(), 0); perb2.assign(ne.size(), 0); std::vector<size_t> perb3(ne.size(), 0);
     PL(E).run(NCH, [&](int c) {
@@ -3046,9 +3064,8 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
       g.eb_bytes = g.ntg * (size_t)tpg * 2 * (size_t)(Qk + 1) * 64 * 4;
       P.gbins.push_back(g);
     }
-    T.h_g_plan += tk.lap();
+    T.h_g_plan += tk.lap(); tm_mark("gb: after h_g_plan#6");
   }
-
   if (h94_mode() >= 1) {
     std::vector<size_t> nat, tgb, cnt, cap; size_t before = 0, after = 0, ntr = 0;
     for (const GBin5& g : P.gbins) { nat.push_back(g.ntg); tgb.push_back(g.tgb); cnt.push_back(g.cnt); before += g.ntg; ntr += g.cnt; }
@@ -3062,7 +3079,7 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     g.tl_off = tlc[g.side]; tlc[g.side] = al5(tlc[g.side] + 1 + g.nt, BIN_ALIGN);
     g.eb_off = ebc; ebc = al5(ebc + g.eb_bytes + ebt_bytes(g.Q, g.nth, g.ntg, g.tpg), 256);
   }
-  T.h_g_plan += tk.lap();
+  T.h_g_plan += tk.lap(); tm_mark("gb: after h_g_plan#7");
   for (int s = 0; s < 2; s++) {
     Side5& X = P.S[s]; FitOut& o = PS.SB->F[s];
     const bool l215 = (g_h215 & 1) != 0; const int N215 = l215 ? (int)X.ls.size() : M;
@@ -3078,7 +3095,7 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     h900_ens(X.gst, "X.gst", dev, TBN * 4, MSH);
     h900_ens(X.gai, "X.gai", dev, TBN * 64, MSH);
     h900_ens(X.gbl, "X.gbl", dev, tlc[s] * 4, MSH);
-    T.h_g_alloc += tk.lap();
+    T.h_g_alloc += tk.lap(); tm_mark("gb: after h_g_alloc#8");
     uint32_t* gtok = (uint32_t*)X.gtok.b.contents; uint32_t* ghdr = (uint32_t*)X.ghdr.b.contents; uint16_t* gsp = (uint16_t*)X.gsp.b.contents;
     uint32_t* gseg = (uint32_t*)X.gseg.b.contents; float* gth = (float*)X.gth.b.contents;
     PL(E).run(NCH, [&](int c) {
@@ -3100,7 +3117,7 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
       }
     });
     for (int z = 0; z < 8; z++) gtok[4 * (size_t)X.gti + z] = 0;
-    T.h_g_fill += tk.lap();
+    T.h_g_fill += tk.lap(); tm_mark("gb: after h_g_fill#9");
     uint32_t* gbl = (uint32_t*)X.gbl.b.contents;
     std::vector<const GBin5*> sb; for (const GBin5& g : P.gbins) if (g.side == s) sb.push_back(&g);
     if (!sb.empty()) PL(E).run((int)sb.size(), [&](int i) {
@@ -3108,14 +3125,12 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
       for (size_t k = 0; k < g.cnt; k++) tl[1 + k] = (uint32_t)glid916(X, X.sorted[g.sst + k]);
       for (size_t k = g.cnt; k < g.nt; k++) tl[1 + k] = 0xFFFFFFFFu;
     });
-    T.h_g_fill += tk.lap();
+    T.h_g_fill += tk.lap(); tm_mark("gb: after h_g_fill#10");
   }
   h900_ens(P.eb, "P.eb", dev, ebc, MPV);
   h900_ens(P.ctr, "P.ctr", dev, 4 * (size_t)NB + 16, MSH);
-  T.h_g_alloc += tk.lap();
+  T.h_g_alloc += tk.lap(); tm_mark("gb: after h_g_alloc#11");
   T.gn_enc += ms_since(t0);
-
-
   if (g_h250_pending && !g_h722) h250a_join(*g_h250_pending);
   B.h250_items.clear(); B.h250_ngpu = 0; B.h250_on = false; B.h250_cpu_ms = 0; B.h334_gc.clear();
   std::vector<size_t> h770lo; size_t h770ngd = 0;
@@ -3151,13 +3166,21 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     if (g_h250a && NB) B.h250_ngpu = B.h250_ngpu >= h770ngd ? B.h250_ngpu - h770ngd : 0;
     h770_finish(PS, B, *H7, T);
   }
-
+  if (g_freet && g_nogn) {
+    for (const GBin5& g : P.gbins) { Side5& X = P.S[g.side]; const FitOut& o = PS.SB->F[g.side];
+      float* grs = (float*)X.grs.b.contents; float* gai = (float*)X.gai.b.contents; uint32_t* gst = (uint32_t*)X.gst.b.contents;
+      for (size_t k = 0; k < g.cnt; k++) { const uint32_t j = X.sorted[g.sst + k]; const size_t lj = glid916(X, (size_t)j);
+        grs[2 * lj] = o.smin[j]; grs[2 * lj + 1] = o.smin[j]; std::memset(gai + 16 * lj, 0, 64); gst[lj] = 0; } }
+    B.wdGn = nullptr; B.t882G = 0; B.cbG = nil; return;
+  }
   Tick tc;
-  auto h882_gn = [&E, &B, &P, NB]() {
+  const bool kc = kcap_sg_active();
+  auto h882_gn_body = [&E, &B, &P, NB](bool snap, bool kc) {
   if (NB) {
     std::memset(P.ctr.b.contents, 0, P.ctr.cap);
+    if (snap && (!g_freet || g_wd_test_itmax > 0 || g_wd_ck)) wd_gn_snapshot(B, P);
     id<MTLCommandBuffer> cb = h182_cb(E.cq);
-    id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
+    id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent); if (kc) en = kcap_sg_wrap(en, 1, 1);
     H263Bind bg263; bg263.on = (g_h263 & 4) != 0;
     for (size_t gj779 = 0; gj779 < P.gbins.size(); gj779++) { const size_t gi334 = g_h779 ? P.gbins.size() - 1 - gj779 : gj779; const GBin5& g = P.gbins[gi334];
       Side5& X = P.S[g.side];
@@ -3165,11 +3188,11 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
       const size_t gc334 = t334 ? B.h334_gc[gi334] : g.nt;
       if (t334 && gc334 == 0) continue;
       const size_t ntg334 = t334 ? std::min(g.ntg, (gc334 + (size_t)g.tpg - 1) / (size_t)g.tpg) : g.ntg;
-      if (h182_on()) [en pushDebugGroup:h182_gname(g)];
+      if (h182_on() && h182_dg()) [en pushDebugGroup:h182_gname(g)];
       bg263.pipe(en, g.ps);
       id<MTLBuffer> bs[9] = {X.gtok.b, X.ghdr.b, X.gsp.b, X.gseg.b, X.yb, X.gth.b, X.grs.b, X.gst.b, X.gbl.b};
       for (int k = 0; k < 9; k++) bg263.buf(en, bs[k], (k == 8 ? g.tl_off * 4 : 0), k);
-      float tf[4] = {g.Q * 9.0f * ldexpf(1.0f, -24), E.tg[g.side].floor_, (g_freet ? 0.0f : 3.0f), g_h333 ? 1.0f : 0.0f};
+      float tf[4] = {g.Q * 9.0f * ldexpf(1.0f, -24), E.tg[g.side].floor_, (g_wd_test_itmax >= 0 ? (float)g_wd_test_itmax : (g_freet ? 0.0f : 3.0f)), g_h333 ? 1.0f : 0.0f};
       if (g_h333) { const int hsl = B.ci % 3; bg263.buf(en, g_h333hand[hsl][g.side].b, 0, 14); bg263.buf(en, g_h333hoff[hsl][g.side].b, 0, 15); }
       [en setBytes:tf length:16 atIndex:9];
       bg263.buf(en, X.gai.b, 0, 10);
@@ -3180,12 +3203,15 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
       [en setThreadgroupMemoryLength:g.tgb atIndex:0];
       if (h150c_on()) { g_h150.gnDisp++; g_h150.gnLaunch += (long)(g.ntg * (size_t)g.tpg); g_h150.gnOcc += (long)g.cnt; }
       [en dispatchThreadgroups:MTLSizeMake(ntg334, 1, 1) threadsPerThreadgroup:MTLSizeMake(32 * (size_t)g.tpg, 1, 1)];
-      if (h182_on()) [en popDebugGroup];
+      if (h182_on() && h182_dg()) [en popDebugGroup];
     }
     [en endEncoding]; [cb commit];
     B.cbG = cb;
   }
   };
+  const bool wd_gn_ok = g_wd.max_try > 0 && !g_h333 && !g_h332 && !g_h711 && !g_h712 && !g_h713 && !g_h790 && h94_mode() == 0;
+  auto h882_gn = [h882_gn_body, wd_gn_ok, kc]() { h882_gn_body(wd_gn_ok, kc); };
+  B.wdGn = wd_gn_ok ? std::function<void()>([h882_gn_body]() { h882_gn_body(false, false); }) : std::function<void()>();
   if ((g_h882 & 2) && NB) B.t882G = g_h882q->submit(1, h882_gn); else h882_gn();
   T.h_g_cmd += tc.lap();
   if (g_h722 && g_h250_pending && g_h250_pending != &B) h250a_join(*g_h250_pending);
@@ -3194,8 +3220,6 @@ static void gn_begin_p(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     B.h250_thr = fw_submit([&B, &P]() { h250a_body(&B, &P, &B.h250_cpu_ms); });
   }
 }
-
-
 struct Fin14 {
   std::vector<float> th[2], a[2];
   void init(size_t nu) {
@@ -3205,8 +3229,6 @@ struct Fin14 {
     for (int s = 0; s < 2; s++) { th[s].assign(nu * 32, v); a[s].assign(nu * 16, v); } }
 };
 static Fin14 F14;
-
-
 struct FitMemo99 {
   static constexpr uint32_t NONE = 0xFFFFFFFFu;
   size_t cap = 0, arena_w = 0;
@@ -3239,13 +3261,11 @@ struct FitMemo99 {
     hd = (uint32_t)((hd + 1) % cap); nlive--; evicts++;
     aold = nlive ? eoff[hd] : aptr;
   }
-
   bool overlaps(size_t s0, size_t n) const {
     if (nlive == 0) return false;
     if (aold < aptr) return s0 < aptr && s0 + n > aold;
     return s0 + n > aold || s0 < aptr;
   }
-
   uint32_t insert(uint64_t h, uint32_t t, const uint32_t* k, uint32_t n) {
     if (n == 0 || (size_t)n > arena_w / 8) { refused++; return NONE; }
     if (nlive == cap) evict_head();
@@ -3265,13 +3285,10 @@ struct FitMemo99 {
 };
 static FitMemo99 G99;
 static uint64_t h99_key(uint64_t hr, uint32_t t) { return splitmix64(hr ^ (0x9e3779b97f4a7c15ull * (uint64_t)(t + 1))); }
-
 static inline uint64_t h770_key(uint64_t hr, uint32_t t, int cpu) { return splitmix64(hr ^ (0x9e3779b97f4a7c15ull * (uint64_t)(t + 1)) ^ (cpu ? 0xD1B54A32D192ED03ull : 0ull)); }
-
 static uint32_t h99_find(uint64_t hr, uint32_t t, const uint32_t* k, uint32_t n) { return G99.find(h99_key(hr, t), t, k, n); }
 static void h99_lookup_count() { G99.lookups++; }
 static void h99_hit_count() { G99.hits++; }
-
 static void h99_apply(PipeStep& PS, int t, int id, uint32_t e, Times& T) {
   FitOut& o = PS.SB->F[t];
   o.rfin[id] = G99.rf[e]; o.smin[id] = G99.sm[e]; o.sarg[id] = G99.sa[e]; o.is_g[id] = G99.ig[e];
@@ -3279,7 +3296,6 @@ static void h99_apply(PipeStep& PS, int t, int id, uint32_t e, Times& T) {
   std::memcpy(&F14.a[t][16 * (size_t)id], &G99.ap[16 * (size_t)e], 16 * sizeof(float));
   if (G99.ig[e]) { T.steps_sum += (double)G99.st[e]; T.steps_n += 1; }
 }
-
 static void h99_put(PipeStep& PS, int t, int j, const FitOut& o, uint32_t steps) {
   const Tree& tr = PS.SB->UQ.U[(size_t)j];
   const uint32_t n = (uint32_t)tr.rec.size();
@@ -3291,8 +3307,6 @@ static void h99_put(PipeStep& PS, int t, int j, const FitOut& o, uint32_t steps)
   std::memcpy(&G99.th[32 * (size_t)e], &F14.th[t][32 * (size_t)j], 32 * sizeof(float));
   std::memcpy(&G99.ap[16 * (size_t)e], &F14.a[t][16 * (size_t)j], 16 * sizeof(float));
 }
-
-
 #include <deque>
 #include <array>
 static constexpr uint32_t H242_ROW = 26;
@@ -3317,7 +3331,6 @@ struct Memo242 {
     if (verify) { voff.assign(cap, 0); vlen.assign(cap, 0); }
   }
   void clear() { std::memset((void*)tab, 0, cap * sizeof(Slot242)); nlive = 0; vdat.clear(); clears++; }
-
   uint32_t probe(uint64_t key, uint32_t t) const {
     for (size_t i = (size_t)key & mask;; i = (i + 1) & mask) {
       const Slot242& s = tab[i];
@@ -3332,7 +3345,6 @@ static inline float h242_flt(uint32_t u) { float f; std::memcpy(&f, &u, 4); retu
 static bool h242_recmatch(uint32_t e, const uint32_t* k, uint32_t n) {
   return G242.vlen[e] == n && std::memcmp(G242.vdat.data() + G242.voff[e], k, 4 * (size_t)n) == 0;
 }
-
 static void h242_insert(const Stage242& g, const std::vector<uint32_t>& recs) {
   const uint32_t f = G242.probe(g.key, g.t);
   if (f != H99_NONE) {
@@ -3392,7 +3404,6 @@ static void h242_shutdown() {
   if (G242.started) G242.th.join();
   G242.started = false;
 }
-
 static void h242_stage(PipeStep& PS, int t, int j, const FitOut& o, uint32_t steps, PutJob242& J, int cpu) {
   const Tree& tr = PS.SB->UQ.U[(size_t)j];
   const uint32_t n = (uint32_t)tr.rec.size();
@@ -3417,8 +3428,6 @@ static void h242_stage(PipeStep& PS, int t, int j, const FitOut& o, uint32_t ste
   if (G242.verify) { g.nrec_off = (uint32_t)J.recs.size(); g.nrec = n; J.recs.insert(J.recs.end(), tr.rec.begin(), tr.rec.end()); }
   J.st.push_back(g);
 }
-
-
 static void h242_apply(PipeStep& PS, int t, int id, uint32_t e, Times& T);
 static void h242_lookup(Engine& E, PipeStep& PS, const std::vector<std::pair<int, int>>& pr, std::vector<uint32_t>& fe, std::vector<uint64_t>& kv, Times* TA = nullptr) {
   auto t0 = clk::now();
@@ -3454,7 +3463,6 @@ static void h242_lookup(Engine& E, PipeStep& PS, const std::vector<std::pair<int
   G242.lookups += (long)np;
   G242.lookup_ms += std::chrono::duration<double, std::milli>(clk::now() - t0).count();
 }
-
 static void h242_apply(PipeStep& PS, int t, int id, uint32_t e, Times& T) {
   FitOut& o = PS.SB->F[t];
   const Slot242& s = G242.tab[e];
@@ -3466,7 +3474,6 @@ static void h242_apply(PipeStep& PS, int t, int id, uint32_t e, Times& T) {
   for (uint32_t q = 0; q < 16; q++) ap[q] = q < la ? s.row[lt + q] : 0.0f;
   if (ig) { T.steps_sum += (double)steps; T.steps_n += 1; }
 }
-
 static void h770_apply_raw(PipeStep& PS, int t, int id, const unsigned char* raw, Times& T) {
   Slot242 s; std::memcpy(&s, raw, sizeof s);
   FitOut& o = PS.SB->F[t];
@@ -3478,8 +3485,6 @@ static void h770_apply_raw(PipeStep& PS, int t, int id, const unsigned char* raw
   for (uint32_t q = 0; q < 16; q++) ap[q] = q < la ? s.row[lt + q] : 0.0f;
   if (ig) { T.steps_sum += (double)steps; T.steps_n += 1; }
 }
-
-
 static void h770_schedule(Engine& E, PipeStep& PS, Batch& B, Times& T, const std::vector<std::pair<int, int>>& pr) {
   const size_t np = pr.size();
   h242_drain();
@@ -3526,7 +3531,6 @@ static void h770_schedule(Engine& E, PipeStep& PS, Batch& B, Times& T, const std
   G242.lookup_ms += std::chrono::duration<double, std::milli>(clk::now() - t0).count();
   T.nfit0 += (double)nsch[0]; T.nfit1 += (double)nsch[1];
 }
-
 static void h770_verify(PipeStep& PS, Batch& B, int s, const uint32_t* ST) {
   FitOut& o = PS.SB->F[s]; H770B& H = *B.h770;
   for (H770Hit& h : H.hits) {
@@ -3572,8 +3576,6 @@ static void h770_total_print() {
   printf("H770 TOTAL: pairs %ld hits %ld full %ld partial %ld GPU-slot skips %ld CPU drops %ld no-bin %ld side-rows-disagree %ld refused %ld | VERIFY compared %ld equal %ld differing %ld tail-differing %ld noside %ld\n",
          g_h770_cum[0], g_h770_cum[1], g_h770_cum[2], g_h770_cum[3], g_h770_cum[4], g_h770_cum[5], g_h770_cum[6], g_h770_cum[7], g_h770_cum[8], g_h770_cum[9], g_h770_cum[10], g_h770_cum[11], g_h770_cum[12], g_h770_cum[13]);
 }
-
-
 static constexpr int H771_NSUB = 16;
 struct H771State {
   Slot242* tab[4][2] = {{nullptr, nullptr}, {nullptr, nullptr}, {nullptr, nullptr}, {nullptr, nullptr}};
@@ -3597,7 +3599,6 @@ static void h771_init(size_t np, int ng, int log2cap) {
   }
   (void)np;
 }
-
 static void h771_begin(int n) {
   G771.gen++;
   if (G771.gen % 511u == 0) { const size_t bytes = G771.subcap * H771_NSUB * sizeof(Slot242); for (int g = 0; g < G771.ng; g++) for (int t = 0; t < 2; t++) std::memset((void*)G771.tab[g][t], 0, bytes); }
@@ -3606,7 +3607,6 @@ static void h771_begin(int n) {
 }
 static inline const Slot242* h771_base(int g, int t, uint64_t key) { return G771.tab[g][t] + (size_t)(key >> 60) * G771.subcap; }
 static inline bool h771_live(const Slot242& s, uint32_t stamp) { return (s.meta & 1u) && (s.meta >> 23) == stamp; }
-
 static const Slot242* h771_probe(int g, int t, uint64_t key, uint32_t stamp) {
   const Slot242* b = h771_base(g, t, key);
   size_t i = (size_t)key & G771.submask;
@@ -3617,7 +3617,6 @@ static const Slot242* h771_probe(int g, int t, uint64_t key, uint32_t stamp) {
   }
   return nullptr;
 }
-
 static int h771_insert(int g, int t, const Slot242& src, uint64_t key, uint32_t stamp) {
   const int u = (int)(key >> 60);
   Slot242* b = G771.tab[g][t] + (size_t)u * G771.subcap;
@@ -3633,7 +3632,6 @@ static int h771_insert(int g, int t, const Slot242& src, uint64_t key, uint32_t 
   }
   return -1;
 }
-
 static void h771_schedule(Engine& E, PipeStep& PS, Batch& B, Times& T, const std::vector<std::pair<int, int>>& pr) {
   const size_t np = pr.size();
   auto t0 = clk::now();
@@ -3680,7 +3678,6 @@ static void h771_schedule(Engine& E, PipeStep& PS, Batch& B, Times& T, const std
   G771.lookup_ms += std::chrono::duration<double, std::milli>(clk::now() - t0).count();
   T.nfit0 += (double)nsch[0]; T.nfit1 += (double)nsch[1];
 }
-
 static bool h771_fit_row(PipeStep& PS, int t, int j, const FitOut& o, uint32_t steps, int cpu, Slot242& g) {
   const Tree& tr = PS.SB->UQ.U[(size_t)j];
   const float* th = &F14.th[t][32 * (size_t)j]; const float* ap = &F14.a[t][16 * (size_t)j];
@@ -3698,8 +3695,6 @@ static bool h771_fit_row(PipeStep& PS, int t, int j, const FitOut& o, uint32_t s
   for (uint32_t q = 0; q < la; q++) g.row[lt + q] = ap[q];
   return true;
 }
-
-
 static void h771_put(Engine& E, PipeStep& PS, Batch& B) {
   auto t0 = clk::now();
   Persist5& P = *B.P;
@@ -3740,8 +3735,6 @@ static void h771_step_print(int st) {
          st, G771.lookups.exchange(0), G771.found.exchange(0), G771.put_fit.exchange(0), G771.put_carry.exchange(0), G771.ref_cap.exchange(0), G771.ref_wide.exchange(0), G771.dup.exchange(0), G771.lookup_ms, G771.put_ms);
   G771.lookup_ms = G771.put_ms = 0;
 }
-
-
 static void h242_schedule(Engine& E, PipeStep& PS, Batch& B, Times& T, const std::vector<std::pair<int, int>>& pr) {
   if (g_h770) { h770_schedule(E, PS, B, T, pr); return; }
   const size_t np = pr.size();
@@ -3772,13 +3765,21 @@ static void h242_schedule(Engine& E, PipeStep& PS, Batch& B, Times& T, const std
   G242.apply_ms += std::chrono::duration<double, std::milli>(clk::now() - ta).count();
   T.nfit0 += (double)nsch[0]; T.nfit1 += (double)nsch[1];
 }
-
 static void gn_finish(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   auto t0 = clk::now();
   g_h882q->wait_for(B.t882G);
   if (B.cbG) {
     k_wait(B.cbG);
-    if (B.cbG.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "GN command buffer failed\n"); h182_dump(B.cbG, "GN"); gpu_fail(); }
+    B.cbG = wd_resolve(WD_GN, B.cbG, [&B]() { B.wdGn(); return B.cbG; }, [&B]() { for (int s = 0; s < 2; s++) wd_restore(B.wdGrows[s]); }, (bool)B.wdGn, [&B, snap = std::shared_ptr<std::vector<float>>(), n = 0]() mutable {
+      const size_t W = 32 + 2 + 16 + 1; size_t tot = 0; for (int s = 0; s < 2; s++) tot += B.wdGrows[s].rows.size();
+      auto getrow = [&](int s, uint32_t r, float* o) { Side5& X = B.P->S[s]; std::memcpy(o, (const float*)X.gth.b.contents + 32 * (size_t)r, 128); std::memcpy(o + 32, (const float*)X.grs.b.contents + 2 * (size_t)r, 8); std::memcpy(o + 34, (const float*)X.gai.b.contents + 16 * (size_t)r, 64); std::memcpy(o + 50, (const uint32_t*)X.gst.b.contents + r, 4); };
+      if (n++ == 0) { snap = std::make_shared<std::vector<float>>(tot * W); size_t i = 0; for (int s = 0; s < 2; s++) for (uint32_t r : B.wdGrows[s].rows) getrow(s, r, &(*snap)[W * i++]); return (uint64_t)0; }
+      size_t i = 0, d[4] = {0, 0, 0, 0}, dn = 0, adlo = 0, adused = 0; int minoff = 99; double mx = 0; float cur[W];
+      for (int s = 0; s < 2; s++) for (size_t ri = 0; ri < B.wdGrows[s].rows.size(); ri++) { const uint32_t r = B.wdGrows[s].rows[ri]; getrow(s, r, cur); const float* o = &(*snap)[W * i++]; bool bad = false;
+        if (std::memcmp(cur, o, 128)) { d[0]++; bad = true; for (int k = 0; k < 32; k++) mx = std::max(mx, (double)std::fabs(cur[k] - o[k])); }
+        if (std::memcmp(cur + 32, o + 32, 8)) { d[1]++; bad = true; } if (std::memcmp(cur + 34, o + 34, 4 * std::min<size_t>(6, B.wdGrows[s].rq[ri]))) { d[2]++; bad = true; const int nS = (int)(((const uint32_t*)B.P->S[s].ghdr.b.contents)[4 * (size_t)r + 1] >> 16); int k0 = 0; while (k0 < 16 && !std::memcmp(cur + 34 + k0, o + 34 + k0, 4)) k0++; minoff = std::min(minoff, k0 - nS); if (k0 < nS) adused++; else adlo++; } if (std::memcmp(cur + 50, o + 50, 4)) { d[3]++; bad = true; } dn += bad; }
+      fprintf(stderr, "WD verify detail: GN rows %zu differ %zu (th %zu rs %zu a %zu st %zu), max |dth| %.3g; (a compared for its first min(Q,6) entries, the others are scratch garbage)\n", tot, dn, d[0], d[1], d[2], d[3], mx); (void)adused; (void)adlo; (void)minoff; return (uint64_t)dn; });
+    B.wdGn = nullptr;
     B.gn_gpu = (B.cbG.GPUEndTime - B.cbG.GPUStartTime) * 1e3;
     PS.iv.push_back({B.cbG.GPUStartTime, B.cbG.GPUEndTime});
   }
@@ -3794,7 +3795,6 @@ static void gn_finish(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     printf("H250A: f_cpu %.3f cpu ms %.3f gpu ms %.3f trees cpu %zu gpu %zu\n", B.h250_f, B.h250_cpu_ms, B.gn_gpu, nc, ng);
     B.h250_on = false;
   }
-
   T.gn_gpu += B.gn_gpu;
   Persist5& P = *B.P;
   for (int s = 0; s < 2; s++) {
@@ -3808,6 +3808,7 @@ static void gn_finish(Engine& E, PipeStep& PS, Batch& B, Times& T) {
       o.rfin[j] = RS[lj * 2 + 1];
       if (!isfinite(o.rfin[j])) o.rfin[j] = INFINITY;
       std::memcpy(&F14.th[s][32 * (size_t)j], TH8 + 32 * lj, 32 * sizeof(float)); std::memcpy(&F14.a[s][16 * (size_t)j], A8 + 16 * lj, 16 * sizeof(float));
+      { const Tree& tq = PS.SB->UQ.U[(size_t)j]; float tmp[51]; int n = 0; for (int q = 0; q < tq.nth && q < 32; q++) tmp[n++] = TH8[32 * lj + q]; for (int q = 0; q < tq.Q && q < 16; q++) tmp[n++] = A8[16 * lj + q]; tmp[n++] = RS[lj * 2]; tmp[n++] = RS[lj * 2 + 1]; H308T('G' + (char)s, PS.SB->UQ.hash[(size_t)j], 0, tmp, n); }
       T.steps_sum += STl[lj] & 255; T.steps_n += 1; if (g_h916) STg916[(size_t)j] = STl[lj]; }
     const uint32_t* ST = g_h916 ? STg916.data() : STl;
     if (g_h242) {
@@ -3828,15 +3829,9 @@ static void gn_finish(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   if (g_h771) h771_put(E, PS, B);
   B.gdone = true;
 }
-
-
 static double (*g_fr_score96)(const float* r96) = nullptr;
-
-
 static const bool g_nres = getenv("NORMAL_RES") && atoi(getenv("NORMAL_RES")) != 0;
 static float g_nres_n[96];
-
-
 static const int g_yfx_flag = getenv("YFX_CELLS") ? atoi(getenv("YFX_CELLS")) : 1;
 static std::vector<double> g_yfx_txy[2];
 static uint64_t g_yfx_epoch = 0; static bool g_yfx = false; static double g_yfx_t[48], g_yfx_y[2][48], g_yfx_n[96]; static float g_yfx_f[2][48], g_yfx_nt[96];
@@ -3864,15 +3859,11 @@ static void glue_range(PipeStep& PS, int b0, int b1, float* err, float* rx, floa
   }
   T.glue_e += ms_since(t0);
 }
-
-
 #include "freet_h950.inc"
 static const int g_h837 = getenv("H837") ? atoi(getenv("H837")) : 0;
 static int g_stage8_only = 0, g_src14 = 0, g_chk_band = 0, g_post_call = 0, g_time14 = 0, g_chk_fin = 0;
 static std::string g_dump14;
 static FILE* g_dumpf = nullptr;
-
-
 static bool zgconv14(const Tree& T, std::vector<uint32_t>& p4, uint32_t* segs, uint32_t& hw) {
   const uint32_t NSC = (uint32_t)T.nS + 2, SS = 48u, SB = (uint32_t)T.nslot * SS;
   auto enc = [&](uint32_t c) -> uint32_t { if (c == 1022) return 1u << 31; if (c < 64) return c * SS; if (c == 900) return 1u << 29;
@@ -3895,7 +3886,6 @@ static bool zgconv14(const Tree& T, std::vector<uint32_t>& p4, uint32_t* segs, u
   hw = NSC | (SB << 8) | ((uint32_t)T.nth << 24);
   return true;
 }
-
 static bool zgconv14d(const Tree& T, std::vector<uint32_t>& p4, uint32_t* segs, uint32_t& hw) {
   const uint32_t NSC = (uint32_t)T.nS + 2, SS = 48u, SB = (uint32_t)T.nslot * SS;
   auto enc = [&](uint32_t c) -> uint32_t { if (c == 1022) return 1u << 31; if (c < 64) return c * SS; if (c == 900) return 1u << 29;
@@ -3917,8 +3907,6 @@ static bool zgconv14d(const Tree& T, std::vector<uint32_t>& p4, uint32_t* segs, 
   hw = NSC | (SB << 8) | ((uint32_t)T.nth << 24);
   return true;
 }
-
-
 static inline double segd14(const float* aos, const float S[band::NROW][2], int i, int s, double& u) {
   double Ax = aos[2 * s], Ay = aos[2 * s + 1];
   double Ex = (double)aos[2 * (s + 1)] - Ax, Ey = (double)aos[2 * (s + 1) + 1] - Ay;
@@ -3948,8 +3936,6 @@ static void ref_cand14(const float* aos, const float S[band::NROW][2], int lev[b
 static double path_cost14(const float* aos, const float S[band::NROW][2], const int* lev) {
   double tot = 0; for (int i = 0; i < band::NROW; i++) { double u; tot += segd14(aos, S, i, lev[i], u); } return tot;
 }
-
-
 struct P14Bin { int side = 0, Q = 0, nth = 0, tpg = 1; uint32_t per = 0, wix = 0; size_t nt = 0, ntg = 0, tgb = 0, eb_bytes = 0, eb_off = 0; std::vector<uint32_t> tl; id<MTLComputePipelineState> ps = nil; };
 static void p14_bins(Engine& E, int s, const std::vector<int>& qs, const std::vector<uint32_t>& pq, const std::vector<uint32_t>& pn,
                      const std::vector<uint32_t>& pg, std::vector<P14Bin>& out, long& ndrop) {
@@ -3986,11 +3972,7 @@ static void p14_bins(Engine& E, int s, const std::vector<int>& qs, const std::ve
     out.push_back(g);
   }
 }
-
-
 struct P14Buf { id<MTLBuffer> hdr, segs, th, rs, a, stio, yv; };
-
-
 static const int g_rec_pol = getenv("REC_POLISH") ? atoi(getenv("REC_POLISH")) :1;
 static std::vector<float> g_rp_th[2]; static std::vector<uint8_t> g_rp_ok; static std::atomic<long> g_rp_n{0}; static double g_rp_dsum = 0; static std::atomic<long> g_rp_dn{0};
 static inline void rp_begin(int n) { if (!g_rec_pol) return; g_rp_ok.assign((size_t)n, 0); for (int s = 0; s < 2; s++) g_rp_th[s].resize((size_t)n * 32); }
@@ -4010,8 +3992,6 @@ static double p14_run(Engine& E, std::vector<P14Bin>& bins, const P14Buf* SBf, i
   }
   size_t eo = 0; for (size_t b = 0; b < bins.size(); b++) { bins[b].eb_off = eo; eo = al5(eo + bins[b].eb_bytes + ebt_bytes(bins[b].Q, bins[b].nth, bins[b].ntg, bins[b].tpg), 256); bins[b].wix = (uint32_t)b; }
   g_ebmb_call += (double)eo / 1048576.0;
-
-
   static const bool h82 = !getenv("H82") || atoi(getenv("H82")) != 0;
   static GBuf p82_eb, p82_ctr, p82_tl;
   id<MTLBuffer> ebB, ctr; std::vector<size_t> tlo(bins.size(), 0);
@@ -4024,6 +4004,13 @@ static double p14_run(Engine& E, std::vector<P14Bin>& bins, const P14Buf* SBf, i
     ebB = h900_nbl(E.dev, __LINE__, std::max<size_t>(eo, 256), MTLResourceStorageModePrivate);
     ctr = h900_nbl(E.dev, __LINE__, 4 * bins.size() + 16, MTLResourceStorageModeShared);
   }
+  const bool wd_pol_ok = g_wd.max_try > 0 && !g_h711 && !g_h712 && !g_h713 && !g_h790 && h94_mode() == 0 && skipf == 0.0f;
+  WdRows wdR[2];
+  if (wd_pol_ok) {
+    for (size_t bi = 0; bi < bins.size(); bi++) { const P14Bin& g = bins[bi]; for (size_t k = 1; k < g.tl.size(); k++) if (g.tl[k] != 0xFFFFFFFFu) wdR[g.side].rows.push_back(g.tl[k]); }
+    for (int s = 0; s < 2; s++) if (!wdR[s].rows.empty()) wd_snap(wdR[s], SBf[s].th);
+  }
+  auto wd_enc = [&]() -> id<MTLCommandBuffer> {
   std::memset(ctr.contents, 0, 4 * bins.size() + 16);
   id<MTLCommandBuffer> cb = h182_cb(E.cq);
   id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
@@ -4041,12 +4028,14 @@ static double p14_run(Engine& E, std::vector<P14Bin>& bins, const P14Buf* SBf, i
     if (h150c_on()) { g_h150.polDisp++; g_h150.polLaunch += (long)(g.ntg * (size_t)g.tpg); g_h150.polOcc += (long)h150_count_tl(g.tl); }
     [en dispatchThreadgroups:MTLSizeMake(g.ntg, 1, 1) threadsPerThreadgroup:MTLSizeMake(32 * (size_t)g.tpg, 1, 1)];
   }
-  [en endEncoding]; [cb commit]; [cb waitUntilCompleted];
-  if (cb.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "I14 polish command buffer failed\n"); h182_dump(cb, "I14 polish"); gpu_fail(); }
+  [en endEncoding]; [cb commit];
+  return cb;
+  };
+  id<MTLCommandBuffer> cb;
+  if (wd_pol_ok) cb = wd_run(WD_POL, wd_enc, [&]() { for (int s = 0; s < 2; s++) wd_restore(wdR[s]); });
+  else { cb = wd_enc(); [cb waitUntilCompleted]; if (cb.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "I14 polish command buffer failed\n"); h182_dump(cb, "I14 polish"); gpu_fail(); } }
   return (cb.GPUEndTime - cb.GPUStartTime) * 1e3;
 }
-
-
 static bool eval_cols_t14(const View& V, const double* th, const double* tt, std::vector<double>& E) {
   const int n = V.n(), Q = V.Q; std::vector<double> v(n); E.assign((size_t)Q * NPT, 0);
   for (int p = 0; p < NPT; p++) { const double t = tt[p];
@@ -4066,7 +4055,6 @@ static double vp14(const std::vector<double>& E, int Q, const double* y, double 
     keep[k] = nn > tau * on; for (int p = 0; p < NPT; p++) Qm[(size_t)k * NPT + p] = keep[k] ? Qm[(size_t)k * NPT + p] / nn : 0; }
   for (int k = 0; k < Q; k++) if (keep[k]) { double s = 0; for (int p = 0; p < NPT; p++) s += Qm[(size_t)k * NPT + p] * z[p]; for (int p = 0; p < NPT; p++) z[p] -= s * Qm[(size_t)k * NPT + p]; }
   double rss = 0; for (int p = 0; p < NPT; p++) rss += z[p] * z[p]; return rss; }
-
 static std::vector<double> vp14z(const std::vector<double>& E, int Q, const double* y, double tau) {
   std::vector<double> Qm(E); std::vector<double> z(y, y + NPT); std::vector<char> keep(Q, 0);
   for (int k = 0; k < Q; k++) { double on = 0; for (int p = 0; p < NPT; p++) on += E[(size_t)k * NPT + p] * E[(size_t)k * NPT + p]; on = sqrt(on);
@@ -4080,8 +4068,6 @@ static const int g_jchk = getenv("J_CHK") ? atoi(getenv("J_CHK")) : 0;
 static std::atomic<uint64_t> g_jchk_bad{0}, g_jchk_n{0}, g_jchk_qbad{0}, g_jchk_qn{0};
 static std::atomic<uint64_t> g_jp_ev{0}, g_jp_qr{0}, g_jp_nn{0}, g_jp_qq{0}, g_jp_sd{0}, g_jp_res{0}, g_jp_sc{0}, g_jp_n{0};
 static const Sketch::CisPerCellEnergyInput* g_sicis_en = nullptr;
-
-
 static inline void jq_dots(const double* const* a, const double* const* b, double* out, int m) {
   for (int q = 0; q < m; q++) { double sd = 0; const double* x = a[q]; const double* y = b[q]; for (int p = 0; p < NPT; p++) sd += x[p] * y[p]; out[q] = sd; }
 }
@@ -4115,7 +4101,6 @@ static void qr48_pair(const double* const Ev[2], const int Qs[2], const double* 
 static bool sicis_res48_fast(Engine& E, const Unique& UQ, const std::vector<int>& ct, const std::vector<int>& K, size_t k,
                              const P14Buf* SBf, id<MTLBuffer> bTV, double z[2][NPT], const float* const* jth = nullptr, const float* jtv = nullptr, int only = -1) {
   thread_local std::vector<double> vb;
-
   double tb[NPT]; if (g_yfx) { for (int p = 0; p < NPT; p++) tb[p] = g_yfx_t[p]; } else if (jtv) { for (int p = 0; p < NPT; p++) tb[p] = (double)jtv[48 * k + p]; } else for (int p = 0; p < NPT; p++) tb[p] = (double)((const float*)bTV.contents)[48 * k + p];
   static const int jqr = getenv("J_QR") ? atoi(getenv("J_QR")) : 1;
   double EvS[2][16 * NPT]; int QS[2] = {0, 0}; double zref[2][NPT];
@@ -4128,8 +4113,6 @@ static bool sicis_res48_fast(Engine& E, const Unique& UQ, const std::vector<int>
     const int n = V.n(); if ((int)vb.size() < n) vb.resize(n); double* v = vb.data(); for (int i = 0; i < n; i++) v[i] = 0;
     double* Ev = EvS[s]; QS[s] = Q;
     const uint64_t jq0 = g_jprof ? mach_absolute_time() : 0;
-
-
     static const int jev = getenv("J_EVAL") ? atoi(getenv("J_EVAL")) : 1;
     bool done2 = false;
     if (jev) {
@@ -4203,8 +4186,6 @@ static bool sicis_res48_fast(Engine& E, const Unique& UQ, const std::vector<int>
   }
   return true;
 }
-
-
 static const int g_yfxfast = (getenv("YFX_FAST") && !(getenv("POST_LIN") && atoi(getenv("POST_LIN")) != 0)) ? atoi(getenv("YFX_FAST")) : 0;
 static std::atomic<uint64_t> g_yf_hit{0}, g_yf_miss{0}, g_yf_bad{0}, g_yf_chk{0}, g_yf_schk{0}, g_yf_sbad{0}, g_yf_zchk{0}, g_yf_zbad{0};
 static bool sicis_res48_yfxf(Engine& E, const Unique& UQ, const std::vector<int>& ct, const std::vector<int>& K, size_t k,
@@ -4230,12 +4211,8 @@ static bool sicis_res48_yfxf(Engine& E, const Unique& UQ, const std::vector<int>
   for (int p = 0; p < NPT; p++) out[p] = (float)(zf[0][p] * g_yfx_n[p] + zf[1][p] * g_yfx_n[NPT + p]);
   return true;
 }
-
-
 #if defined(__aarch64__)
 #include <arm_neon.h>
-
-
 static const int g_yfx_l16 = getenv("YFX_L16") ? atoi(getenv("YFX_L16")) : 0;
 template <int L, bool FUSE> static inline void dotL(const double* A, const double* B, double* o) {
   float64x2_t a[L / 2]; for (int v = 0; v < L / 2; v++) a[v] = vdupq_n_f64(0.0);
@@ -4246,7 +4223,6 @@ template <int L, bool FUSE> static inline void dotL(const double* A, const doubl
 static const int g_yfx_dm = getenv("YFX_DM") ? atoi(getenv("YFX_DM")) : 3, g_yfx_um = getenv("YFX_UM") ? atoi(getenv("YFX_UM")) : 3;
 template <int L> static inline void dotk(int kind, const double* A, const double* B, double* o) { if ((g_yfx_dm >> kind) & 1) dotL<L, true>(A, B, o); else dotL<L, false>(A, B, o); }
 static inline float64x2_t updk(bool fz, float64x2_t c, float64x2_t sd, float64x2_t q) { return fz ? vfmsq_f64(c, sd, q) : vsubq_f64(c, vmulq_f64(sd, q)); }
-
 template <int L> static void qr48_bL(const double* const* Ev, int nb, int Q, const double* y, double* const* zo) {
   constexpr int NV = L / 2;
   thread_local std::vector<double> Qv; if (Qv.size() < (size_t)16 * NPT * L) Qv.resize((size_t)16 * NPT * L);
@@ -4276,7 +4252,6 @@ template <int L> static void qr48_bL(const double* const* Ev, int nb, int Q, con
   }
   for (int b = 0; b < nb; b++) for (int p = 0; p < NPT; p++) zo[b][p] = zz[p * L + b];
 }
-
 static bool yfx_eval_side(const Tree& tr, const double* th, double* Ev) {
   View V(tr.rec.data()); const int n = V.n(), Q = tr.Q;
   thread_local std::vector<double> vm; if ((int)vm.size() < n * NPT) vm.resize((size_t)n * NPT);
@@ -4308,7 +4283,6 @@ static bool yfx_eval_side(const Tree& tr, const double* th, double* Ev) {
   for (int q = 0; q < Q; q++) { const double* R = M + (size_t)V.root(q) * NPT; for (int p = 0; p < NPT; p++) { const double x = R[p]; if (!std::isfinite(x)) return false; Ev[(size_t)q * NPT + p] = x; } }
   return true;
 }
-
 static void yfx_chunk(Engine& E, const Unique& UQ, const std::vector<int>& ct, const std::vector<int>& K, size_t lo, size_t hi, const uint8_t* need,
                       const P14Buf* SBf, id<MTLBuffer> bTV, const float* const* jth, const float* jtv, float* resOut, float* ceOut, uint8_t* have) {
   const int n = (int)(hi - lo);
@@ -4415,7 +4389,6 @@ static bool sicis_res48(Engine& E, const Unique& UQ, const std::vector<int>& ct,
   }
   return true;
 }
-
 struct PostWall14 { Times& T; clk::time_point t0; ~PostWall14() { T.p_wall += ms_since(t0); } };
 static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, float* rx, float* ry, Times& T) {
   auto tw = clk::now();
@@ -4423,7 +4396,6 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
   const std::vector<int>& ct = SB.ct; const std::vector<uint8_t>& admit = *PS.admit;
   const Unique& UQ = SB.UQ; const size_t Mu = UQ.U.size();
   const int call = ++g_post_call;
-
   std::vector<int> K0;
   for (int i = 0; i < n; i++) {
     if (!admit[i]) continue;
@@ -4433,7 +4405,6 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
     K0.push_back(i);
   }
   if (K0.empty()) return;
-
   std::vector<char> need(Mu, 0), okg(Mu, 0), okp(Mu, 0);
   for (int i : K0) { need[ct[(size_t)i * 2]] = 1; need[ct[(size_t)i * 2 + 1]] = 1; }
   std::vector<uint32_t> gtok, ptok, gh(4 * Mu, 0), ph(4 * Mu, 0), gsg(36 * Mu, 0), psg(36 * Mu, 0), gpj(Mu, 0);
@@ -4462,12 +4433,9 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
   const int nK = (int)K.size();
   T.p_cand += nK;
   if (nK == 0) return;
-
   std::vector<int> rowid(Mu, -1), ulist;
   for (int i : K) for (int s = 0; s < 2; s++) { const int j = ct[(size_t)i * 2 + s]; if (rowid[j] < 0) { rowid[j] = (int)ulist.size(); ulist.push_back(j); } }
   const size_t NU = ulist.size();
-
-
   id<MTLBuffer> bTok = E.B(gtok.data(), gtok.size() * 4), bHdr = E.B(gh.data(), gh.size() * 4), bSp = E.B(gsp.data(), gsp.size() * 2 + 2), bSg = E.B(gsg.data(), gsg.size() * 4);
   id<MTLBuffer> bPtok = E.B(ptok.data(), ptok.size() * 4), bPsp = E.B(psp.data(), psp.size() * 2 + 2);
   std::vector<uint32_t> qv(Mu, 0); for (size_t j = 0; j < Mu; j++) if (okg[j]) qv[j] = (uint32_t)UQ.U[j].Q;
@@ -4503,24 +4471,23 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
   double gpu_grid = 0; double w_grid = 0;
   {
     auto t0 = clk::now();
+    auto wd_enc = [&]() -> id<MTLCommandBuffer> {
     id<MTLCommandBuffer> cb = h182_cb(E.cq);
     id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
     for (auto& g : GB) {
       [en setComputePipelineState:gps];
-
       id<MTLBuffer> bs[10] = {bTok, bHdr, bSp, bSg, bTh[g.side], bAa[g.side], bQ, g.tl, bOid[g.side], bGout};
       for (int k = 0; k < 10; k++) [en setBuffer:bs[k] offset:0 atIndex:k];
       [en setBytes:g.pd length:8 atIndex:10]; [en setThreadgroupMemoryLength:g.tgb atIndex:0];
       [en dispatchThreadgroups:MTLSizeMake(g.ntg, 1, 1) threadsPerThreadgroup:MTLSizeMake(32 * (size_t)g.tpg, 1, 1)];
     }
-    [en endEncoding]; [cb commit]; [cb waitUntilCompleted];
-    if (cb.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "I14 grid command buffer failed\n"); h182_dump(cb, "I14 grid"); gpu_fail(); }
+    [en endEncoding]; [cb commit];
+    return cb; };
+    id<MTLCommandBuffer> cb = wd_run(WD_GRID, wd_enc, nullptr);
     gpu_grid = (cb.GPUEndTime - cb.GPUStartTime) * 1e3; w_grid = ms_since(t0);
   }
   T.p_enc += ms_since(tw) - w_grid;
   T.p_grid += gpu_grid;
-
-
   static band::Tables BT = band::make_tables();
   static float STR[2 * band::NROW];
   for (int i = 0; i < band::NROW; i++) { STR[2 * i] = E.tg[0].yf[i]; STR[2 * i + 1] = E.tg[1].yf[i]; }
@@ -4541,6 +4508,7 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
     auto t0 = clk::now();
     id<MTLComputePipelineState> pg = E.pipe(E.Lb, "post_gather_i14"), pb = E.pipe(E.Lb, "band_lane"), pr = E.pipe(E.Lb, "post_repair_i14");
     if (!pg || !pb || !pr) { fprintf(stderr, "I14: band pipeline missing\n"); exit(1); }
+    auto wd_enc = [&]() -> id<MTLCommandBuffer> {
     id<MTLCommandBuffer> cb = h182_cb(E.cq);
     id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
     [en setComputePipelineState:pg];
@@ -4557,13 +4525,12 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
     [en setComputePipelineState:pr];
     [en setBuffer:bOT offset:0 atIndex:0]; [en setBuffer:bOS offset:0 atIndex:1]; [en setBuffer:bTV offset:0 atIndex:2]; [en setBytes:&Pk length:4 atIndex:3];
     [en dispatchThreadgroups:MTLSizeMake(((size_t)nK + 63) / 64, 1, 1) threadsPerThreadgroup:MTLSizeMake(64, 1, 1)];
-    [en endEncoding]; [cb commit]; [cb waitUntilCompleted];
-    if (cb.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "I14 band command buffer failed\n"); h182_dump(cb, "I14 band"); gpu_fail(); }
+    [en endEncoding]; [cb commit];
+    return cb; };
+    id<MTLCommandBuffer> cb = wd_run(WD_BAND, wd_enc, nullptr);
     gpu_band = (cb.GPUEndTime - cb.GPUStartTime) * 1e3; w_band = ms_since(t0);
   }
   T.p_band += gpu_band;
-
-
   if (g_chk_band > 0) {
     const float* G = (const float*)bGout.contents;
     const uint32_t* rw = (const uint32_t*)bRows.contents; const float* OO = (const float*)bOO.contents;
@@ -4588,8 +4555,6 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
       for (int i = 1; i < band::NROW; i++) if (TV[k * 48 + i] < TV[k * 48 + i - 1]) { T.p_chk_mono += 1; break; }
     }
   }
-
-
   std::vector<uint32_t> PQ[2], PN[2], PG[2], PH[2], PSG[2], PST[2];
   std::vector<float> PTH[2], PRS[2], PA[2];
   for (int s = 0; s < 2; s++) {
@@ -4613,15 +4578,11 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
     SBf[s].yv = E.B(E.tg[s].yf, sizeof E.tg[s].yf);
   }
   id<MTLBuffer> bPHtok = bPtok, bPHsp = bPsp;
-
-
   std::vector<P14Bin> binsP; long ndrop = 0;
   for (int s = 0; s < 2; s++) { std::vector<int> qs(nK); for (int k = 0; k < nK; k++) qs[k] = k; p14_bins(E, s, qs, PQ[s], PN[s], PG[s], binsP, ndrop); }
   T.p_ndrop += (double)ndrop;
   double gpu_pb = 0;
   { auto t0 = clk::now(); gpu_pb = p14_run(E, binsP, SBf, bPHtok, bPHsp, bTV, 3.0f, 0.0f); T.p_pb += gpu_pb; T.p_pb_wall += ms_since(t0); }
-
-
   std::vector<char> acc[2];
   acc[0].assign(nK, 0); acc[1].assign(nK, 0);
   {
@@ -4633,7 +4594,6 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
       if (std::isfinite(rbx) && std::isfinite(rby) && rbx + rby <= r8x + r8y) { acc[0][k] = 1; acc[1][k] = 1; }
     }
   }
-
   if (g_time14) {
     P14Buf SBt[2];
     for (int s = 0; s < 2; s++) {
@@ -4645,7 +4605,6 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
     auto t0 = clk::now(); const double g = p14_run(E, binsP, SBt, bPHtok, bPHsp, bTV, 0.0f, 0.0f);
     T.p_pa += g; T.p_pa_wall += ms_since(t0);
   }
-
   if (g_chk_fin > 0) {
     int done = 0;
     for (int s = 0; s < 2 && done < g_chk_fin; s++) {
@@ -4666,12 +4625,10 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
         if (bad) T.p_fin_bad += 1;
         const double tau_v = (double)tr.Q * 9.0 * ldexp(1.0, -24);
         if (g_minratio < 10 * tau_v) { T.p_fin_lo += 1; if (bad) T.p_fin_lobad += 1; }
-
         done++;
       }
     }
   }
-
   auto to = clk::now();
   if (g_dump14.size() && !g_dumpf) g_dumpf = fopen(g_dump14.c_str(), "w");
   if (g_dumpf && call == 1) fprintf(g_dumpf, "call,child,rx8,ry8,rxf,ryf,acc0,acc1\n");
@@ -4683,7 +4640,6 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
     ac[0] = ac[1] = acc[0][k] ? 1 : 0;
     if (ac[0] && (!std::isfinite(rf0) || !std::isfinite(rf1))) { T.p_fb += 1; ac[0] = ac[1] = 0; }
     fin[0] = ac[0] ? rf0 : r8[0]; fin[1] = ac[1] ? rf1 : r8[1];
-
     if ((double)fin[0] + fin[1] > (double)r8[0] + r8[1]) T.p_viol += 1;
     if (fin[0] > r8[0]) T.p_side_up += 1;
     if (fin[1] > r8[1]) T.p_side_up += 1;
@@ -4697,19 +4653,15 @@ static void post14(Engine& E, PipeStep& PS, StepBatch& SB, int n, float* err, fl
   T.p_ebmb += g_ebmb_call; g_ebmb_call = 0;
   (void)w_grid; (void)gpu_pb; (void)grid_pre;
 }
-
-
 static int g_post16 = 2;
 static std::vector<int32_t> g_loc16;
 struct Loc16Reset { std::vector<int32_t>& v; const std::vector<int>& u; ~Loc16Reset() { for (int j : u) v[(size_t)j] = -1; } };
-
 static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int>& cand, float* err, float* rx, float* ry, Times& T) {
   auto tw = clk::now();
   PostWall14 pw{T, tw};
   const std::vector<int>& ct = SB.ct; const std::vector<uint8_t>& admit = *PS.admit;
   const Unique& UQ = SB.UQ;
   const int call = ++g_post_call;
-
   std::vector<int> K0;
   for (int i : cand) {
     if (!admit[i]) continue;
@@ -4719,13 +4671,11 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
     K0.push_back(i);
   }
   if (K0.empty()) return;
-
   if (g_loc16.size() < 2 * (size_t)PS.n + 2) g_loc16.assign(2 * (size_t)PS.n + 2, -1);
   std::vector<int> ulist;
   for (int i : K0) for (int s = 0; s < 2; s++) { const int j = ct[(size_t)i * 2 + s]; if (g_loc16[(size_t)j] < 0) { g_loc16[(size_t)j] = (int)ulist.size(); ulist.push_back(j); } }
   Loc16Reset loc_reset{g_loc16, ulist};
   const size_t NL = ulist.size();
-
   std::vector<char> okg(NL, 0), okp(NL, 0);
   std::vector<uint32_t> gtok, ptok, gh(4 * NL, 0), ph(4 * NL, 0), gsg(36 * NL, 0), psg(36 * NL, 0), gpj(NL, 0);
   std::vector<uint16_t> gsp, psp;
@@ -4747,7 +4697,6 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
     }
   }
   for (int z = 0; z < 8; z++) { gtok.push_back(0); ptok.push_back(0); }
-
   std::vector<int> K;
   for (int i : K0) {
     const size_t la = (size_t)g_loc16[(size_t)ct[(size_t)i * 2]], lb = (size_t)g_loc16[(size_t)ct[(size_t)i * 2 + 1]];
@@ -4756,7 +4705,6 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
   const int nK = (int)K.size();
   T.p_cand += nK;
   if (nK == 0) return;
-
   std::vector<float> thc[2], aL[2];
   for (int s = 0; s < 2; s++) {
     thc[s].assign(NL * 32, 0.0f); aL[s].assign(NL * 16, 0.0f);
@@ -4765,7 +4713,6 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
       std::memcpy(&aL[s][16 * l], &F14.a[s][16 * (size_t)ulist[l]], 16 * sizeof(float));
     }
   }
-
   id<MTLBuffer> bTok = E.B(gtok.data(), gtok.size() * 4), bHdr = E.B(gh.data(), gh.size() * 4), bSp = E.B(gsp.data(), gsp.size() * 2 + 2), bSg = E.B(gsg.data(), gsg.size() * 4);
   id<MTLBuffer> bPtok = E.B(ptok.data(), ptok.size() * 4), bPsp = E.B(psp.data(), psp.size() * 2 + 2);
   std::vector<uint32_t> qv(NL, 0); for (size_t l = 0; l < NL; l++) if (okg[l]) qv[l] = (uint32_t)UQ.U[(size_t)ulist[l]].Q;
@@ -4806,24 +4753,23 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
   double gpu_grid = 0, w_grid = 0;
   {
     auto t0 = clk::now();
+    auto wd_enc = [&]() -> id<MTLCommandBuffer> {
     id<MTLCommandBuffer> cb = h182_cb(E.cq);
     id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
     for (auto& g : GB) {
       [en setComputePipelineState:gps];
-
       id<MTLBuffer> bs[10] = {bTok, bHdr, bSp, bSg, bTh[g.side], bAa[g.side], bQ, g.tl, bOid[g.side], bGout};
       for (int k = 0; k < 10; k++) [en setBuffer:bs[k] offset:0 atIndex:k];
       [en setBytes:g.pd length:8 atIndex:10]; [en setThreadgroupMemoryLength:g.tgb atIndex:0];
       [en dispatchThreadgroups:MTLSizeMake(g.ntg, 1, 1) threadsPerThreadgroup:MTLSizeMake(32 * (size_t)g.tpg, 1, 1)];
     }
-    [en endEncoding]; [cb commit]; [cb waitUntilCompleted];
-    if (cb.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "I16 grid command buffer failed\n"); h182_dump(cb, "I16 grid"); gpu_fail(); }
+    [en endEncoding]; [cb commit];
+    return cb; };
+    id<MTLCommandBuffer> cb = wd_run(WD_GRID, wd_enc, nullptr);
     gpu_grid = (cb.GPUEndTime - cb.GPUStartTime) * 1e3; w_grid = ms_since(t0);
   }
   T.p_enc += ms_since(tw) - w_grid;
   T.p_grid += gpu_grid;
-
-
   static band::Tables BT = band::make_tables();
   static float STR[2 * band::NROW];
   for (int i = 0; i < band::NROW; i++) { STR[2 * i] = E.tg[0].yf[i]; STR[2 * i + 1] = E.tg[1].yf[i]; }
@@ -4844,6 +4790,7 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
     auto t0 = clk::now();
     id<MTLComputePipelineState> pg = E.pipe(E.Lb, "post_gather_i14"), pb = E.pipe(E.Lb, "band_lane"), pr = E.pipe(E.Lb, "post_repair_i14");
     if (!pg || !pb || !pr) { fprintf(stderr, "I14: band pipeline missing\n"); exit(1); }
+    auto wd_enc = [&]() -> id<MTLCommandBuffer> {
     id<MTLCommandBuffer> cb = h182_cb(E.cq);
     id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
     [en setComputePipelineState:pg];
@@ -4860,13 +4807,12 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
     [en setComputePipelineState:pr];
     [en setBuffer:bOT offset:0 atIndex:0]; [en setBuffer:bOS offset:0 atIndex:1]; [en setBuffer:bTV offset:0 atIndex:2]; [en setBytes:&Pk length:4 atIndex:3];
     [en dispatchThreadgroups:MTLSizeMake(((size_t)nK + 63) / 64, 1, 1) threadsPerThreadgroup:MTLSizeMake(64, 1, 1)];
-    [en endEncoding]; [cb commit]; [cb waitUntilCompleted];
-    if (cb.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "I14 band command buffer failed\n"); h182_dump(cb, "I14 band"); gpu_fail(); }
+    [en endEncoding]; [cb commit];
+    return cb; };
+    id<MTLCommandBuffer> cb = wd_run(WD_BAND, wd_enc, nullptr);
     gpu_band = (cb.GPUEndTime - cb.GPUStartTime) * 1e3; w_band = ms_since(t0);
   }
   T.p_band += gpu_band;
-
-
   if (g_chk_band > 0) {
     const float* G = (const float*)bGout.contents;
     const uint32_t* rw = (const uint32_t*)bRows.contents; const float* OO = (const float*)bOO.contents;
@@ -4891,8 +4837,6 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
       for (int i = 1; i < band::NROW; i++) if (TV[k * 48 + i] < TV[k * 48 + i - 1]) { T.p_chk_mono += 1; break; }
     }
   }
-
-
   std::vector<uint32_t> PQ[2], PN[2], PG[2], PH[2], PSG[2], PST[2];
   std::vector<float> PTH[2], PRS[2], PA[2];
   for (int s = 0; s < 2; s++) {
@@ -4917,15 +4861,11 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
     SBf[s].yv = E.B(E.tg[s].yf, sizeof E.tg[s].yf);
   }
   id<MTLBuffer> bPHtok = bPtok, bPHsp = bPsp;
-
-
   std::vector<P14Bin> binsP; long ndrop = 0;
   for (int s = 0; s < 2; s++) { std::vector<int> qs(nK); for (int k = 0; k < nK; k++) qs[k] = k; p14_bins(E, s, qs, PQ[s], PN[s], PG[s], binsP, ndrop); }
   T.p_ndrop += (double)ndrop;
   double gpu_pb = 0;
   { auto t0 = clk::now(); gpu_pb = p14_run(E, binsP, SBf, bPHtok, bPHsp, bTV, 3.0f, 0.0f); T.p_pb += gpu_pb; T.p_pb_wall += ms_since(t0); }
-
-
   std::vector<char> acc[2];
   acc[0].assign(nK, 0); acc[1].assign(nK, 0);
   {
@@ -4937,7 +4877,6 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
       if (std::isfinite(rbx) && std::isfinite(rby) && rbx + rby <= r8x + r8y) { acc[0][k] = 1; acc[1][k] = 1; }
     }
   }
-
   if (g_time14) {
     P14Buf SBt[2];
     for (int s = 0; s < 2; s++) {
@@ -4949,7 +4888,6 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
     auto t0 = clk::now(); const double g = p14_run(E, binsP, SBt, bPHtok, bPHsp, bTV, 0.0f, 0.0f);
     T.p_pa += g; T.p_pa_wall += ms_since(t0);
   }
-
   if (g_chk_fin > 0) {
     int done = 0;
     for (int s = 0; s < 2 && done < g_chk_fin; s++) {
@@ -4970,12 +4908,10 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
         if (bad) T.p_fin_bad += 1;
         const double tau_v = (double)tr.Q * 9.0 * ldexp(1.0, -24);
         if (g_minratio < 10 * tau_v) { T.p_fin_lo += 1; if (bad) T.p_fin_lobad += 1; }
-
         done++;
       }
     }
   }
-
   auto to = clk::now();
   if (g_dump14.size() && !g_dumpf) g_dumpf = fopen(g_dump14.c_str(), "w");
   if (g_dumpf && call == 1) fprintf(g_dumpf, "call,child,rx8,ry8,rxf,ryf,acc0,acc1\n");
@@ -4987,7 +4923,6 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
     ac[0] = ac[1] = acc[0][k] ? 1 : 0;
     if (ac[0] && (!std::isfinite(rf0) || !std::isfinite(rf1))) { T.p_fb += 1; ac[0] = ac[1] = 0; }
     fin[0] = ac[0] ? rf0 : r8[0]; fin[1] = ac[1] ? rf1 : r8[1];
-
     if ((double)fin[0] + fin[1] > (double)r8[0] + r8[1]) T.p_viol += 1;
     if (fin[0] > r8[0]) T.p_side_up += 1;
     if (fin[1] > r8[1]) T.p_side_up += 1;
@@ -5001,10 +4936,7 @@ static void post16(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int
   T.p_ebmb += g_ebmb_call; g_ebmb_call = 0;
   (void)gpu_pb;
 }
-
-
 #define H53_CH 1024
-
 static bool h900_inplace(id<MTLDevice> dev, __strong id<MTLBuffer>& b, size_t& cap, char*& ip, size_t& ipres, unsigned char& ipst, size_t bytes, const char* nm) {
   if (ipst == 2) return false;
   size_t len = al5(std::max<size_t>(bytes, 256), 16384);
@@ -5031,7 +4963,6 @@ struct H53Buf {
   }
 };
 struct H53Task { std::vector<uint32_t> p4, gt, pt; std::vector<uint16_t> gs, ps; size_t og = 0, os = 0, op = 0, ops = 0; size_t l0 = 0, l1 = 0; };
-
 struct H117G { int side = 0; uint32_t pd[2] = {0, 0}; int tpg = 1; size_t ntg = 0, tgb = 0; std::vector<uint32_t> tl; };
 struct H53Scr {
   size_t h731_gb = 0, h731_kb = 0; std::vector<id<MTLCommandBuffer>> h731_cbs;
@@ -5043,7 +4974,6 @@ struct H53Scr {
   std::vector<uint32_t> psg, gpj;
   std::vector<std::vector<uint32_t>> bins;
   std::vector<std::vector<int>> kb;
-
   size_t nt_done = 0, k_done = 0, gw_run = 0, gs_run = 0, pw_run = 0, ps_run = 0;
   H53Buf rows, phb[2], psgb[2], pthb[2], prsb[2], pab[2], stiob[2];
   std::vector<uint32_t> PQ[2], PN[2], PG[2];
@@ -5059,8 +4989,6 @@ static H53Scr* g_h53p = &g_h53sb[0];
 static int g_h91 = 0;
 static int g_h92 = 3;
 static int g_h53 = 1;
-
-
 static int g_h84 = 2;
 static int h84_nb(size_t n, size_t gr) { return (g_h84 && n >= 2 * gr) ? (int)((n + gr - 1) / gr) : 1; }
 static void h84_run(Engine& E, size_t n, size_t gr, const std::function<void(size_t, size_t, int)>& f) {
@@ -5069,10 +4997,7 @@ static void h84_run(Engine& E, size_t n, size_t gr, const std::function<void(siz
   PL(E).run(nb, [&](int b) { f((size_t)b * gr, std::min(n, ((size_t)b + 1) * gr), b); });
 }
 static void kb_fit(H53Scr& HS, int nb) { if ((int)HS.kb.size() < nb) HS.kb.resize((size_t)nb); }
-
-
 static inline bool postlin_side(const StepBatch& SB, int s, int uid) { return SB.F[s].is_g[(size_t)uid] || (postlin_on(s) && SB.UQ.U[(size_t)uid].nth == 0); }
-
 static void post_lin_a(Engine& E, const Unique& UQ, int s, int uid) {
   const Tree& tr = UQ.U[(size_t)uid]; float* ap = &F14.a[s][16 * (size_t)uid]; for (int q = 0; q < 16; q++) ap[q] = 0.0f;
   const int Q = tr.Q; if (Q < 1 || Q > 16) return;
@@ -5114,7 +5039,6 @@ static void post16_h53_prep(Engine& E, PipeStep& PS, StepBatch& SB, const std::v
     HS.bAa[0] = HS.aa[0].get(dev, CAP * 64); HS.bAa[1] = HS.aa[1].get(dev, CAP * 64);
     HS.okg.resize(CAP); HS.okp.resize(CAP); HS.psg.resize(36 * CAP); HS.gpj.resize(CAP);
   }
-
   const size_t NC = cand.size(), GR = 4096;
   kb_fit(HS, h84_nb(NC, GR));
   h84_run(E, NC, GR, [&](size_t lo, size_t hi, int bi) {
@@ -5130,7 +5054,6 @@ static void post16_h53_prep(Engine& E, PipeStep& PS, StepBatch& SB, const std::v
   });
   const size_t k0b = HS.K0.size();
   for (size_t bi = 0; bi < (size_t)h84_nb(NC, GR); bi++) HS.K0.insert(HS.K0.end(), HS.kb[bi].begin(), HS.kb[bi].end());
-
   std::vector<int>& ulist = HS.ulist;
   const size_t L0 = ulist.size();
   for (size_t q = k0b; q < HS.K0.size(); q++) {
@@ -5138,8 +5061,6 @@ static void post16_h53_prep(Engine& E, PipeStep& PS, StepBatch& SB, const std::v
     for (int s = 0; s < 2; s++) { const int j = ct[(size_t)i * 2 + s]; if (g_loc16[(size_t)j] < 0) { g_loc16[(size_t)j] = (int)ulist.size(); ulist.push_back(j); } }
   }
   const size_t NL = ulist.size();
-
-
   const int NCH = (int)((NL - L0 + H53_CH - 1) / H53_CH);
   const size_t T0 = HS.ntask;
   if (HS.task.size() < T0 + (size_t)NCH) HS.task.resize(T0 + (size_t)NCH);
@@ -5161,7 +5082,6 @@ static void post16_h53_prep(Engine& E, PipeStep& PS, StepBatch& SB, const std::v
       auto pf_payload = [&](size_t l) { const int jj = ul[l]; const Tree& t2 = UQ.U[(size_t)jj]; const TreeEnc& e2 = UQ.enc[(size_t)jj];
         pf_lines(h313a::prog(t2), std::min<size_t>(h313a::nprog(t2) * 4, 512)); pf_lines(h313a::segs(t2), 72); pf_lines(t2.sp.data(), std::min<size_t>(t2.sp.size() * 2, 128));
         if (e2.g_ok) pf_lines(e2.pgp(), std::min<size_t>((size_t)e2.ngp() * 4, 512)); };
-
       if (pf) for (size_t k = 0; k < 4 && l0 + k < l1; k++) { pf_struct(l0 + k); if (k < 2) pf_payload(l0 + k); }
       for (size_t l = l0; l < l1; l++) {
         if (pf) { if (l + 4 < l1) pf_struct(l + 4); if (l + 2 < l1) pf_payload(l + 2); }
@@ -5208,7 +5128,6 @@ static void post16_h53_prep(Engine& E, PipeStep& PS, StepBatch& SB, const std::v
       uint32_t* hd = hdrd + 4 * l; uint32_t* sgl = sgd + 36 * l; uint32_t* pl = phd + 4 * l;
       std::memset(hd, 0, 16); std::memset(sgl, 0, 36 * 4); std::memset(pl, 0, 16);
       okgd[l] = 0; okpd[l] = 0; gpjd[l] = 0; std::memset(psgd + 36 * l, 0, 36 * 4);
-
       uint32_t hw = 0;
       tk.p4.clear();
       if (zgconv14(tr, tk.p4, sgl, hw)) {
@@ -5217,7 +5136,6 @@ static void post16_h53_prep(Engine& E, PipeStep& PS, StepBatch& SB, const std::v
         hd[2] = (uint32_t)tk.gs.size(); hd[3] = hw;
         tk.gt.insert(tk.gt.end(), tk.p4.begin(), tk.p4.end()); tk.gs.insert(tk.gs.end(), tr.sp.begin(), tr.sp.end());
       }
-
       if (te.g_ok) {
         okpd[l] = 1; gpjd[l] = te.gper;
         pl[0] = (uint32_t)(tk.pt.size() / 4); pl[1] = (uint32_t)(te.ngp() / 4) | ((uint32_t)tr.nS << 16);
@@ -5225,14 +5143,11 @@ static void post16_h53_prep(Engine& E, PipeStep& PS, StepBatch& SB, const std::v
         tk.pt.insert(tk.pt.end(), te.pgp(), te.pgp() + te.ngp()); tk.ps.insert(tk.ps.end(), tr.sp.begin(), tr.sp.end());
         for (int q = 0; q < 36; q++) psgd[36 * l + q] = te.gg[q];
       }
-
-
       qd[l] = okgd[l] ? (uint32_t)UQ.U[(size_t)j].Q : 0u;
       oid0[l] = (uint32_t)(l * 2); oid1[l] = (uint32_t)(l * 2 + 1);
     }
   });
   HS.ntask = T0 + (size_t)NCH;
-
   const size_t NK0 = HS.K0.size() - k0b;
   kb_fit(HS, h84_nb(NK0, GR));
   h84_run(E, NK0, GR, [&](size_t lo, size_t hi, int bi) {
@@ -5252,8 +5167,6 @@ static void post16_h53_prep(Engine& E, PipeStep& PS, StepBatch& SB, const std::v
   for (size_t bi = 0; bi < (size_t)h84_nb(NK0, GR); bi++) HS.K.insert(HS.K.end(), HS.kb[bi].begin(), HS.kb[bi].end());
   T.p_enc += ms_since(tw);
 }
-
-
 static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, float* rx, float* ry, Times& T) {
   auto tw = clk::now();
   PostWall14 pw{T, tw};
@@ -5265,8 +5178,6 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
   Loc16Reset loc_reset{g_loc16, HS.ulist};
   if (!HS.open || HS.K0.empty()) return;
   const size_t NL = HS.ulist.size();
-
-
   size_t gw = 0, gsn = 0, pwd = 0, psn = 0;
   for (size_t c = 0; c < HS.ntask; c++) {
     H53Task& tk = HS.task[c];
@@ -5293,8 +5204,6 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
   for (int z = 0; z < 8; z++) { tokd[gw + z] = 0; ptd[pwd + z] = 0; }
   { uint8_t* sb = (uint8_t*)bSp.contents; sb[gsn * 2] = 0; sb[gsn * 2 + 1] = 0;
     uint8_t* pb = (uint8_t*)bPsp.contents; pb[psn * 2] = 0; pb[psn * 2 + 1] = 0; }
-
-
   {
     float* thw[2] = {(float*)HS.bTh[0].contents, (float*)HS.bTh[1].contents};
     float* aaw[2] = {(float*)HS.bAa[0].contents, (float*)HS.bAa[1].contents};
@@ -5312,14 +5221,12 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
   const std::vector<int>& K = HS.K; const int nK = (int)K.size();
   T.p_cand += nK;
   if (nK == 0) return;
-
   id<MTLBuffer> bHdr = HS.bHdr, bPH = HS.bPH, bSg = HS.bSg, bQ = HS.bQ;
   id<MTLBuffer> bOid[2] = {HS.bOid[0], HS.bOid[1]}, bTh[2] = {HS.bTh[0], HS.bTh[1]}, bAa[2] = {HS.bAa[0], HS.bAa[1]};
   id<MTLBuffer> bPHtok = bPtok, bPHsp = bPsp;
   const uint32_t* ph = (const uint32_t*)bPH.contents;
   const float* thc[2] = {(const float*)bTh[0].contents, (const float*)bTh[1].contents};
   std::vector<uint32_t>& psg = HS.psg; std::vector<uint32_t>& gpj = HS.gpj;
-
   id<MTLBuffer> bGout = HS.gout.get(dev, std::max<size_t>(NL * 128 * 4, 256));
   struct G16 { int side; uint32_t pd[2]; int tpg; size_t ntg, tgb; id<MTLBuffer> tl; };
   std::vector<G16> GB;
@@ -5327,7 +5234,6 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
   if (!gps) { fprintf(stderr, "I16: grid_h26 pipeline missing\n"); exit(1); }
   double gpu_grid = 0, w_grid = 0;
   for (int s = 0; s < 2; s++) {
-
     for (auto& v : HS.bins) v.clear();
     HS.seen.assign(NL, 0);
     for (int i : K) {
@@ -5354,23 +5260,23 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
   }
   {
     auto t0 = clk::now();
+    auto wd_enc = [&]() -> id<MTLCommandBuffer> {
     id<MTLCommandBuffer> cb = h182_cb(E.cq);
     id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
     for (auto& g : GB) {
       [en setComputePipelineState:gps];
-
       id<MTLBuffer> bs[10] = {bTok, bHdr, bSp, bSg, bTh[g.side], bAa[g.side], bQ, g.tl, bOid[g.side], bGout};
       for (int k = 0; k < 10; k++) [en setBuffer:bs[k] offset:0 atIndex:k];
       [en setBytes:g.pd length:8 atIndex:10]; [en setThreadgroupMemoryLength:g.tgb atIndex:0];
       [en dispatchThreadgroups:MTLSizeMake(g.ntg, 1, 1) threadsPerThreadgroup:MTLSizeMake(32 * (size_t)g.tpg, 1, 1)];
     }
-    [en endEncoding]; [cb commit]; [cb waitUntilCompleted];
-    if (cb.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "I16 grid command buffer failed\n"); h182_dump(cb, "I16 grid"); gpu_fail(); }
+    [en endEncoding]; [cb commit];
+    return cb; };
+    id<MTLCommandBuffer> cb = wd_run(WD_GRID, wd_enc, nullptr);
     gpu_grid = (cb.GPUEndTime - cb.GPUStartTime) * 1e3; w_grid = ms_since(t0);
   }
   T.p_enc += ms_since(tw) - w_grid;
   T.p_grid += gpu_grid;
-
   static band::Tables BT = band::make_tables();
   static float STR[2 * band::NROW];
   for (int i = 0; i < band::NROW; i++) { STR[2 * i] = E.tg[0].yf[i]; STR[2 * i + 1] = E.tg[1].yf[i]; }
@@ -5393,6 +5299,7 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
     auto t0 = clk::now();
     id<MTLComputePipelineState> pg = E.pipe(E.Lb, "post_gather_i14"), pb = E.pipe(E.Lb, "band_lane"), pr = E.pipe(E.Lb, "post_repair_i14");
     if (!pg || !pb || !pr) { fprintf(stderr, "I14: band pipeline missing\n"); exit(1); }
+    auto wd_enc = [&]() -> id<MTLCommandBuffer> {
     id<MTLCommandBuffer> cb = h182_cb(E.cq);
     id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
     [en setComputePipelineState:pg];
@@ -5409,13 +5316,12 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
     [en setComputePipelineState:pr];
     [en setBuffer:bOT offset:0 atIndex:0]; [en setBuffer:bOS offset:0 atIndex:1]; [en setBuffer:bTV offset:0 atIndex:2]; [en setBytes:&Pk length:4 atIndex:3];
     [en dispatchThreadgroups:MTLSizeMake(((size_t)nK + 63) / 64, 1, 1) threadsPerThreadgroup:MTLSizeMake(64, 1, 1)];
-    [en endEncoding]; [cb commit]; [cb waitUntilCompleted];
-    if (cb.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "I14 band command buffer failed\n"); h182_dump(cb, "I14 band"); gpu_fail(); }
+    [en endEncoding]; [cb commit];
+    return cb; };
+    id<MTLCommandBuffer> cb = wd_run(WD_BAND, wd_enc, nullptr);
     gpu_band = (cb.GPUEndTime - cb.GPUStartTime) * 1e3; w_band = ms_since(t0);
   }
   T.p_band += gpu_band;
-
-
   if (g_chk_band > 0) {
     const float* G = (const float*)bGout.contents;
     const uint32_t* rw = (const uint32_t*)bRows.contents; const float* OO = (const float*)bOO.contents;
@@ -5440,8 +5346,6 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
       for (int i = 1; i < band::NROW; i++) if (TV[k * 48 + i] < TV[k * 48 + i - 1]) { T.p_chk_mono += 1; break; }
     }
   }
-
-
   std::vector<uint32_t> PQ[2], PN[2], PG[2], PH[2], PSG[2], PST[2];
   std::vector<float> PTH[2], PRS[2], PA[2];
   for (int s = 0; s < 2; s++) {
@@ -5467,16 +5371,12 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
     SBf[s].stio = E.B(PST[s].data(), PST[s].size() * 4);
     SBf[s].yv = E.B(E.tg[s].yf, sizeof E.tg[s].yf);
   }
-
-
   std::vector<P14Bin> binsP; long ndrop = 0;
   for (int s = 0; s < 2; s++) { std::vector<int> qs(nK); for (int k = 0; k < nK; k++) qs[k] = k; p14_bins(E, s, qs, PQ[s], PN[s], PG[s], binsP, ndrop); }
   T.p_ndrop += (double)ndrop;
   double gpu_pb = 0;
   { auto t0 = clk::now(); gpu_pb = p14_run(E, binsP, SBf, bPHtok, bPHsp, bTV, 3.0f, 0.0f); T.p_pb += gpu_pb; T.p_pb_wall += ms_since(t0); }
   const float* rs0d = (const float*)SBf[0].rs.contents; const float* rs1d = (const float*)SBf[1].rs.contents;
-
-
   std::vector<char> acc[2];
   acc[0].assign(nK, 0); acc[1].assign(nK, 0);
   h84_run(E, (size_t)nK, 4096, [&](size_t lo, size_t hi, int) {
@@ -5487,7 +5387,6 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
       if (std::isfinite(rbx) && std::isfinite(rby) && rbx + rby <= r8x + r8y) { acc[0][k] = 1; acc[1][k] = 1; }
     }
   });
-
   if (g_time14) {
     P14Buf SBt[2];
     for (int s = 0; s < 2; s++) {
@@ -5499,7 +5398,6 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
     auto t0 = clk::now(); const double g = p14_run(E, binsP, SBt, bPHtok, bPHsp, bTV, 0.0f, 0.0f);
     T.p_pa += g; T.p_pa_wall += ms_since(t0);
   }
-
   if (g_chk_fin > 0) {
     int done = 0;
     for (int s = 0; s < 2 && done < g_chk_fin; s++) {
@@ -5524,8 +5422,6 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
       }
     }
   }
-
-
   auto to = clk::now();
   if (g_dump14.size() && !g_dumpf) g_dumpf = fopen(g_dump14.c_str(), "w");
   if (g_dumpf && HS.call == 1) fprintf(g_dumpf, "call,child,rx8,ry8,rxf,ryf,acc0,acc1\n");
@@ -5544,7 +5440,6 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
       ac[0] = ac[1] = acc[0][k] ? 1 : 0;
       if (ac[0] && (!std::isfinite(rf0) || !std::isfinite(rf1))) { cn.fb += 1; ac[0] = ac[1] = 0; }
       fin[0] = ac[0] ? rf0 : r8[0]; fin[1] = ac[1] ? rf1 : r8[1];
-
       if ((double)fin[0] + fin[1] > (double)r8[0] + r8[1]) cn.viol += 1;
       if (fin[0] > r8[0]) cn.up += 1;
       if (fin[1] > r8[1]) cn.up += 1;
@@ -5562,8 +5457,6 @@ static void post16_h53_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, f
   T.p_ebmb += g_ebmb_call; g_ebmb_call = 0;
   (void)gpu_pb;
 }
-
-
 struct H91Slot {
   H53Scr hs; GBuf pe, pc;
   id<MTLCommandBuffer> cb = nil; bool pend = false;
@@ -5579,7 +5472,6 @@ static double g_h406_rg = 0, g_h406_rc = 0;
 struct H240bItem { int side, Q; float floor_; uint32_t tree, per; };
 static void h406_launch(Engine& E, std::shared_ptr<std::vector<H240bItem>> items, const P14Buf* SBf, id<MTLBuffer> tok, id<MTLBuffer> psp,
                         id<MTLBuffer> tvec, id<MTLCommandBuffer> cb, H91Slot& SL);
-
 static const int g_h299 = getenv("H299") ? atoi(getenv("H299")) : 0;
 struct H299Queue { std::mutex m; std::condition_variable cv; std::deque<std::pair<std::function<void()>, std::shared_ptr<FitJob242>>> q; bool started = false; };
 static H299Queue g_h299q;
@@ -5608,12 +5500,9 @@ static void h299_join(std::shared_ptr<FitJob242>& j) {
   if (!j) return;
   std::unique_lock<std::mutex> lk(j->m); j->cv.wait(lk, [&] { return j->done; }); lk.unlock(); j.reset();
 }
-
 static void h299_launch(Engine& E, const std::vector<P14Bin>& bins, const P14Buf* SBf, id<MTLBuffer> tok, id<MTLBuffer> psp,
                         id<MTLBuffer> tvec, id<MTLCommandBuffer> cb, H91Slot& SL);
 static id<MTLCommandQueue> g_q91 = nil;
-
-
 static size_t g_h894_need = 0, g_h894_last_eo = 0; static id<MTLCommandQueue> g_h894q = nil; static id<MTLCommandBuffer> g_h894cb = nil;
 static void h894_join() { if (g_h894cb) { [g_h894cb waitUntilCompleted]; g_h894cb = nil; } }
 static void h894_pregrow(id<MTLDevice> dev, GBuf& pe) {
@@ -5629,7 +5518,6 @@ static void h894_pregrow(id<MTLDevice> dev, GBuf& pe) {
   [bl endEncoding]; [cb commit]; g_h894cb = cb;
   if (g_h894 & 16) fprintf(stderr, "H894 pregrow: need %.1f MB -> cap %.1f MB\n", (double)g_h894_need / 1048576.0, (double)pe.cap / 1048576.0);
 }
-
 static const H91Slot* g_h899_fin = nullptr;
 struct H899Pe { id<MTLHeap> heap = nil; size_t hsize = 0; id<MTLCommandBuffer> last = nil; };
 static H899Pe g_h899_pe;
@@ -5655,7 +5543,6 @@ static void h899_pe_ensure(Engine& E, GBuf& pe, size_t eo, id<MTLCommandBuffer> 
 static void p14_encode_h91(Engine& E, id<MTLCommandBuffer> cb, std::vector<P14Bin>& bins, const P14Buf* SBf, id<MTLBuffer> tok,
                            id<MTLBuffer> psp, id<MTLBuffer> tvec, float itmax, float skipf, H91Slot& SL) {
   if (bins.empty()) return;
-
   if (h94_mode() >= 1) {
     std::vector<size_t> nat(bins.size()), tgb(bins.size()), cnt(bins.size()), cap(bins.size()); size_t before = 0, after = 0, ntr = 0;
     for (size_t b = 0; b < bins.size(); b++) {
@@ -5697,8 +5584,6 @@ static void p14_encode_h91(Engine& E, id<MTLCommandBuffer> cb, std::vector<P14Bi
   }
   [en endEncoding];
 }
-
-
 static void post16_h91_enc(Engine& E, PipeStep& PS, StepBatch& SB, H91Slot& SL, Times& T) {
   auto tw = clk::now();
   PostWall14 pw{T, tw};
@@ -5732,8 +5617,6 @@ static void post16_h91_enc(Engine& E, PipeStep& PS, StepBatch& SB, H91Slot& SL, 
   for (int z = 0; z < 8; z++) { tokd[gw + z] = 0; ptd[pwd + z] = 0; }
   { uint8_t* sb = (uint8_t*)bSp.contents; sb[gsn * 2] = 0; sb[gsn * 2 + 1] = 0;
     uint8_t* pb = (uint8_t*)bPsp.contents; pb[psn * 2] = 0; pb[psn * 2 + 1] = 0; }
-
-
   {
     float* thw[2] = {(float*)HS.bTh[0].contents, (float*)HS.bTh[1].contents};
     float* aaw[2] = {(float*)HS.bAa[0].contents, (float*)HS.bAa[1].contents};
@@ -5761,7 +5644,6 @@ static void post16_h91_enc(Engine& E, PipeStep& PS, StepBatch& SB, H91Slot& SL, 
   id<MTLBuffer> bGout = HS.gout.get(dev, std::max<size_t>(NL * 128 * 4, 256));
   if (!g_q91) g_q91 = [dev newCommandQueue];
   id<MTLCommandBuffer> cb = h182_cb(g_q91);
-
   struct G91 { int side; uint32_t pd[2]; int tpg; size_t ntg, tgb; id<MTLBuffer> tl; };
   std::vector<G91> GB;
   id<MTLComputePipelineState> gps = E.pipe(E.Lgr, "grid_h26");
@@ -5802,7 +5684,6 @@ static void post16_h91_enc(Engine& E, PipeStep& PS, StepBatch& SB, H91Slot& SL, 
     }
     [en endEncoding];
   }
-
   static band::Tables BT = band::make_tables();
   static float STR[2 * band::NROW];
   for (int i = 0; i < band::NROW; i++) { STR[2 * i] = E.tg[0].yf[i]; STR[2 * i + 1] = E.tg[1].yf[i]; }
@@ -5840,7 +5721,6 @@ static void post16_h91_enc(Engine& E, PipeStep& PS, StepBatch& SB, H91Slot& SL, 
     [en dispatchThreadgroups:MTLSizeMake(((size_t)nK + 63) / 64, 1, 1) threadsPerThreadgroup:MTLSizeMake(64, 1, 1)];
     [en endEncoding];
   }
-
   std::vector<uint32_t> PQ[2], PN[2], PG[2], PH[2], PSG[2], PST[2];
   std::vector<float> PTH[2], PRS[2], PA[2];
   for (int s = 0; s < 2; s++) {
@@ -5866,7 +5746,6 @@ static void post16_h91_enc(Engine& E, PipeStep& PS, StepBatch& SB, H91Slot& SL, 
     SBf[s].stio = E.B(PST[s].data(), PST[s].size() * 4);
     SBf[s].yv = E.B(E.tg[s].yf, sizeof E.tg[s].yf);
   }
-
   std::vector<P14Bin> binsP; long ndrop = 0;
   for (int s = 0; s < 2; s++) { std::vector<int> qs(nK); for (int k = 0; k < nK; k++) qs[k] = k; p14_bins(E, s, qs, PQ[s], PN[s], PG[s], binsP, ndrop); }
   T.p_ndrop += (double)ndrop;
@@ -5901,8 +5780,6 @@ static void post16_h91_enc(Engine& E, PipeStep& PS, StepBatch& SB, H91Slot& SL, 
   for (int s = 0; s < 2; s++) SL.SBf[s] = SBf[s];
   T.p_ebmb += g_ebmb_call; g_ebmb_call = 0;
 }
-
-
 static void post16_h91_col(Engine& E, H91Slot& SL, StepBatch& SB, float* err, float* rx, float* ry, Times& T) {
   if (!SL.pend) return;
   auto t0 = clk::now();
@@ -5954,10 +5831,7 @@ static void post16_h91_col(Engine& E, H91Slot& SL, StepBatch& SB, float* err, fl
   });
   for (const OutCnt& cn : oc) { T.p_viol += cn.viol; T.p_side_up += cn.up; T.p_acc0 += cn.a0; T.p_acc1 += cn.a1; T.p_fb += cn.fb; }
 }
-
-
 static int g_h117 = 15;
-
 static int g_h131 = 7;
 struct H131Buf { id<MTLBuffer> b = nil; size_t cap = 0; };
 struct H131Pool { H131Buf curve, ot, os, oo, tv, str, tb, td, tvl, yv[2]; std::vector<H131Buf> tl; };
@@ -5971,19 +5845,15 @@ static id<MTLBuffer> h131_put(id<MTLDevice> dev, H131Buf& P, const void* src, si
   if (bytes) std::memcpy(b.contents, src, bytes);
   return b;
 }
-
 static void h131_prealloc(id<MTLDevice> dev, size_t NP) {
   const size_t nT = (NP + 31) / 32;
   h131_get(dev, g_h131p.curve, nT * 4096 * 4); h131_get(dev, g_h131p.ot, NP * 48 * 4); h131_get(dev, g_h131p.os, NP * 48);
   h131_get(dev, g_h131p.oo, NP * 4); h131_get(dev, g_h131p.tv, NP * 48 * 4 + 64);
 }
-
 struct H4Job { double dump_ms = 0, sets_ms = 0; size_t npair = 0, ntree = 0; };
 static H91Slot g_h117_sl;
 static const int g_h117b = getenv("H117B") ? atoi(getenv("H117B")) : 0;
 static std::vector<H91Slot> g_h117b_sl;
-
-
 static void h117_reserve(H53Buf& hb, id<MTLDevice> dev, size_t bytes, size_t used) {
   bytes = std::max<size_t>(bytes, 256);
   if (hb.b && hb.cap >= bytes && !(g_h900 & 8)) return;
@@ -5994,7 +5864,6 @@ static void h117_reserve(H53Buf& hb, id<MTLDevice> dev, size_t bytes, size_t use
   if (hb.b && used) std::memcpy(nb.contents, hb.b.contents, std::min(used, hb.cap));
   hb.b = nb; hb.cap = nc;
 }
-
 static void p14_bins_h898(Engine& E, int s, const std::vector<int>& qs, const std::vector<uint32_t>& pq, const std::vector<uint32_t>& pn,
                      const std::vector<uint32_t>& pg, std::vector<P14Bin>& out, long& ndrop) {
   const auto tg0 = clk::now();
@@ -6036,8 +5905,6 @@ static void p14_bins_h898(Engine& E, int s, const std::vector<int>& qs, const st
     out.push_back(g);
   }
 }
-
-
 static void h898_polprep(Engine& E, StepBatch& SB, H53Scr& HS, Times& T, size_t k0, size_t k1, int mode) {
   const auto tp0 = clk::now();
   const std::vector<int>& ct = SB.ct; const Unique& UQ = SB.UQ; const std::vector<int>& K = HS.K;
@@ -6076,7 +5943,6 @@ static void h898_polprep(Engine& E, StepBatch& SB, H53Scr& HS, Times& T, size_t 
   g_h898_arr_ms += ms_since(tp0);
   if (mode == 2) return;
   const auto tp1 = clk::now();
-
   long ndrop = 0;
   for (int s = 0; s < 2; s++) {
     std::vector<int> qs(k1 - k0);
@@ -6092,8 +5958,6 @@ static void h898_flush(Engine& E, StepBatch& SB, H53Scr& HS, Times& T) {
   HS.h898_rng.clear();
   g_h898_fin_ms += ms_since(tp);
 }
-
-
 static void h117_cpu(Engine& E, PipeStep& PS, StepBatch& SB, H53Scr& HS, Times& T) {
   auto tw = clk::now();
   id<MTLDevice> dev = E.dev;
@@ -6106,7 +5970,6 @@ static void h117_cpu(Engine& E, PipeStep& PS, StepBatch& SB, H53Scr& HS, Times& 
     HS.pbins.clear(); HS.gbins.clear(); HS.h898_rng.clear();
     HS.h731_gb = HS.h731_kb = 0; HS.h731_cbs.clear();
   }
-
   const size_t t0 = HS.nt_done, t1 = HS.ntask;
   if (t1 > t0) {
     size_t gw = HS.gw_run, gsn = HS.gs_run, pwd = HS.pw_run, psn = HS.ps_run;
@@ -6139,7 +6002,6 @@ static void h117_cpu(Engine& E, PipeStep& PS, StepBatch& SB, H53Scr& HS, Times& 
       uint8_t* pb = (uint8_t*)HS.psp.b.contents; pb[psn * 2] = 0; pb[psn * 2 + 1] = 0; }
     HS.gw_run = gw; HS.gs_run = gsn; HS.pw_run = pwd; HS.ps_run = psn; HS.nt_done = t1;
   }
-
   const size_t k0 = HS.k_done, k1 = K.size();
   if (k1 > k0) {
     id<MTLComputePipelineState> gps = E.pipe(E.Lgr, "grid_h26");
@@ -6150,7 +6012,6 @@ static void h117_cpu(Engine& E, PipeStep& PS, StepBatch& SB, H53Scr& HS, Times& 
       HS.phb[s].get(dev, n * 16); HS.psgb[s].get(dev, n * 144); HS.pthb[s].get(dev, n * 128);
       HS.prsb[s].get(dev, n * 8); HS.pab[s].get(dev, n * 64); HS.stiob[s].get(dev, n * 4);
     }
-
     std::vector<std::pair<uint32_t, int>> cp[2];
     for (size_t k = k0; k < k1; k++) {
       const int i = K[k];
@@ -6170,7 +6031,6 @@ static void h117_cpu(Engine& E, PipeStep& PS, StepBatch& SB, H53Scr& HS, Times& 
         }
       });
     }
-
     for (int s = 0; s < 2; s++) {
       std::vector<std::vector<uint32_t>> bl;
       for (size_t k = k0; k < k1; k++) {
@@ -6195,7 +6055,6 @@ static void h117_cpu(Engine& E, PipeStep& PS, StepBatch& SB, H53Scr& HS, Times& 
         HS.gbins.push_back(std::move(g));
       }
     }
-
     uint32_t* rw = (uint32_t*)HS.rows.b.contents;
     h84_run(E, k1 - k0, 4096, [&](size_t lo, size_t hi, int) {
       for (size_t q = lo; q < hi; q++) {
@@ -6210,11 +6069,8 @@ static void h117_cpu(Engine& E, PipeStep& PS, StepBatch& SB, H53Scr& HS, Times& 
   }
   T.p_enc += ms_since(tw);
 }
-
-
 #include "polish_cpu_h719.hpp"
 #include "polish_cpu_h719.cpp"
-
 struct H860Dump { std::vector<uint8_t> tok, sp, tv, hdr[2], segs[2], yv[2], th0[2]; struct It { int side, Q; uint32_t tree, per; float fl; }; std::vector<It> items; double ns = 0; };
 static H860Dump* g_h860 = nullptr; static std::atomic<uint64_t> g_h860_cur{0};
 static std::vector<uint8_t> h860_slurp(const std::string& p) {
@@ -6262,8 +6118,6 @@ static void h860_launch(int Kn) {
 static const int g_h240b = getenv("H240B") ? atoi(getenv("H240B")) : 0;
 static const int g_h240bt = getenv("H240BT") ? std::max(1, atoi(getenv("H240BT"))) : 4;
 static double g_h240b_rg = 0, g_h240b_rc = 0;
-
-
 static const int g_h880 = getenv("H880") ? atoi(getenv("H880")) : 0;
 static size_t g_h880_nmax = 0;
 static void h240b_observe(size_t ntot, size_t ngpu, double gpu_ms, size_t ncpu, double cpu_ms) {
@@ -6276,7 +6130,6 @@ static void h240b_observe(size_t ntot, size_t ngpu, double gpu_ms, size_t ncpu, 
   if (cpu_ms > 0 && ncpu > 0) g_h240b_rc = g_h240b_rc > 0 ? 0.5 * g_h240b_rc + 0.5 * ((double)ncpu / cpu_ms) : (double)ncpu / cpu_ms;
 }
 struct H240bSplit { std::vector<H240bItem> items; std::vector<std::pair<size_t, std::vector<uint32_t>>> saved; std::vector<uint64_t> mod; size_t ntot = 0; double f = 0; };
-
 static H240bSplit h240b_mark(Engine& E, H53Scr& HS) {
   H240bSplit sp;
   for (auto& g : HS.pbins) for (size_t k = 1; k < g.tl.size(); k++) if (g.tl[k] != 0xFFFFFFFFu) sp.ntot++;
@@ -6299,8 +6152,6 @@ static void h240b_restore(H53Scr& HS, const H240bSplit& sp) {
   for (const auto& p : sp.saved) HS.pbins[p.first].tl = p.second;
   for (size_t i = 0; i < sp.mod.size(); i++) HS.pbins[(size_t)(sp.mod[i] >> 32)].tl[(size_t)(sp.mod[i] & 0xFFFFFFFFu)] = sp.items[i].tree;
 }
-
-
 static FitHandle fw_submit_nospan265(std::function<void()> f) {
   CpuSpan265* s = g_fit_span; g_fit_span = nullptr; FitHandle h = fw_submit(std::move(f)); g_fit_span = s; return h;
 }
@@ -6362,7 +6213,6 @@ static void h299_launch(Engine& E, const std::vector<P14Bin>& bins, const P14Buf
     *msp = ms;
   });
 }
-
 static void h406_launch(Engine& E, std::shared_ptr<std::vector<H240bItem>> items, const P14Buf* SBf, id<MTLBuffer> tok, id<MTLBuffer> psp,
                         id<MTLBuffer> tvec, id<MTLCommandBuffer> cb, H91Slot& SL) {
   auto sp = std::make_shared<H240bSplit>(); sp->items = std::move(*items); sp->ntot = sp->items.size(); sp->f = 1.0;
@@ -6376,8 +6226,6 @@ static void h406_launch(Engine& E, std::shared_ptr<std::vector<H240bItem>> items
     double ms = 0; h240b_cpu(*sp, bufs->data(), tok, psp, tvec, ms); *msp = ms;
   });
 }
-
-
 struct H670Job {
   H240bSplit sp; P14Buf SBf[2]; id<MTLBuffer> tok, psp, tv; id<MTLCommandBuffer> cbG, cbB, cbP;
   std::thread th; double cpu_ms = 0; bool pending = false;
@@ -6396,7 +6244,6 @@ static void h670_join() {
   const double gpu_ms = (J.cbP.GPUEndTime - J.cbP.GPUStartTime) * 1e3;
   const size_t ngpu = J.sp.ntot - J.sp.items.size();
   h240b_observe(J.sp.ntot, ngpu, gpu_ms, J.sp.items.size(), J.cpu_ms);
-
   const float* rs0d = (const float*)J.SBf[0].rs.contents; const float* rs1d = (const float*)J.SBf[1].rs.contents;
   g_h670_res.clear();
   const size_t nK = J.K.size();
@@ -6423,7 +6270,6 @@ static void h731_wait(H53Scr& HS, double* gpu) {
     if (gpu) gpu[1] += (cb.GPUEndTime - cb.GPUStartTime) * 1e3; }
   HS.h731_cbs.clear();
 }
-
 static id<MTLBuffer> h731_gout(id<MTLDevice> dev, H53Scr& HS, size_t bytes) {
   bytes = std::max<size_t>(bytes, 256);
   if (HS.gout.b && HS.gout.cap >= bytes) return HS.gout.b;
@@ -6472,7 +6318,6 @@ static void h731_enc_band(id<MTLCommandBuffer> cb, const H731BandBufs& B, size_t
   [en dispatchThreadgroups:MTLSizeMake(((size_t)Pk + 63) / 64, 1, 1) threadsPerThreadgroup:MTLSizeMake(64, 1, 1)];
   [en endEncoding];
 }
-
 static H731BandBufs h731_bufs(Engine& E, H53Scr& HS, size_t n, size_t NL) {
   id<MTLDevice> dev = E.dev;
   static band::Tables BT = band::make_tables();
@@ -6487,7 +6332,6 @@ static H731BandBufs h731_bufs(Engine& E, H53Scr& HS, size_t n, size_t NL) {
   B.td = h131_put(dev, g_h131p.td, BT.del, sizeof BT.del); B.tv_tab = h131_put(dev, g_h131p.tvl, BT.valid, sizeof BT.valid);
   return B;
 }
-
 static void h731_chunk(Engine& E, PipeStep& PS, H53Scr& HS, Times& T) {
   if (!HS.open || HS.K.empty()) return;
   const auto t0 = clk::now();
@@ -6505,15 +6349,12 @@ static void h731_chunk(Engine& E, PipeStep& PS, H53Scr& HS, Times& T) {
   HS.h731_gb = HS.gbins.size(); HS.h731_kb = std::max(HS.h731_kb, kb1);
   T.h131_enc += ms_since(t0);
 }
-
 static id<MTLBuffer> h900_gout(id<MTLDevice> dev, H53Scr& HS, size_t bytes) {
   H53Buf& g = HS.gout; bytes = std::max<size_t>(bytes, 256);
   if (g.b && g.cap >= bytes && !(g_h900 & 8)) return g.b;
   if ((g_h900 & 2) && h900_inplace(dev, g.b, g.cap, g.ip, g.ipres, g.ipst, bytes, "gout")) return g.b;
   return g.get(dev, bytes);
 }
-
-
 static std::vector<std::vector<P14Bin>> h117b_split(const std::vector<P14Bin>& src, size_t gr, size_t nblk) {
   std::vector<std::vector<P14Bin>> out(nblk);
   for (const P14Bin& g : src) {
@@ -6534,16 +6375,11 @@ static std::vector<std::vector<P14Bin>> h117b_split(const std::vector<P14Bin>& s
   }
   return out;
 }
-
-
 static const int g_post_sicis_gpu = getenv("POST_SICIS_GPU") ? atoi(getenv("POST_SICIS_GPU")) : 0;
-
-
 static const int g_post_sicis_yfx = getenv("POST_SICIS_YFX") ? atoi(getenv("POST_SICIS_YFX")) : 0;
 static const int g_post_sicis_check = getenv("POST_SICIS_CHECK") ? atoi(getenv("POST_SICIS_CHECK")) : 256;
 static id<MTLComputePipelineState> g_psRes = nil, g_psScore = nil;
 static std::string g_psKdir;
-
 static bool post_sicis_cfc(const Sketch::CisPerCellEnergyInput& se, std::vector<float>& cf) {
   const auto& me = se.memberEnergy; if (me.empty() || me.size() > 8 || Sketch::cisEnsembleModeFromEnv() == 0) return false;
   cf.assign(400, 0.0f); double K[8] = {0}, Kmin = 1e300;
@@ -6581,9 +6417,7 @@ static bool post_sicis_gpu_init(id<MTLDevice> dev) {
   printf("POST_SICIS_GPU=1: residual+score kernels from post_sicis_gpu.metallib (check every %d)\n", g_post_sicis_check);
   return true;
 }
-
 static id<MTLBuffer> post_sicis_new(id<MTLDevice> dev, size_t bytes) { id<MTLBuffer> b = [dev newBufferWithLength:std::max<size_t>(bytes, 256) options:MTLResourceStorageModeShared]; memdiag::metal_note(b, bytes, false); return b; }
-
 struct PostSicisOut { id<MTLBuffer> err = nil, bad = nil; size_t lo = 0, n = 0; };
 static bool post_sicis_enc(Engine& E, id<MTLCommandBuffer> cb, const std::vector<float>& cf, const StepBatch& SB, const std::vector<int>& ct,
                            const std::vector<int>& K, size_t lo, size_t hi, const P14Buf* SBf, id<MTLBuffer> bTV, PostSicisOut& o) {
@@ -6608,7 +6442,6 @@ static bool post_sicis_enc(Engine& E, id<MTLCommandBuffer> cb, const std::vector
   id<MTLBuffer> bR = post_sicis_new(dev, n * 48 * 4), bB = post_sicis_new(dev, n * 4), bF = post_sicis_new(dev, n * 4);
   o.err = post_sicis_new(dev, n * 4); o.bad = bB; o.lo = lo; o.n = n;
   uint32_t nn = (uint32_t)n;
-
   id<MTLComputeCommandEncoder> en = [cb computeCommandEncoderWithDispatchType:MTLDispatchTypeConcurrent];
   [en setComputePipelineState:g_psRes];
   [en setBuffer:SBf[0].th offset:lo * 32 * 4 atIndex:0]; [en setBuffer:SBf[1].th offset:lo * 32 * 4 atIndex:1]; if (g_yfx) { static id<MTLBuffer> bTfx = nil; if (!bTfx) { bTfx = post_sicis_new(dev, 4096 * 48 * 4); float* tp = (float*)bTfx.contents; for (int q = 0; q < 4096; q++) for (int p = 0; p < 48; p++) tp[q * 48 + p] = (float)g_yfx_t[p]; }
@@ -6626,8 +6459,6 @@ static bool post_sicis_enc(Engine& E, id<MTLCommandBuffer> cb, const std::vector
   [en endEncoding];
   return true;
 }
-
-
 static id<MTLComputePipelineState> g_pgGeo = nil, g_pgScore = nil;
 static bool pick_gpu_init(id<MTLDevice> dev, double& ms) {
   if (g_pgGeo && g_pgScore) return true;
@@ -6644,7 +6475,6 @@ static bool pick_gpu_init(id<MTLDevice> dev, double& ms) {
   ms += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
   return true;
 }
-
 static bool pick_gpu_run(Engine& E, const fitx::GeoPack& GP, const float* Yv, const std::vector<float>& cf, int chunk, float gsx, float gsy, int sgn_tan,
                          std::vector<float>& nll, std::vector<uint8_t>& bad, std::vector<float>& cond, double& ms_init, double& ms_gpu) {
   if (!pick_gpu_init(E.dev, ms_init)) return false;
@@ -6688,7 +6518,11 @@ static bool pick_gpu_run(Engine& E, const fitx::GeoPack& GP, const float* Yv, co
   ms_gpu += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
   return true;
 }
-
+namespace fitx { struct Side; }
+struct RecPre { const void* sb = nullptr; size_t nu = 0; std::vector<std::shared_ptr<const fitx::Side>> pc[2]; double ms = 0; size_t n = 0, used = 0; };
+static RecPre g_recpre;
+static const int g_rec_pre = getenv("REC_PRE") ? atoi(getenv("REC_PRE")) : 0;
+static void rec_pre_structs(Engine& E, StepBatch& SB);
 static void post16_h117_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, float* rx, float* ry, Times& T, bool cpu_here) {
   h301_mark("post fin: alloc/bind/grid enc");
   if (g_h675) h670_join();
@@ -6806,7 +6640,6 @@ static void post16_h117_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, 
     }
   };
   double gpu_t[3] = {0, 0, 0}, wall_t[3] = {0, 0, 0};
-
   const bool h898_def = (g_h898 & 5) && !HS.h898_rng.empty();
   const bool h898_ovl = h898_def && !((g_h117 & 2) && !g_h240b) && !(g_h670 && g_h670_st > 0 && g_h240b) && (g_h257 & 1) && g_h240b;
   if (h898_def && !h898_ovl) h898_flush(E, SB, HS, T);
@@ -6816,27 +6649,21 @@ static void post16_h117_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, 
     if (cb.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "H117 command buffer failed\n"); h182_dump(cb, "H117"); gpu_fail(); }
     gpu_t[which] += (cb.GPUEndTime - cb.GPUStartTime) * 1e3; wall_t[which] += ms_since(t0);
   };
-
   T.h131_pre += h131_alloc_ms + h131_bind_ms;
   auto h131_enc_t = [&](const std::function<void()>& f) { const auto q = clk::now(); f(); const double ms = ms_since(q); T.h131_enc += ms; T.h131_pre += ms; };
   bool h670_on = false;
-
   const float* rs0d = (const float*)SBf[0].rs.contents; const float* rs1d = (const float*)SBf[1].rs.contents;
   if (g_dump14.size() && !g_dumpf) g_dumpf = fopen(g_dump14.c_str(), "w");
   if (g_dumpf && HS.call == 1) fprintf(g_dumpf, "call,child,rx8,ry8,rxf,ryf,acc0,acc1\n");
   struct OutCnt { double viol = 0, up = 0, a0 = 0, a1 = 0, fb = 0, pchk = 0, pchkn = 0, pfb = 0; };
-
-
   static const int g_pfr = getenv("POSTFIN_REUSE") ? atoi(getenv("POSTFIN_REUSE")) : 1;
   static const size_t PFG = getenv("K_PFG") ? (size_t)std::max(16, atoi(getenv("K_PFG"))) : 512;
-
   static const size_t jblk = getenv("J_BLK") ? (size_t)std::max(256, atoi(getenv("J_BLK"))) : 4096;
   const size_t HB = g_post_sicis_gpu ? 4096 : jblk;
   std::vector<OutCnt> oc(std::max({(size_t)h84_nb((size_t)nK, 4096), ((size_t)nK + HB - 1) / HB + 1, ((size_t)nK + PFG - 1) / PFG}));
   const bool want_dump = g_dumpf != nullptr;
   std::vector<float> ORW(want_dump ? (size_t)nK * 4 : 0);
   std::vector<uint8_t> OAC(want_dump ? (size_t)nK * 2 : 0);
-
   std::vector<PostSicisOut> psout(std::max<size_t>(1, ((size_t)nK + 4095) / 4096));
   std::vector<float> psCf;
   const bool psOn = g_post_sicis_gpu && (!g_yfx || g_post_sicis_yfx) && g_sicis_en && g_sicis_en->present && !HS.pbins.empty() && post_sicis_cfc(*g_sicis_en, psCf) && post_sicis_gpu_init(dev);
@@ -6846,7 +6673,6 @@ static void post16_h117_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, 
     const bool acc_off = g_h660 || h670_on;
     OutCnt& cn = oc[(size_t)bi];
 #if defined(__aarch64__)
-
     const bool yfxb = g_yfxfast && g_yfx && jptr && sicis::fastEnabled() && NPT == 48 && !getenv("FJN_S1") && g_sicis_en && g_sicis_en->present;
     thread_local std::vector<float> ypre_res, ypre_ce; thread_local std::vector<uint8_t> ypre_have, ypre_need;
     if (yfxb) { const size_t nn_ = hi - lo; ypre_res.resize(nn_ * NPT); ypre_ce.resize(nn_); ypre_have.assign(nn_, 0); ypre_need.assign(nn_, 0);
@@ -6902,10 +6728,79 @@ static void post16_h117_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, 
       if (want_dump) { ORW[4 * k] = r8[0]; ORW[4 * k + 1] = r8[1]; ORW[4 * k + 2] = fin[0]; ORW[4 * k + 3] = fin[1]; OAC[2 * k] = (uint8_t)ac[0]; OAC[2 * k + 1] = (uint8_t)ac[1]; }
     }
   };
+  const bool wd_t = g_wd.max_try > 0 && !psOn && !g_h731 && h94_mode() == 0 && !g_h711 && !g_h712 && !g_h713 && !g_h790;
+  const bool wd_ck_t = wd_t && g_wd_ck;
+  auto wd_restore_rows = [&](size_t k0, size_t k1) {
+    if (g_wd.norestore) return;
+    const float* thc[2] = {(const float*)HS.bTh[0].contents, (const float*)HS.bTh[1].contents};
+    for (int s = 0; s < 2; s++) {
+      float* thw = (float*)HS.pthb[s].b.contents; float* rsw = (float*)HS.prsb[s].b.contents; float* paw = (float*)HS.pab[s].b.contents; uint32_t* stw = (uint32_t*)HS.stiob[s].b.contents;
+      for (size_t k = k0; k < k1; k++) {
+        const int j = ct[(size_t)K[k] * 2 + s]; const size_t l = (size_t)g_loc16[(size_t)j];
+        std::memcpy(&thw[32 * k], &thc[s][32 * l], 32 * 4);
+        rsw[2 * k] = rsw[2 * k + 1] = SB.F[s].rfin[j];
+        std::memset(&paw[16 * k], 0, 16 * 4); stw[k] = 0;
+      }
+    }
+  };
+  auto wd_rows_img = [&](size_t k0, size_t k1, bool incl_a) {
+    std::vector<uint8_t> v;
+    for (int s = 0; s < 2; s++) {
+      const uint8_t* t = (const uint8_t*)HS.pthb[s].b.contents; const uint8_t* r = (const uint8_t*)HS.prsb[s].b.contents; const uint8_t* a = (const uint8_t*)HS.pab[s].b.contents; const uint8_t* st = (const uint8_t*)HS.stiob[s].b.contents;
+      v.insert(v.end(), t + 128 * k0, t + 128 * k1); v.insert(v.end(), r + 8 * k0, r + 8 * k1); v.insert(v.end(), st + 4 * k0, st + 4 * k1);
+      if (incl_a) v.insert(v.end(), a + 64 * k0, a + 64 * k1);
+    }
+    return v;
+  };
+  auto wd_fnv_img = [&](const std::vector<uint8_t>& v) { return wd_fnv(14695981039346656037ull, v.data(), v.size()); };
+  auto wd_gb_hash = [&](int which) -> uint64_t { return which == 0 ? wd_fnv(14695981039346656037ull, bGout.contents, NL * 128 * 4) : wd_fnv(14695981039346656037ull, bTV.contents, (size_t)nK * 48 * 4); };
+  auto wd_enc_grid_r = [&](id<MTLCommandBuffer> cb, size_t a, size_t b) {
+    if (b <= a) return;
+    id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
+    for (size_t gi = a; gi < b; gi++) { const H117G& g = HS.gbins[gi];
+      id<MTLBuffer> tl = (g_h131 & 1) ? h131_put(dev, g_h131p.tl.size() > gi ? g_h131p.tl[gi] : (g_h131p.tl.resize(gi + 1), g_h131p.tl[gi]), g.tl.data(), g.tl.size() * 4)
+                                      : E.B(g.tl.data(), g.tl.size() * 4);
+      [en setComputePipelineState:gps];
+      id<MTLBuffer> bs[10] = {HS.tok.b, HS.bHdr, HS.sp.b, HS.bSg, HS.bTh[g.side], HS.bAa[g.side], HS.bQ, tl, HS.bOid[g.side], bGout};
+      for (int k = 0; k < 10; k++) [en setBuffer:bs[k] offset:0 atIndex:k];
+      [en setBytes:g.pd length:8 atIndex:10]; [en setThreadgroupMemoryLength:g.tgb atIndex:0];
+      [en dispatchThreadgroups:MTLSizeMake(g.ntg, 1, 1) threadsPerThreadgroup:MTLSizeMake(32 * (size_t)g.tpg, 1, 1)];
+    }
+    [en endEncoding];
+  };
+  auto wd_grid = [&](int kind) {
+    const size_t nbn = HS.gbins.size();
+    wd_stage_retry(kind, "H117 grid", [] {}, [&](int np) {
+      const size_t n = std::max<size_t>(1, std::min<size_t>((size_t)np, nbn));
+      for (size_t i = 0; i < n; i++) { id<MTLCommandBuffer> cb = h182_cb(E.cq); wd_enc_grid_r(cb, i * nbn / n, (i + 1) * nbn / n); if (!wd_piece_run(cb, "H117 grid")) return false; }
+      return true; });
+  };
+  auto wd_band = [&](int kind) {
+    wd_stage_retry(kind, "H117 band", [] {}, [&](int np) {
+      const size_t n = std::max<size_t>(1, std::min<size_t>((size_t)np, nTile));
+      const H731BandBufs B7{bGout, bRows, bCurve, bStr, bTb, bTd, bTv, bOT, bOS, bOO, bTV};
+      for (size_t i = 0; i < n; i++) { id<MTLCommandBuffer> cb = h182_cb(E.cq); h731_enc_band(cb, B7, (i * nTile / n) * 32, std::min<size_t>((size_t)nK, ((i + 1) * nTile / n) * 32), pg, pb, pr); if (!wd_piece_run(cb, "H117 band")) return false; }
+      return true; });
+  };
+  auto wd_pol = [&](int kind, const std::vector<P14Bin>& bins, size_t k0, size_t k1, H91Slot& SL, const std::vector<uint8_t>* pre_img) {
+    wd_stage_retry(kind, "H117 polish", [&] {
+      wd_restore_rows(k0, k1);
+      if (pre_img && !g_wd.norestore) { const std::vector<uint8_t> now = wd_rows_img(k0, k1, true); size_t nd = 0; for (size_t i = 0; i < now.size(); i++) nd += now[i] != (*pre_img)[i];
+        fprintf(stderr, "WD restore check: H117 polish rows [%zu, %zu): %zu differing bytes of %zu: %s\n", k0, k1, nd, now.size(), nd ? "MISMATCH" : "MATCH"); } },
+      [&](int np) {
+        const size_t nb = bins.size(); const size_t n = std::max<size_t>(1, std::min<size_t>((size_t)np, nb));
+        for (size_t i = 0; i < n; i++) {
+          std::vector<P14Bin> sub(bins.begin() + (long)(i * nb / n), bins.begin() + (long)((i + 1) * nb / n));
+          id<MTLCommandBuffer> cb = h182_cb(E.cq);
+          const H91Slot* sv99 = g_h899_fin; g_h899_fin = nullptr;
+          p14_encode_h91(E, cb, sub, SBf, HS.ptok.b, HS.psp.b, bTV, 3.0f, 0.0f, SL);
+          g_h899_fin = sv99;
+          if (!wd_piece_run(cb, "H117 polish")) return false;
+        }
+        return true; });
+  };
   bool h117b_on = false;
   if (g_h117b && (g_h117 & 2) && !g_h240b && h84_nb((size_t)nK, HB) > 1 && !HS.pbins.empty() && !g_h731 && !g_h660 && !g_h670 && !(g_h891 && g_h891_gpu_us > 0)) {
-
-
     h117b_on = true;
     const size_t nb = (size_t)h84_nb((size_t)nK, HB);
     auto wait_blk = [&](id<MTLCommandBuffer> cb, int which) {
@@ -6926,33 +6821,75 @@ static void post16_h117_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, 
     std::vector<std::vector<P14Bin>> blk = h117b_split(HS.pbins, HB, nb);
     if (g_h117b_sl.size() < nb) g_h117b_sl.resize(nb);
     std::vector<id<MTLCommandBuffer>> cbP(nb, nil);
+    std::vector<std::vector<uint8_t>> wd_img(wd_ck_t ? nb : 0);
     for (size_t b = 0; b < nb; b++) {
       if (blk[b].empty()) continue;
       cbP[b] = h182_cb(E.cq);
       h131_enc_t([&]{ p14_encode_h91(E, cbP[b], blk[b], SBf, HS.ptok.b, HS.psp.b, bTV, 3.0f, 0.0f, g_h117b_sl[b]); });
       if (psOn) { const size_t lo = b * HB, hi = std::min((size_t)nK, (b + 1) * HB); h131_enc_t([&]{ post_sicis_enc(E, cbP[b], psCf, SB, ct, K, lo, hi, SBf, bTV, psout[b]); }); }
+      if (wd_ck_t) wd_img[b] = wd_rows_img(b * HB, std::min((size_t)nK, (b + 1) * HB), true);
       [cbP[b] commit];
     }
+    if (g_rec_pre >= 2 && !g_freet && (g_kfill || g_kfin)) {
+      h301_mark("post fin: k tail async");
+      if (g_kfill) { while (g_kfill()) {} g_kfill = nullptr; }
+      if (g_kfin) { auto f = std::move(g_kfin); g_kfin = nullptr; fitx::retain_join(); std::lock_guard<std::mutex> lk(fitx::g_rt_mx); fitx::g_rt_thr = std::thread([f = std::move(f)]() { f(); }); } }
+    if (g_rec_pre) { h301_mark("post fin: rec pre"); rec_pre_structs(E, SB); }
     h301_mark("post fin: m6 wait grid+band");
-    wait_blk(cbG, 0); wait_blk(cbB, 1);
+    bool wd_redo_p = false;
+    if (wd_t) {
+      [cbG waitUntilCompleted]; [cbB waitUntilCompleted];
+      if (cbG.status == MTLCommandBufferStatusCompleted) gpu_t[0] += (cbG.GPUEndTime - cbG.GPUStartTime) * 1e3;
+      if (cbB.status == MTLCommandBufferStatusCompleted) gpu_t[1] += (cbB.GPUEndTime - cbB.GPUStartTime) * 1e3;
+      const bool bg = wd_bad(WD_HGRID, cbG), bb = wd_bad(WD_HBAND, cbB);
+      if (bg || bb) {
+        for (size_t b = 0; b < nb; b++) if (cbP[b]) [cbP[b] waitUntilCompleted];
+        const uint64_t g0 = wd_ck_t ? wd_gb_hash(0) : 0, t0 = wd_ck_t ? wd_gb_hash(1) : 0;
+        if (bg) wd_grid(WD_HGRID);
+        wd_band(WD_HBAND);
+        if (wd_ck_t) { const uint64_t g1 = wd_gb_hash(0), t1 = wd_gb_hash(1);
+          fprintf(stderr, "WD verify: H117 grid output %016llx -> %016llx: %s | band tv %016llx -> %016llx: %s\n", (unsigned long long)g0, (unsigned long long)g1, g0 == g1 ? "MATCH" : "MISMATCH", (unsigned long long)t0, (unsigned long long)t1, t0 == t1 ? "MATCH" : "MISMATCH"); }
+        wd_redo_p = true;
+      }
+    } else { wait_blk(cbG, 0); wait_blk(cbB, 1); }
     for (size_t b = 0; b < nb; b++) {
       h301_mark("post fin: m7 wait polish blk");
-      if (cbP[b]) wait_blk(cbP[b], 2);
-      h301_mark("post fin: m8 outputs blk");
       const size_t blo = b * HB, bhi = std::min((size_t)nK, (b + 1) * HB);
+      if (cbP[b] && wd_t) {
+        [cbP[b] waitUntilCompleted];
+        if (cbP[b].status == MTLCommandBufferStatusCompleted) gpu_t[2] += (cbP[b].GPUEndTime - cbP[b].GPUStartTime) * 1e3;
+        if (wd_bad(WD_HPOL, cbP[b]) || wd_redo_p) {
+          const uint64_t c0 = wd_ck_t ? wd_fnv_img(wd_rows_img(blo, bhi, false)) : 0;
+          wd_pol(WD_HPOL, blk[b], blo, bhi, g_h117b_sl[b], wd_ck_t ? &wd_img[b] : nullptr);
+          if (wd_ck_t) { const uint64_t c1 = wd_fnv_img(wd_rows_img(blo, bhi, false));
+            fprintf(stderr, "WD verify: H117 polish block %zu first-attempt outputs %016llx, retry outputs %016llx: %s\n", b, (unsigned long long)c0, (unsigned long long)c1, c0 == c1 ? "MATCH" : "MISMATCH"); }
+        }
+      } else if (cbP[b]) wait_blk(cbP[b], 2);
+      h301_mark("post fin: m8 outputs blk");
       if (g_pfr) { const size_t ns = (bhi - blo + PFG - 1) / PFG; PL(E).run((int)ns, [&](int c) { const size_t lo = blo + (size_t)c * PFG; outputs(lo, std::min(bhi, lo + PFG), (int)(lo / PFG)); }); }
       else outputs(blo, bhi, (int)b);
-
       if (g_ovl_hook && !g_freet && b + 1 < nb && (b + 1) * HB < (size_t)nK && kasc) { h301_mark("K: early select"); g_ovl_hook(K[(b + 1) * HB]); }
     }
   } else if ((g_h117 & 2) && !g_h240b) {
     id<MTLCommandBuffer> cb = h182_cb(E.cq);
     h131_enc_t([&]{ enc_grid(cb); enc_band(cb); enc_pol(cb); });
     if (psOn) { for (size_t b = 0; b < psout.size(); b++) { const size_t lo = b * 4096, hi = std::min((size_t)nK, (b + 1) * 4096); h131_enc_t([&]{ post_sicis_enc(E, cb, psCf, SB, ct, K, lo, hi, SBf, bTV, psout[b]); }); } }
+    if (wd_t) {
+      const std::vector<uint8_t> wd_pre = wd_ck_t ? wd_rows_img(0, (size_t)nK, true) : std::vector<uint8_t>();
+      const auto t0 = clk::now(); [cb commit]; [cb waitUntilCompleted];
+      if (cb.status == MTLCommandBufferStatusCompleted) gpu_t[2] += (cb.GPUEndTime - cb.GPUStartTime) * 1e3;
+      wall_t[2] += ms_since(t0);
+      if (wd_bad(WD_HPOL, cb)) {
+        const uint64_t c0 = wd_ck_t ? wd_fnv_img(wd_rows_img(0, (size_t)nK, false)) : 0, g0 = wd_ck_t ? wd_gb_hash(0) : 0, v0 = wd_ck_t ? wd_gb_hash(1) : 0;
+        wd_grid(WD_HPOL); wd_band(WD_HPOL);
+        wd_pol(WD_HPOL, HS.pbins, 0, (size_t)nK, g_h117_sl, wd_ck_t ? &wd_pre : nullptr);
+        if (wd_ck_t) { const uint64_t c1 = wd_fnv_img(wd_rows_img(0, (size_t)nK, false)), g1 = wd_gb_hash(0), v1 = wd_gb_hash(1);
+          fprintf(stderr, "WD verify: H117 fused CB first-attempt outputs polish %016llx grid %016llx tv %016llx, retry %016llx %016llx %016llx: %s\n", (unsigned long long)c0, (unsigned long long)g0, (unsigned long long)v0, (unsigned long long)c1, (unsigned long long)g1, (unsigned long long)v1, (c0 == c1 && g0 == g1 && v0 == v1) ? "MATCH" : "MISMATCH"); }
+      }
+    } else
     run_cb(cb, 2);
     if (g_h731) h731_wait(HS, gpu_t);
   } else if (g_h670 && g_h670_st > 0 && g_h240b && !HS.pbins.empty()) {
-
     h670_join();
     h670_on = true;
     H670Job& J = g_h670j;
@@ -6977,8 +6914,6 @@ static void post16_h117_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, 
       [J.cbP waitUntilCompleted]; });
     if (g_h675) { g_h53cur = (g_h53cur == &g_h53sb[0]) ? &g_h53sb[1] : &g_h53sb[0]; g_h53p = g_h53cur; }
   } else if ((g_h257 & 1) && g_h240b && (h898_ovl || !HS.pbins.empty())) {
-
-
     auto wait_cb = [&](id<MTLCommandBuffer> cb, int which) {
       [cb waitUntilCompleted];
       if (cb.status != MTLCommandBufferStatusCompleted) { fprintf(stderr, "H117 command buffer failed\n"); h182_dump(cb, "H117"); gpu_fail(); }
@@ -7041,7 +6976,6 @@ static void post16_h117_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, 
       printf("H240B: f_cpu %.3f cpu ms %.3f gpu ms %.3f tail wall %.3f (trees cpu %zu gpu %zu)\n", sp.f, cpu_ms, gpu_ms, tail, sp.items.size(), ngpu);
     }
     if (!HS.pbins.empty() && !g_h240b) { id<MTLCommandBuffer> cb = h182_cb(E.cq); h131_enc_t([&]{ enc_pol(cb); }); run_cb(cb, 2); }
-
   }
   h301_mark("post fin: m9 tail");
   T.p_grid += gpu_t[0]; T.p_band += gpu_t[1]; T.p_pb += gpu_t[2]; T.p_pb_wall += wall_t[2];
@@ -7056,14 +6990,10 @@ static void post16_h117_fin(Engine& E, PipeStep& PS, StepBatch& SB, float* err, 
   T.p_ebmb += g_ebmb_call; g_ebmb_call = 0;
   h894_pregrow(E.dev, g_h117_sl.pe);
 }
-
-
 static void post16_h53(Engine& E, PipeStep& PS, StepBatch& SB, const std::vector<int>& cand, float* err, float* rx, float* ry, Times& T) {
   post16_h53_prep(E, PS, SB, cand, T);
   post16_h53_fin(E, PS, SB, err, rx, ry, T);
 }
-
-
 static void scan_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   const Unique& UQ = PS.SB->UQ;
   const int M = (int)UQ.U.size();
@@ -7086,7 +7016,6 @@ static void scan_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     auto lspan = [L, NCH](int c, int& a, int& z) { a = (int)((long)L * c / NCH); z = (int)((long)L * (c + 1) / NCH); };
     X.sok.resize(M); X.ninst.resize(M); X.toff.resize(M); X.spoff.resize(M); X.thoff.resize(M); X.dkey.resize(M);
     T.h_s_alloc += tk.lap();
-
     std::vector<uint32_t> bti(NCH, 0), bsi(NCH, 0), bhi(NCH, 0), bns(NCH, 0);
     std::vector<int> bq(NCH, 0); std::vector<double> bfl(NCH, 0.0);
     PL(E).run(NCH, [&](int c) {
@@ -7107,7 +7036,6 @@ static void scan_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     }
     X.ti = TI; X.si = SI; X.hi = HI;
     X.seq.resize(NS);
-
     PL(E).run(NCH, [&](int c) {
       int a, z; lspan(c, a, z);
       uint32_t ti = oti[c], si = osi[c], hi = ohi[c], sq = osq[c];
@@ -7118,7 +7046,7 @@ static void scan_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
         if (te.s_ok) {
           X.sok[j] = 1; X.ninst[j] = (uint32_t)(te.nsp() / 4); ti += X.ninst[j];
           const uint32_t cls = (tr.nS <= 4 ? 0u : tr.nS <= 8 ? 1u : tr.nS <= 16 ? 2u : 3u) + (tr.nth == 0 ? 4u : 0u);
-          X.dkey[j] = (uint32_t)(((size_t)tr.Q * 41 + (size_t)tr.nslot) * 8 + cls);
+          X.dkey[j] = (uint32_t)(((size_t)tr.Q * 41 + (size_t)DKEY_NS(tr)) * 8 + cls);
           X.seq[sq++] = (uint32_t)j;
         }
         si += (uint32_t)tr.sp.size(); hi += (uint32_t)tr.th.size();
@@ -7171,8 +7099,6 @@ static void scan_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     T.h_s_fill += tk.lap();
   }
   T.scan_enc += ms_since(t0);
-
-
   Tick tc;
   size_t nsb = 0; for (int s = 0; s < 2; s++) nsb += P.S[s].sbins.size();
   if (nsb) {
@@ -7229,7 +7155,6 @@ static void scan_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   }
   T.h_s_cmd += tc.lap();
 }
-
 static void gn_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   const Unique& UQ = PS.SB->UQ;
   const int M = B.M;
@@ -7245,7 +7170,6 @@ static void gn_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     const int L = (int)X.ls.size();
     auto lspan = [L, NCH](int c, int& a, int& z) { a = (int)((long)L * c / NCH); z = (int)((long)L * (c + 1) / NCH); };
     T.h_g_alloc += tk.lap();
-
     std::vector<uint32_t> bgi(NCH, 0), bgs(NCH, 0), bns(NCH, 0);
     std::vector<int> bqg(NCH, 0), bcg(NCH, 0), blm(NCH, 0);
     std::vector<double> bal(NCH, 0.0), bkm(NCH, 0.0);
@@ -7276,7 +7200,6 @@ static void gn_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     X.gti = GTI; X.gsi = GSI;
     X.seq.resize(NS);
     if (Qg >= 100) { fprintf(stderr, "GN: Q %d >= 100 breaks the bin key\n", Qg); exit(1); }
-
     PL(E).run(NCH, [&](int c) {
       int a, z; lspan(c, a, z);
       uint32_t gt = ogt[c], gs = ogs[c], sq = osq[c];
@@ -7301,7 +7224,6 @@ static void gn_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     T.h_g_plan += tk.lap();
     sort_by_key5_p(E, X.seq2, X.dkey, DNg, X.start, X.sorted);
     T.h_g_sort += tk.lap();
-
     std::vector<size_t> ne; for (size_t dk = 0; dk < DNg; dk++) if (X.start[dk + 1] > X.start[dk]) ne.push_back(dk);
     std::vector<size_t> perb(ne.size(), 0); std::vector<size_t> perb2(ne.size(), 0); std::vector<size_t> perb3(ne.size(), 0);
     PL(E).run(NCH, [&](int c) {
@@ -7340,7 +7262,6 @@ static void gn_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     }
     T.h_g_plan += tk.lap();
   }
-
   if (h94_mode() >= 1) {
     std::vector<size_t> nat, tgb, cnt, cap; size_t before = 0, after = 0, ntr = 0;
     for (const GBin5& g : P.gbins) { nat.push_back(g.ntg); tgb.push_back(g.tgb); cnt.push_back(g.cnt); before += g.ntg; ntr += g.cnt; }
@@ -7402,8 +7323,6 @@ static void gn_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
   h900_ens(P.ctr, "P.ctr", dev, 4 * (size_t)NB + 16, MSH);
   T.h_g_alloc += tk.lap();
   T.gn_enc += ms_since(t0);
-
-
   Tick tc;
   if (NB) {
     std::memset(P.ctr.b.contents, 0, P.ctr.cap);
@@ -7411,7 +7330,7 @@ static void gn_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
     id<MTLComputeCommandEncoder> en = tl_enc(cb, MTLDispatchTypeConcurrent);
     for (size_t gj779 = 0; gj779 < P.gbins.size(); gj779++) { const GBin5& g = P.gbins[g_h779 ? P.gbins.size() - 1 - gj779 : gj779];
       Side5& X = P.S[g.side];
-      if (h182_on()) [en pushDebugGroup:h182_gname(g)];
+      if (h182_on() && h182_dg()) [en pushDebugGroup:h182_gname(g)];
       [en setComputePipelineState:g.ps];
       id<MTLBuffer> bs[9] = {X.gtok.b, X.ghdr.b, X.gsp.b, X.gseg.b, X.yb, X.gth.b, X.grs.b, X.gst.b, X.gbl.b};
       for (int k = 0; k < 9; k++) [en setBuffer:bs[k] offset:(k == 8 ? g.tl_off * 4 : 0) atIndex:k];
@@ -7425,15 +7344,13 @@ static void gn_begin_p_h215(Engine& E, PipeStep& PS, Batch& B, Times& T) {
       [en setThreadgroupMemoryLength:g.tgb atIndex:0];
       if (h150c_on()) { g_h150.gnDisp++; g_h150.gnLaunch += (long)(g.ntg * (size_t)g.tpg); g_h150.gnOcc += (long)g.cnt; }
       [en dispatchThreadgroups:MTLSizeMake(g.ntg, 1, 1) threadsPerThreadgroup:MTLSizeMake(32 * (size_t)g.tpg, 1, 1)];
-      if (h182_on()) [en popDebugGroup];
+      if (h182_on() && h182_dg()) [en popDebugGroup];
     }
     [en endEncoding]; [cb commit];
     B.cbG = cb;
   }
   T.h_g_cmd += tc.lap();
 }
-
-
 static void h265_bal_update(const PipeStep& PS, const CpuSpan265& R) {
   if (!g_h242d_bal) return;
   double gs = 1e300, ge = -1e300;
@@ -7443,8 +7360,6 @@ static void h265_bal_update(const PipeStep& PS, const CpuSpan265& R) {
   if (ec > 0 && eg > 0) { const double L = std::log(ec / eg); g_bal_s = std::min(20.0, std::max(0.05, g_bal_s * std::exp(-0.5 * L))); }
   printf("H242D step %2d: s %.3f | CPU-fit end %.1f ms | GPU-busy end %.1f ms | next CPU shares = clamp(f*s, 0, 0.5)\n", ++g_h242d_steps, g_bal_s, ec, eg);
 }
-
-
 static const int g_tiny = getenv("TINY_FIX") ? atoi(getenv("TINY_FIX")) : 0;
 static const int g_tiny_chk = getenv("TINY_CHK") ? atoi(getenv("TINY_CHK")) : 0;
 static std::vector<uint8_t> g_tdone;
@@ -7461,8 +7376,6 @@ static void tiny_score(Engine& E, PipeStep& PS, StepBatch& SB, float* err, int n
     if (postlin_side(SB, 0, a) && postlin_side(SB, 1, b)) { if (fin && g_tiny_chk && std::isfinite(err[i]) && err[i] < 1e20f && (i % 97) == 0) chk.push_back(i); continue; }
     todo.push_back(i); }
   std::atomic<long> nsc{0}, ndead{0}, nboth0{0}, nmix{0}; long nskip = 0;
-
-
   const size_t NU = SB.UQ.U.size(); std::vector<int> slot[2] = {std::vector<int>(NU, -1), std::vector<int>(NU, -1)}; std::vector<int> rep[2]; std::vector<int8_t> cls(todo.size(), 0);
   for (size_t q = 0; q < todo.size(); q++) { const int i = todo[q]; const int u[2] = {ct[(size_t)i * 2], ct[(size_t)i * 2 + 1]}; int nlin = 0; bool bad = false;
     for (int sd = 0; sd < 2; sd++) { const Tree& tr = SB.UQ.U[(size_t)u[sd]]; if (tr.Q > 16 || tr.nth > 32) { bad = true; break; }
@@ -7506,16 +7419,12 @@ static void tiny_score(Engine& E, PipeStep& PS, StepBatch& SB, float* err, int n
            m ? gap[0] : 0.0, m ? gap[m / 2] : 0.0, m ? gap[m * 9 / 10] : 0.0, m ? gap[m - 1] : 0.0); }
   else { static int ncall = 0; if (ncall++ < 6 || getenv("TINY_V")) printf("TINY_FIX: scored %ld (nonlinear side %ld, both linear %ld), DEAD %ld, skipped %ld of %zu not-in-K children\n", nsc.load(), nmix.load(), nboth0.load(), ndead.load(), nskip, todo.size()); }
 }
-
-
 static const int g_recfix_g = getenv("REC_FIX") ? atoi(getenv("REC_FIX")) : 1;
 static inline bool rec_pinpost() { return g_recfix_g && !g_freet && g_sf_axis && g_sf_pin && !g_pinfix; }
 static inline void rec_set_pin() { fitx::g_lazy_retain = g_recfix_g && !g_freet && g_sf_axis && (getenv("REC_LAZY") ? atoi(getenv("REC_LAZY")) != 0 : true); fitx::g_pin_t = rec_pinpost() ? (g_sf_axis == 1 ? 0 : 1) : -1; fitx::g_pin_op = evo::TVAR; }
 static inline bool rec_isdrv(const evo::Cand* c, int s, int drv) { return s == drv && (rec_pinpost() || (c->len[s] == 1 && c->op[s][0] == evo::TVAR)); }
 static inline int s_drv_q(int drv, int s, const evo::Cand* c, const Tree& t) { return (s == drv && c->len[s] == 1 && c->op[s][0] == evo::TVAR) ? 1 : t.Q + t.nth; }
 struct FitRefT { int Q, nth, nS; const uint32_t* prog; size_t nprog; const uint16_t* sp; size_t nsp; const uint16_t* segs; };
-
-
 static float k_batch_gate(Engine& E, size_t n, const float* err, const std::vector<uint8_t>& admit) {
   const float gg = fitx::g_gate; const int tn = fitx::topn(0); if (tn <= 0) return gg; const size_t N = (size_t)tn; const size_t B = 4096, nb = (n + B - 1) / B;
   std::vector<size_t> cnt(nb, 0); std::vector<std::vector<float>> keep(nb);
@@ -7528,8 +7437,36 @@ static float k_batch_gate(Engine& E, size_t n, const float* err, const std::vect
     std::nth_element(e.begin(), e.begin() + (long)(N - 1), e.end()); g = std::min(g, e[N - 1]); }
   return g;
 }
+static void rec_resolve(Engine& E, StepBatch& SB, std::vector<int> nl[2], std::vector<std::shared_ptr<const fitx::Side>> pcache[2], std::chrono::time_point<clk> jbg0, double& rtb, double& rtc, double& rtd, double& rte, size_t& rmiss, size_t& rnl) {
+      auto fref = [&](int sd, int u) { const Tree& t = SB.UQ.U[(size_t)u]; return FitRefT{t.Q, t.nth, t.nS, h313a::prog(t), h313a::nprog(t), t.sp.data(), t.sp.size(), h313a::segs(t)}; };
+      std::vector<uint64_t> hh[2]; for (int sd = 0; sd < 2; sd++) hh[sd].resize(nl[sd].size());
+      const size_t n0 = nl[0].size(), nt = n0 + nl[1].size();
+      PL(E).run((int)((nt + 1023) / 1024), [&](int b) { for (size_t q = (size_t)b * 1024; q < std::min(nt, (size_t)b * 1024 + 1024); q++) { const int sd = q < n0 ? 0 : 1; const size_t l = q < n0 ? q : q - n0; const FitRefT f = fref(sd, nl[sd][l]); hh[sd][l] = fitx::shash(f) | 1; } });
+      rtb = ms_since(jbg0); rnl = nt;
+      fitx::Store& S = fitx::st(); std::lock_guard<std::mutex> lk(S.mx);
+      struct Miss { uint64_t h; int sd, u; std::shared_ptr<const fitx::Side> r; }; std::vector<Miss> ms; std::unordered_map<uint64_t, size_t> mi;
+      for (int sd = 0; sd < 2; sd++) for (size_t l = 0; l < nl[sd].size(); l++) { const uint64_t h = hh[sd][l]; const int u = nl[sd][l];
+        auto ii = S.intern.find(h); std::shared_ptr<const fitx::Side> r; if (ii != S.intern.end()) r = ii->second.lock();
+        if (r) { pcache[sd][(size_t)u] = r; continue; }
+        auto m = mi.find(h); if (m == mi.end()) { mi.emplace(h, ms.size()); ms.push_back({h, sd, u, nullptr}); } }
+      rtc = ms_since(jbg0); rmiss = ms.size();
+      PL(E).run((int)((ms.size() + 255) / 256), [&](int b) { for (size_t q = (size_t)b * 256; q < std::min(ms.size(), (size_t)b * 256 + 256); q++) { float z[32] = {0}; auto sdp = std::make_shared<fitx::Side>(); const FitRefT f = fref(ms[q].sd, ms[q].u); if (fitx::build_side(f, z, z, *sdp)) ms[q].r = sdp; } });
+      rtd = ms_since(jbg0);
+      for (Miss& m : ms) { if (m.r) S.intern[m.h] = m.r; else S.nbuildfail++; }
+      rte = ms_since(jbg0);
+      for (int sd = 0; sd < 2; sd++) for (size_t l = 0; l < nl[sd].size(); l++) { const int u = nl[sd][l]; if (pcache[sd][(size_t)u]) continue; auto m = mi.find(hh[sd][l]); if (m != mi.end()) pcache[sd][(size_t)u] = ms[m->second].r; }
+}
+static void rec_pre_structs(Engine& E, StepBatch& SB) {
+  g_recpre.sb = nullptr; if (!fitx::on() || !(g_recfix_g && !g_freet) || g_fit_chk || !g_sf_axis) return;
+  const auto t0 = clk::now(); rec_set_pin();
+  const int drv = g_sf_axis == 1 ? 0 : g_sf_axis == 2 ? 1 : -1; const size_t NU = SB.UQ.U.size(); std::vector<int> nl[2];
+  for (int sd = 0; sd < 2; sd++) { g_recpre.pc[sd].assign(NU, nullptr); if (rec_pinpost() && sd == drv) continue;
+    if (SB.F[sd].is_g.size() < NU) return;
+    for (size_t u = 0; u < NU; u++) { const Tree& t = SB.UQ.U[u]; if (t.nth >= 1 && !SB.F[sd].is_g[u]) continue; nl[sd].push_back((int)u); } }
+  double a, b, c, d; size_t m, n; rec_resolve(E, SB, nl, g_recpre.pc, t0, a, b, c, d, m, n);
+  g_recpre.sb = (const void*)&SB; g_recpre.nu = NU; g_recpre.ms += ms_since(t0); g_recpre.n += n;
+}
 static void fit_capture_fixed(Engine& E, const PipeStep& PS, StepBatch& SB, const float* err, int n, const std::vector<uint8_t>& admit) {
-
   if ((int)SB.ct.size() < 2 * n || (!g_freet && !g_sf_axis)) return;
   const int drv = g_sf_axis == 1 ? 0 : g_sf_axis == 2 ? 1 : -1; double tg[48]; for (int i = 0; i < 48; i++) tg[i] = (double)i / 47.0;
   std::vector<uint64_t> hc[2] = {std::vector<uint64_t>(SB.UQ.U.size(), 0), std::vector<uint64_t>(SB.UQ.U.size(), 0)};
@@ -7538,14 +7475,11 @@ static void fit_capture_fixed(Engine& E, const PipeStep& PS, StepBatch& SB, cons
   auto rpth = [&](int sd, int i, int uid) -> const float* { if (g_rec_pol && (size_t)i < g_rp_ok.size() && ((g_rp_ok[(size_t)i] >> sd) & 1)) { g_rp_n.fetch_add(1, std::memory_order_relaxed); return &g_rp_th[sd][(size_t)i * 32]; } return &F14.th[sd][32 * (size_t)uid]; };
   for (int s = 0; s < 2; s++) std::memcpy(fitx::g_target[s], E.tg[s].yf, 48 * sizeof(float));
   const auto jbg0 = clk::now();
-
   const bool rfx = g_recfix_g && !g_freet;
   rec_set_pin();
   const bool g_tiny_cap = g_tiny && g_sf_axis && !rfx;
   float bg = rfx ? INFINITY : (g_kcap && !g_freet && !g_tiny_cap) ? k_batch_gate(E, (size_t)n, err, admit) : fitx::batch_gate((size_t)n, [&](size_t k) { return (admit[k] && !fitx::was_captured((int)k)) ? err[k] : INFINITY; });
   if (g_jprof) printf("J_PROF batch_gate %.2f ms (bg %g gate %g)\n", ms_since(jbg0), (double)bg, (double)fitx::g_gate);
-
-
   std::vector<float> tkey; float tbg = INFINITY; const float gpop = fitx::g_gate;
   if (g_tiny_cap) { static float PT[40][26][26]; static bool pti = false; if (!pti) { for (auto& a : PT) for (auto& b : a) for (float& c : b) c = NAN; pti = true; }
     tkey.assign((size_t)n, INFINITY); std::vector<int> kk((size_t)n, -1);
@@ -7576,21 +7510,11 @@ static void fit_capture_fixed(Engine& E, const PipeStep& PS, StepBatch& SB, cons
       for (const CB& B : cb) { unc += B.neg + B.nog; u_neg += B.neg; u_nog += B.nog; el.insert(el.end(), B.el.begin(), B.el.end()); }
       for (int sd = 0; sd < 2; sd++) for (size_t u = 0; u < need[sd].size(); u++) if (need[sd][u]) nl[sd].push_back((int)u);
     }
-    {
-      auto fref = [&](int sd, int u) { const Tree& t = SB.UQ.U[(size_t)u]; return FitRefT{t.Q, t.nth, t.nS, h313a::prog(t), h313a::nprog(t), t.sp.data(), t.sp.size(), h313a::segs(t)}; };
-      std::vector<uint64_t> hh[2]; for (int sd = 0; sd < 2; sd++) hh[sd].resize(nl[sd].size());
-      const size_t n0 = nl[0].size(), nt = n0 + nl[1].size();
-      PL(E).run((int)((nt + 1023) / 1024), [&](int b) { for (size_t q = (size_t)b * 1024; q < std::min(nt, (size_t)b * 1024 + 1024); q++) { const int sd = q < n0 ? 0 : 1; const size_t l = q < n0 ? q : q - n0; const FitRefT f = fref(sd, nl[sd][l]); hh[sd][l] = fitx::shash(f) | 1; } });
-      fitx::Store& S = fitx::st(); std::lock_guard<std::mutex> lk(S.mx);
-      struct Miss { uint64_t h; int sd, u; std::shared_ptr<const fitx::Side> r; }; std::vector<Miss> ms; std::unordered_map<uint64_t, size_t> mi;
-      for (int sd = 0; sd < 2; sd++) for (size_t l = 0; l < nl[sd].size(); l++) { const uint64_t h = hh[sd][l]; const int u = nl[sd][l];
-        auto ii = S.intern.find(h); std::shared_ptr<const fitx::Side> r; if (ii != S.intern.end()) r = ii->second.lock();
-        if (r) { pcache[sd][(size_t)u] = r; continue; }
-        auto m = mi.find(h); if (m == mi.end()) { mi.emplace(h, ms.size()); ms.push_back({h, sd, u, nullptr}); } }
-      PL(E).run((int)((ms.size() + 255) / 256), [&](int b) { for (size_t q = (size_t)b * 256; q < std::min(ms.size(), (size_t)b * 256 + 256); q++) { float z[32] = {0}; auto sdp = std::make_shared<fitx::Side>(); const FitRefT f = fref(ms[q].sd, ms[q].u); if (fitx::build_side(f, z, z, *sdp)) ms[q].r = sdp; } });
-      for (Miss& m : ms) { if (m.r) S.intern[m.h] = m.r; else S.nbuildfail++; }
-      for (int sd = 0; sd < 2; sd++) for (size_t l = 0; l < nl[sd].size(); l++) { const int u = nl[sd][l]; if (pcache[sd][(size_t)u]) continue; auto m = mi.find(hh[sd][l]); if (m != mi.end()) pcache[sd][(size_t)u] = ms[m->second].r; }
-    }
+    if (g_rec_pre && g_recpre.sb == (const void*)&SB && g_recpre.nu == SB.UQ.U.size()) {
+      for (int sd = 0; sd < 2; sd++) { std::vector<int> left; for (int u : nl[sd]) { if (g_recpre.pc[sd][(size_t)u]) { pcache[sd][(size_t)u] = g_recpre.pc[sd][(size_t)u]; g_recpre.used++; } else left.push_back(u); } nl[sd].swap(left); } }
+    const double rta = ms_since(jbg0); double rtb = 0, rtc = 0, rtd = 0, rte = 0; size_t rmiss = 0, rnl = 0;
+    rec_resolve(E, SB, nl, pcache, jbg0, rtb, rtc, rtd, rte, rmiss, rnl);
+    g_recpre.sb = nullptr; for (int sd = 0; sd < 2; sd++) g_recpre.pc[sd].clear();
     { std::vector<int> el2; el2.reserve(el.size()); for (int i : el) { const int uid[2] = {SB.ct[(size_t)i * 2], SB.ct[(size_t)i * 2 + 1]}; bool good = true;
         for (int sd = 0; sd < 2; sd++) { if (rec_isdrv(PS.cands[i], sd, drv)) continue; if (!pcache[sd][(size_t)uid[sd]]) good = false; }
         if (good) el2.push_back(i); else { unc++; u_cap++; } } el.swap(el2); }
@@ -7607,7 +7531,7 @@ static void fit_capture_fixed(Engine& E, const PipeStep& PS, StepBatch& SB, cons
     { fitx::Store& S = fitx::st(); std::lock_guard<std::mutex> lk(S.mx); size_t tc = 0, ta = 0; for (Blk& B : bl) { tc += B.c.size(); ta += B.ar.size(); } S.cur.reserve(S.cur.size() + tc); S.ar.reserve(S.ar.size() + ta);
       for (Blk& B : bl) { const size_t base = S.ar.size(); S.ar.insert(S.ar.end(), B.ar.begin(), B.ar.end());
         for (size_t q = 0; q < B.c.size(); q++) { B.c[q].off += base; S.cur.push_back(std::move(B.c[q])); S.ncap++; const int ch = B.ch[q]; if ((size_t)ch < S.got.size()) S.got[(size_t)ch] = 1; } } }
-    if (g_rdiag) printf("REC_DIAG captured %zu of %d (unexportable %ld) | prepass %.1f ms, pool+merge %.1f ms\n", NE, n, unc, rt1, ms_since(jbg0) - rt1);
+    if (g_rdiag) printf("REC_DIAG captured %zu of %d (unexportable %ld) | prepass %.1f ms, pool+merge %.1f ms | classify %.2f hash %.2f lookup %.2f build %.2f intern %.2f rest %.2f | trees %zu miss %zu intern size %zu | REC_PRE cum ms %.1f resolved %zu used %zu\n", NE, n, unc, rt1, ms_since(jbg0) - rt1, rta, rtb - rta, rtc - rtb, rtd - rtc, rte - rtd, rt1 - rte, rnl, rmiss, fitx::st().intern.size(), g_recpre.ms, g_recpre.n, g_recpre.used);
     if (unc) s_unc += unc;
     return;
   }
@@ -7635,8 +7559,6 @@ static void fit_capture_fixed(Engine& E, const PipeStep& PS, StepBatch& SB, cons
   if (g_rdiag) printf("REC_DIAG proto total %.1f ms of capture %.1f ms\n", fitx::g_ms_proto, ms_since(jbg0));
   if (unc) { s_unc += unc; if (g_fit_chk) printf("FIT_EXPORT: %ld admitted children without an exportable fit this call (total %ld): no tree %ld, nth>=1 without GN theta %ld, build failed %ld\n", unc, s_unc, u_neg, u_nog, u_cap); }
 }
-
-
 static void fit_set_theta(fitx::Side& S, const double* th) { for (int i = 0; i < S.nth; i++) S.th[i] = (float)th[i]; for (auto& tr : S.thref) S.n[tr.first].c = S.th[tr.second]; }
 static double fit_rss_ls(fitx::Side& S, const double* th, const double* tg, const float* Y) {
   fit_set_theta(S, th); fitx::ls_fit(S, tg, Y); std::vector<double> v(S.n.size() + 1); double r2 = 0;
@@ -7651,8 +7573,6 @@ static bool fit_refit_side(const evo::Cand& g, int s, const float* Y, fitx::Side
   float z[32] = {0}; if (!fitx::build_side(f, z, z, out)) return false;
   const int n = out.nth; std::vector<double> th((size_t)n); for (int i = 0; i < n; i++) th[(size_t)i] = P->thd[i];
   double F = fit_rss_ls(out, th.data(), tg, Y), lam = 1e-3;
-
-
   { static const int sc = getenv("FP_REFIT_SCAN") ? atoi(getenv("FP_REFIT_SCAN")) : 1;
     for (int pass = 0; sc && pass < 2 && n > 0; pass++) for (int j = 0; j < n; j++) { const double keep = th[(size_t)j]; double bv = keep;
       for (int k = -2; k <= 128; k++) for (int sg = -1; sg <= 1; sg += 2) { if (k == 0) continue; th[(size_t)j] = sg * (k < 0 ? std::ldexp(1.0, k - 1) : 0.5 * k); const double Fc = fit_rss_ls(out, th.data(), tg, Y); if (Fc < F) { F = Fc; bv = th[(size_t)j]; } }
@@ -7676,7 +7596,6 @@ static bool fit_refit_side(const evo::Cand& g, int s, const float* Y, fitx::Side
   }
   F = fit_rss_ls(out, th.data(), tg, Y); rss = F; return true;
 }
-
 static bool fit_get(Engine& E, const evo::Cand& g, fitx::Rec& r, double* refit_rss = nullptr) {
   static const bool force = getenv("FIT_FORCE_REFIT") != nullptr;
   if (!force && fitx::find(g, r)) return true;
@@ -7690,8 +7609,6 @@ static bool fit_get(Engine& E, const evo::Cand& g, fitx::Rec& r, double* refit_r
   { static long nrf = 0; if (g_fit_chk && nrf++ < 20) printf("FIT_EXPORT: shown member without stored fit -> CPU refit rss_x+rss_y %.6g\n", rs[0] + rs[1]); }
   return true;
 }
-
-
 static void sp_fill_k(Engine& E, const PipeStep& PS, const StepBatch& SB, int n, const std::vector<uint8_t>& admit, std::vector<Meta>& M) {
   const int drv = g_sf_axis == 1 ? 0 : g_sf_axis == 2 ? 1 : -1;
   PL(E).run((n + 4095) / 4096, [&](int b) {
@@ -7706,8 +7623,6 @@ static void sp_fill_k(Engine& E, const PipeStep& PS, const StepBatch& SB, int n,
     }
     if (unk) g_sp_kunk.fetch_add(unk, std::memory_order_relaxed); });
 }
-
-
 static const int g_h418 = (getenv("H418") ? atoi(getenv("H418")) : 0) | (g_h874 & 1);
 static const int g_h_sb_nofill = getenv("H_SB_NOFILL") ? atoi(getenv("H_SB_NOFILL")) : 0;
 struct H418Store { FlatKeySet step, uidx; std::vector<FlatKeySet> stepSh, uidxSh; std::vector<std::vector<uint32_t>> shMap; std::vector<uint8_t> fitted[2]; };
@@ -7721,23 +7636,24 @@ static void h418_put(PipeStep& P) { h418_swap(P); }
 static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t* valid, int n, const FlatKeySet& popset,
                         float* err, float* rx, float* ry, std::vector<uint8_t>& admit, std::vector<Meta>& M, Times& T, StepBatch& SB) {
   auto tw = clk::now();
-  if (fitx::on()) fitx::begin(n);
-  rp_begin(n);
+  h301_mark("SS setup: entry"); if (fitx::on()) fitx::begin(n);
+  h301_mark("SS setup: fitx::begin"); rp_begin(n);
   CpuSpan265 bal_span; g_fit_span = &bal_span;
-  if (g_h771) h771_begin(n);
+  h301_mark("SS setup: rp_begin+span"); if (g_h771) h771_begin(n);
+  h301_mark("SS setup: h771");
   const int NCH = (n + 63) / 64;
   PipeStep PS; PS.n = n; PS.NCH = NCH; PS.cands = cands; PS.valid = valid; PS.popset = &popset;
   PS.admit = &admit; PS.M = &M; PS.SB = &SB;
   if (g_h264) { if ((int)M.size() != n) M.resize(n); } else M.assign(n, Meta());
-  admit.assign(n, 0);
+  admit.assign(n, 0); h301_mark("SS setup: M+admit");
   if (g_h264) { if ((int)NFD.ch.size() != n) NFD.ch.resize(n); } else NFD.ch.assign(n, nf16::Child());
   NFD.sc.resize(n);
   if ((int)NFD.blk.size() < NCH) NFD.blk.resize(NCH);
-  SB.ct.assign((size_t)n * 2, -1);
+  h301_mark("SS setup: NFD"); SB.ct.assign((size_t)n * 2, -1); h301_mark("SS setup: SB.ct");
   SB.UQ.U.clear(); SB.UQ.hash.clear(); SB.UQ.enc.clear();
   if (g_h864 & 4) { SB.UQ.U.reserve((size_t)2 * n + 2); SB.UQ.hash.reserve((size_t)2 * n + 2); SB.UQ.enc.reserve((size_t)2 * n + 2); }
   for (int s = 0; s < 2; s++) { SB.F[s].init(2 * n + 2); SB.ids[s].clear(); if (!(g_h418 && g_h_sb_nofill)) PS.fitted[s].assign((size_t)2 * n + 2, 0); }
-  F14.init((size_t)2 * n + 2);
+  h301_mark("SS setup: SB.F/fitted"); F14.init((size_t)2 * n + 2); h301_mark("SS setup: F14");
   if (g_h870 & 2) { PS.rep.reserve((size_t)2 * n + 2); PS.fid.reserve((size_t)2 * n + 2); }
   struct H418Guard { PipeStep& P; bool on; ~H418Guard() { if (on) h418_put(P); } } h418g{PS, g_h418 != 0};
   if (g_h418) {
@@ -7746,6 +7662,7 @@ static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t*
     for (int s = 0; s < 2; s++) PS.fitted[s].assign((size_t)2 * n + 2, 0);
   } else
   PS.step.reserve((size_t)n), PS.uidx.reserve((size_t)n * 2);
+  h301_mark("SS setup: h418/step");
   if (g_h92 & 2) {
     const int NSh = g_h410ns > 0 ? std::min(254, g_h410ns) : std::max(1, (int)WK(E).size());
     if (g_h418 && (int)PS.stepSh.size() == NSh) {
@@ -7755,17 +7672,14 @@ static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t*
     }
     for (int s = 0; s < NSh; s++) { PS.stepSh[(size_t)s].reserve((size_t)n / (size_t)NSh + 1); PS.uidxSh[(size_t)s].reserve((size_t)n * 2 / (size_t)NSh + 1); }
   }
-
   if (g_h890 & 1) {
     PS.step.byref = PS.uidx.byref = true;
     for (auto& x : PS.stepSh) x.byref = true;
     for (auto& x : PS.uidxSh) x.byref = true;
   }
-
+  h301_mark("SS setup: stepSh");
   const int K = std::max(1, std::min(g_chunks, NCH));
   const int CS = ((NCH + K - 1) / K) * 64;
-
-
   std::vector<int> cstart;
   if (g_h402 && K > 2 && NCH >= 2 * K) {
     const double rho = g_h402r > 0 ? g_h402r : g_h402_rho;
@@ -7795,8 +7709,6 @@ static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t*
   for (int c = 0; c < Kn; c++) { BT[c].b0 = cstart[c]; BT[c].b1 = c + 1 < Kn ? cstart[c + 1] : n; BT[c].ci = c; }
   h301_mark("K: ev chunks setup");
   if (g_h826_head) { h301_mark("K: breed head hook"); auto hk = std::move(g_h826_head); g_h826_head = nullptr; hk(BT[0].b1); }
-
-
   const bool h897on = (g_h897 & 1) != 0 && !g_h217 && !g_h250b && !g_h650d;
   int h897_n = 0; double h897_ms = 0;
   auto h897_early = [&](int c, Times& T) {
@@ -7810,26 +7722,24 @@ static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t*
     h301_mark("early scan_finish");
     scan_finish(E, PS, Bc, T);
     h301_mark("early gn_begin encode");
-    if (g_h93) { gn_begin_p(E, PS, Bc, T);  } else gn_begin(E, PS, Bc, T);
+    if (g_h93) { gn_begin_p(E, PS, Bc, T);   } else gn_begin(E, PS, Bc, T);
     Bc.egn = true; h897_n++;
     h897_ms += ms_since(e0);
     h301_mark("front(c+1)");
   };
-
   auto front = [&](int c, Times& T) {
     Batch& B = BT[c]; B.P = &PP[g_h217 ? c % 3 : (c & 1)];
+    TmScope tm_fe_("fe: entry");
     if (c >= 2 && !BT[c - 2].sdone) { fprintf(stderr, "pipeline: scan slot %d reused before S(%d) finished\n", c & 1, c - 2); exit(1); }
-    h401_sub("fe: NF"); if (g_h264) nf_range_h264(E, PS, B.b0, B.b1, T); else nf_range(E, PS, B.b0, B.b1, T);
+    h401_sub("fe: NF"); tm_mark("fe: NF"); if (g_h264) nf_range_h264(E, PS, B.b0, B.b1, T); else nf_range(E, PS, B.b0, B.b1, T);
     if (h897on) h897_early(c - 1, T);
-    h401_sub("fe: dedup+unique"); if (g_h92 & 2) { dedup_h92(E, PS, B.b0, B.b1, T); if (g_h257 & 4) build_unique_h257(E, PS, B.b0, B.b1, T); else build_unique_h92(E, PS, B.b0, B.b1, T); }
+    h401_sub("fe: dedup+unique"); tm_mark("fe: dedup+unique"); if (g_h92 & 2) { dedup_h92(E, PS, B.b0, B.b1, T); if (g_h257 & 4) build_unique_h257(E, PS, B.b0, B.b1, T); else build_unique_h92(E, PS, B.b0, B.b1, T); }
     else { dedup_range(PS, B.b0, B.b1, T); build_unique_range(E, PS, B.b0, B.b1, T); }
     if (h897on) h897_early(c - 1, T);
-    h401_sub("fe: schedule"); schedule_range(E, PS, B, T);
-    h401_sub("fe: scan_begin"); if (g_h93) { scan_begin_p(E, PS, B, T);  } else scan_begin(E, PS, B, T);
+    h401_sub("fe: schedule"); tm_mark("fe: schedule"); schedule_range(E, PS, B, T);
+    h401_sub("fe: scan_begin"); tm_mark("fe: scan_begin"); if (g_h93) { scan_begin_p(E, PS, B, T);   } else scan_begin(E, PS, B, T);
     h401_sub("fe: end");
   };
-
-
   auto post_chunk = [&](const Batch& B) {
     if (g_freet) { freet_chunk(E, PS, B, err, rx, ry, T); return; }
     if (g_stage8_only || g_post16 != 1) return;
@@ -7837,8 +7747,6 @@ static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t*
     for (int i = B.b0; i < B.b1; i++) cc.push_back(i);
     if (g_h53) post16_h53(E, PS, SB, cc, err, rx, ry, T); else post16(E, PS, SB, cc, err, rx, ry, T);
   };
-
-
   const bool h84c = g_h84 >= 2 && g_h53 && g_post16 == 2;
   const bool h91c = h84c && g_h91 && !g_chk_band && !g_chk_fin && !g_time14;
   const bool h117c = h84c && !h91c && !g_h91 && (g_h117 & 3) && !g_chk_band && !g_chk_fin && !g_time14;
@@ -7858,11 +7766,10 @@ static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t*
     if (g_h680) h680_inject(E.dev, Kn, (int)(&B - BT.data()) == Kn - 1);
   };
   if (g_h891 && g_h891_head_us > 0) g_h891_head_ms += h891_main_spin_ms(g_h891_head_us);
+  if (g_ss_join) { h301_mark("SS2 memo join"); auto j = std::move(g_ss_join); g_ss_join = nullptr; j(); }
   h301_mark("head front(0)");
   auto tf = clk::now();
   double h402_front_ms = 0;
-
-
   struct ProdSync { std::mutex m; std::condition_variable cv; int ready = 0; } PSY;
   Times TP;
   std::thread prod;
@@ -7874,8 +7781,6 @@ static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t*
     prod = std::thread([&] {
       tl_pool = g_pool2; tl_W = &g_W2;
       for (int c = 0; c < Kn; c++) {
-
-
         if (c >= 2) { std::unique_lock<std::mutex> lk(PSY.m); PSY.cv.wait(lk, [&] { return BT[c - 2].sdone && BT[c - 2].gbegun && (c < 3 || BT[c - 3].pdone); }); }
         front(c, TP);
         { std::lock_guard<std::mutex> lk(PSY.m); PSY.ready = c + 1; }
@@ -7892,6 +7797,16 @@ static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t*
   T.head += ms_since(tf);
   for (int c = 0; c < Kn; c++) {
     if (c == 0 && g_h826_rest) { auto rk = std::move(g_h826_rest); g_h826_rest = nullptr; rk(); }
+    if (g_nogn2 && g_freet && !g_h217) {
+      if (!BT[c].egn) { h301_mark("scan_finish wait"); scan_finish(E, PS, BT[c], T); }
+      if (c >= 2 && !BT[c - 2].gdone) { fprintf(stderr, "pipeline: GN slot reuse at chunk %d\n", c); exit(1); }
+      if (!BT[c].egn) { h301_mark("gn_begin encode"); if (g_h93) gn_begin_p(E, PS, BT[c], T); else gn_begin(E, PS, BT[c], T); }
+      h301_mark("gn_finish wait"); gn_finish(E, PS, BT[c], T); h301_mark("glue+post prep"); glue_range(PS, BT[c].b0, BT[c].b1, err, rx, ry, T); post_chunk(BT[c]); pre_chunk(BT[c]);
+      h301_mark("front(c+1)");
+      if (c + 1 < Kn && !BT[c + 1].fdone) { const auto f0 = clk::now(); front(c + 1, T); const double fw = ms_since(f0); h402_front_ms += fw; BT[c + 1].fdone = true; BT[c + 1].fms = fw; }
+      if (!g_h313_defer && c + 1 == Kn - 1 && g_h301_after_front) { g_h301_after_front(); g_h301_after_front = nullptr; }
+      continue;
+    }
     h301_mark("front(c+1)");
     if (h650_is("front") && !g_h217 && c + 1 < Kn) h650_spin_ns(g_h650ms * 1e6 / Kn);
     if (!g_h217 && c + 1 < Kn && !BT[c + 1].fdone) { const auto f0 = clk::now(); const double e0 = h897_ms; front(c + 1, T); const double fw = ms_since(f0) - (h897_ms - e0); h402_front_ms += fw; BT[c + 1].fdone = true; BT[c + 1].fms = fw; }
@@ -7907,12 +7822,10 @@ static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t*
     if (c >= 2 && !BT[c - 2].gdone) { fprintf(stderr, "pipeline: GN slot reuse at chunk %d\n", c); exit(1); }
     if (!BT[c].egn) h301_mark("gn_begin encode");
     if (h650_is("enc")) h650_spin_ns(g_h650ms * 1e6 / Kn);
-    if (!BT[c].egn) { if (g_h93) { gn_begin_p(E, PS, BT[c], T);  } else gn_begin(E, PS, BT[c], T); }
+    if (!BT[c].egn) { if (g_h93) { gn_begin_p(E, PS, BT[c], T);   } else gn_begin(E, PS, BT[c], T); }
     if (h650_is("gpumid")) { h680_init(E.dev); h680_spin_cb(E.cq, g_h650ms / Kn); }
     if (g_h217) { { std::lock_guard<std::mutex> lk(PSY.m); BT[c].gbegun = true; } PSY.cv.notify_all(); }
     if (g_kahead && !g_freet && !g_h217 && c >= 2 && c + 2 < Kn && !BT[c + 2].fdone && BT[c].sdone && BT[c - 2].gdone && BT[c - 2].gn_gpu > 0 && BT[c + 1].fms > 0) {
-
-
       const Batch& A = BT[c - 2];
       const double gest = A.gn_gpu / (double)(A.b1 - A.b0) * (double)(BT[c].b1 - BT[c].b0);
       const double fest = BT[c + 1].fms / (double)(BT[c + 1].b1 - BT[c + 1].b0) * (double)(BT[c + 2].b1 - BT[c + 2].b0);
@@ -7927,21 +7840,23 @@ static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t*
   if (g_h217) { prod.join(); addT(T, TP); }
   if (g_h897 & 2) printf("H897: early GN chunks %d of %d, %.3f ms\n", h897_n, Kn, h897_ms);
   if (!g_h313_defer && g_h301_after_front) { g_h301_after_front(); g_h301_after_front = nullptr; }
-  h301_mark("last gn_finish wait");
-  gn_finish(E, PS, BT[Kn - 1], T);
+  const bool nogn_ro_ = g_nogn2 && g_freet && !g_h217;
+  if (!nogn_ro_) { h301_mark("last gn_finish wait");
+  gn_finish(E, PS, BT[Kn - 1], T); }
   if (g_h242 && g_h413) { h301_mark("H413 put drain"); h242_drain(); }
   h301_mark("last glue+post prep");
-  glue_range(PS, BT[Kn - 1].b0, BT[Kn - 1].b1, err, rx, ry, T);
-  post_chunk(BT[Kn - 1]);
+  if (!nogn_ro_) glue_range(PS, BT[Kn - 1].b0, BT[Kn - 1].b1, err, rx, ry, T);
+  if (!nogn_ro_) post_chunk(BT[Kn - 1]);
   pre_chunk(BT[Kn - 1]);
+  if (g_ss3 && g_h313_defer && h84c && g_freet && g_h301_after_front) { h301_mark("SS3 memo launch"); g_h301_after_front(); g_h301_after_front = nullptr; }
   if (g_ovl_hook && g_freet && g_freet_async && Kn >= 2) { auto hk = std::move(g_ovl_hook); g_ovl_hook = nullptr; h301_mark("STEP_OVL early select"); freet_drain_prior(); hk(BT[Kn - 1].b0); }
   if (g_freet) g_ovl_hook = nullptr;
   if (g_freet_async) freet_flush(T);
+  if (g_freet && g_gap_collect_on) freet_gap_replay(E);
   if (h650_is("post")) h650_spin_ns(g_h650ms * 1e6);
   if (g_h313_defer && h84c && g_h301_after_front) { g_h301_after_front(); g_h301_after_front = nullptr; }
   h882_drain(); h882_report();
   h301_mark("union/post fin setup");
-
   for (int s = 0; s < 2; s++) SB.ids[s] = PS.allids[s];
   T.nuniq += (double)SB.UQ.U.size();
   if (g_h313dbg) { size_t np = 0, a2 = 0, a1s = 0, a1g = 0; for (const Tree& t : SB.UQ.U) { np++; a2 += t.progp != nullptr; } for (const TreeEnc& e : SB.UQ.enc) { a1s += e.sp4p != nullptr; a1g += e.gp4p != nullptr; }
@@ -7974,20 +7889,22 @@ static void evaluate_v7(Engine& E, const evo::Cand* const* cands, const uint8_t*
     const double r = (gs + std::sqrt(gs * gs + 4.0 * f * gg)) / (2.0 * f);
     if (std::isfinite(r)) g_h402_rho = std::min(4.0, std::max(1.0, r));
     if (g_h402v) printf("H402: rates f %.3f gS %.3f gG %.3f us/child -> rho %.3f\n", 1e3 * f, 1e3 * gs, 1e3 * gg, g_h402_rho); }
+  h301_mark("tail: k_flush");
   k_flush();
+  h301_mark("tail: tiny_score");
   tiny_score(E, PS, SB, err, n, admit);
+  h301_mark("tail: sp+capture");
   if (g_sp_env || g_sp_diag) sp_fill_k(E, PS, SB, n, admit, M);
-  if (fitx::on()) { const auto fx0 = clk::now(); fit_capture_fixed(E, PS, SB, err, n, admit); const double jcap = ms_since(fx0); fitx::commit(); fitx::g_ms += ms_since(fx0); if (g_jprof) printf("J_PROF capture: fit_capture_fixed %.2f commit+rest %.2f ms (n %d)\n", jcap, ms_since(fx0) - jcap, n); fit_chk_print(g_freet ? 1 : 2); }
+  if (fitx::on() && g_cap_async && !g_freet && !g_fit_chk) { const auto fx0 = clk::now(); fitx::cap_join(); fit_capture_fixed(E, PS, SB, err, n, admit); const double jcap = ms_since(fx0); fitx::cap_submit([] { fitx::commit_nj(); }); fitx::g_ms += ms_since(fx0); if (g_jprof) printf("J_PROF capture: fit_capture_fixed %.2f commit async (n %d)\n", jcap, n); }
+  else
+  if (fitx::on()) { const auto fx0 = clk::now(); fitx::cap_join(); fit_capture_fixed(E, PS, SB, err, n, admit); const double jcap = ms_since(fx0); fitx::commit(); fitx::g_ms += ms_since(fx0); if (g_jprof) printf("J_PROF capture: fit_capture_fixed %.2f commit+rest %.2f ms (n %d)\n", jcap, ms_since(fx0) - jcap, n); fit_chk_print(g_freet ? 1 : 2); }
+  h301_mark("tail: after capture");
   g_fit_span = nullptr; h265_bal_update(PS, bal_span);
 }
-
-
 static void memo_counts(const Engine& E, long& h, long& m, long& d) {
   h = m = 0; for (const std::vector<Worker>* ws : {&E.W, (const std::vector<Worker>*)&g_W2}) for (const Worker& w : *ws) { h += w.H->hits; m += w.H->misses; }
   d = (long)E.SH->drops.load();
 }
-
-
 static double g_h129_cap_mb = 768;
 static long g_h129_clears = 0;
 static double mb_of(double bytes) { return bytes / 1048576.0; }
@@ -8002,8 +7919,6 @@ static double phys_fp_mb() {
   return mb_of((double)vi.phys_footprint);
 }
 static double cnt_clamp(uint64_t v, uint64_t cap) { return (double)std::min<uint64_t>(v, cap); }
-
-
 static double memo_var_bytes(const Engine& E) {
   const double ne = cnt_clamp(E.CS->nent.load(), cc14::Shared::MAXENT);
   double b = (double)E.SH->bump.load();
@@ -8012,8 +7927,6 @@ static double memo_var_bytes(const Engine& E) {
   b += ne * sizeof(cmi6::Slot) + (double)E.MM->bump.load() * 4.0;
   return b;
 }
-
-
 static void memo_clear(Engine& E) {
   const uint32_t nent_cc = std::min<uint32_t>(E.CS->nent.load(), cc14::Shared::MAXENT);
   for (uint32_t i = 0; i < nf16::TB; i++) E.SH->tab[i].store(0, std::memory_order_relaxed);
@@ -8029,7 +7942,6 @@ static void memo_clear(Engine& E) {
   }
   g_h129_clears++;
 }
-
 static void memo_line(const Engine& E, int st, double step_ms) {
   printf("H129 step %2d | step ms %.1f | RSS %.0f MB | phys %.0f MB | Metal alloc %.0f MB | NF entries %u arena %.1f MB | cc14 entries %u key %.1f prog %.1f sp %.1f MB | cmi6 arena %.1f MB | memo var %.1f MB | clears %ld\n",
          st, step_ms, rss_mb_now(), phys_fp_mb(), mb_of((double)[E.dev currentAllocatedSize]),
@@ -8038,14 +7950,11 @@ static void memo_line(const Engine& E, int st, double step_ms) {
          mb_of(cnt_clamp(E.CS->nprog.load(), cc14::Shared::MAXPROG) * 4.0), mb_of(cnt_clamp(E.CS->nsp.load(), cc14::Shared::MAXSP) * 2.0),
          mb_of((double)E.MM->bump.load() * 4.0), mb_of(memo_var_bytes(E)), g_h129_clears);
 }
-
-
 struct H156Snap { long nf_h = 0, nf_m = 0, cc_h = 0, cc_m = 0, enc_h = 0, enc_m = 0, enc_l = 0; };
 static H156Snap g_h156_s0;
 static h156::RetainStats g_h156_ev;
 static int g_h156_fallback = 0;
 static long g_h156_compacts = 0;
-
 static const int g_h886 = getenv("H886") ? atoi(getenv("H886")) : 0;
 static std::atomic<int> g_h886_boost{0};
 static std::atomic<int> g_h886_qos_seen{0};
@@ -8073,12 +7982,8 @@ static void h156_step_begin(const Engine& E, int st) {
   h156::g_touch = (uint32_t)st;
   g_h156_s0 = h156_snap(E);
 }
-
-
 static void h874_pretouch(size_t n) {
   const size_t cap = 2 * n + 2; const auto t0 = clk::now(); size_t tot = 0;
-
-
   static const int mem_pre = getenv("MEM_PRETOUCH") ? atoi(getenv("MEM_PRETOUCH")) : 1;
   auto touch = [&](auto& v) { using T = typename std::decay<decltype(v)>::type::value_type; v.reserve(cap); if (!mem_pre) memset((void*)v.data(), 0, cap * sizeof(T)); tot += mem_pre ? 0 : cap * sizeof(T); };
   StepBatch* sp = new StepBatch();
@@ -8090,8 +7995,6 @@ static void h874_pretouch(size_t n) {
 }
 static long h874_mf() { struct rusage r; getrusage(RUSAGE_SELF, &r); return r.ru_minflt; }
 static long g_h874_mf0 = -1;
-
-
 static const int g_h853 = getenv("H853") ? atoi(getenv("H853")) : 0;
 static const int g_prefault = getenv("PREFAULT") ? atoi(getenv("PREFAULT")) : 0;
 static void h853_prefault(Engine& E) {
@@ -8117,7 +8020,6 @@ static void h853_prefault(Engine& E) {
   printf("H853: %d | prefault %.1f MB in %.1f ms (cap %.0f MB x %.2f)\n", g_h853, (double)tot / 1048576.0,
          std::chrono::duration<double, std::milli>(clk::now() - t0).count(), g_h129_cap_mb, X);
 }
-
 static const int g_h854 = getenv("H854") ? atoi(getenv("H854")) : 0;
 static const int g_h854_qos = getenv("H854_QOS") ? atoi(getenv("H854_QOS")) : 2;
 struct H854Rec { double launch = 0, start = 0, end = 0, hist = 0, nfc = 0, ccc = 0; bool ran = false; };
@@ -8128,7 +8030,6 @@ static void h854_qos_self() {
   if (!(g_h854 & 2)) return;
   pthread_set_qos_class_self_np(g_h854_qos == 1 ? QOS_CLASS_BACKGROUND : g_h854_qos == 3 ? QOS_CLASS_DEFAULT : QOS_CLASS_UTILITY, 0);
 }
-
 template <class F> static void h854_par_ranges(uint64_t n, F f) {
   const uint64_t NQ = h886_nq(); std::vector<std::thread> th(NQ - 1);
   auto fc = [&](uint64_t lo, uint64_t hi) {
@@ -8139,14 +8040,12 @@ template <class F> static void h854_par_ranges(uint64_t n, F f) {
   fc(n * (NQ - 1) / NQ, n);
   for (uint64_t q = 0; q < NQ - 1; q++) th[q].join();
 }
-
 static void h854_cc_live(cc14::Shared& C, uint32_t ne, std::vector<uint8_t>& live) {
   live.assign(ne, 0);
   h854_par_ranges(cc14::Shared::TB, [&](uint64_t lo, uint64_t hi) {
     for (uint64_t p = lo; p < hi; p++) { const uint32_t v = C.tab[p].load(std::memory_order_relaxed); if (v && v - 1 < ne) live[v - 1] = 1; }
   });
 }
-
 typedef std::vector<std::pair<uint32_t, uint32_t>> H886Rec;
 static void h854_compact_nf(nf16::Shared& S, uint32_t thr, h156::RetainStats& out, const H886Rec* rec = nullptr) {
   const uint64_t NQ = h886_nq(); std::vector<std::vector<uint64_t>> kp(NQ); std::vector<long> lv(NQ, 0);
@@ -8201,7 +8100,6 @@ static void h854_compact_nf(nf16::Shared& S, uint32_t thr, h156::RetainStats& ou
   out.nf_ev = live - (long)keep.size();
   out.nf_kept = (long)keep.size();
 }
-
 static void h854_compact_cc(cc14::Shared& C, cmi6::Memo& M, uint32_t thr, const std::vector<uint8_t>& live, h156::RetainStats& out) {
   const double q0 = h301_now();
   const uint32_t ne = std::min<uint32_t>(C.nent.load(std::memory_order_relaxed), cc14::Shared::MAXENT);
@@ -8276,7 +8174,6 @@ static void h854_compact_cc(cc14::Shared& C, cmi6::Memo& M, uint32_t thr, const 
   if (g_h854 & 1) printf("H854 cc compact: live scan %.1f | keep+slides %.1f ... entries+table+rest %.1f ms (ne %u K %u) | slides sort/move ms, MB: key %.1f/%.1f/%.0f prog %.1f/%.1f/%.0f sp %.1f/%.1f/%.0f enc %.1f/%.1f/%.0f\n", (q1 - q0) * 1e3, (q2 - q1) * 1e3, (h301_now() - q2) * 1e3, ne, K,
     g_h886_sl[0][0], g_h886_sl[0][1], g_h886_sl[0][2] / 1048576.0, g_h886_sl[1][0], g_h886_sl[1][1], g_h886_sl[1][2] / 1048576.0, g_h886_sl[2][0], g_h886_sl[2][1], g_h886_sl[2][2] / 1048576.0, g_h886_sl[3][0], g_h886_sl[3][1], g_h886_sl[3][2] / 1048576.0);
 }
-
 static void h854_retain(nf16::Shared& S, cc14::Shared& C, cmi6::Memo& M, uint32_t st, double cap_bytes, h156::RetainStats& out) {
   const double ta = h301_now();
   const uint32_t NT = st + 2;
@@ -8351,7 +8248,6 @@ static void h854_retain(nf16::Shared& S, cc14::Shared& C, cmi6::Memo& M, uint32_
   }
   g_h854_rec.hist = (tb - ta) * 1e3;
 }
-
 struct H886Pub { bool on; H886Pend p; ~H886Pub() { if (on) { std::lock_guard<std::mutex> lk(g_h886_mx); g_h886_pend.ev = p.ev; g_h886_pend.fb = p.fb; g_h886_pend.cmp += p.cmp; g_h886_pend.valid = true; } } };
 static void memo_boundary(Engine& E, int st) {
   H886Pub h886pub; h886pub.on = (g_h886 & 1) != 0;
@@ -8367,8 +8263,6 @@ static void memo_boundary(Engine& E, int st) {
   if (g_h854 & 13) { g_h854_rec.ran = true; g_h854_rec.start = h301_now(); h854_retain(*E.SH, *E.CS, *E.MM, (uint32_t)st, g_h129_cap_mb * 1048576.0, g_h156_ev); }
   else h156::retain(*E.SH, *E.CS, *E.MM, (uint32_t)st, g_h129_cap_mb * 1048576.0, g_h156_ev);
   g_h156_compacts++;
-
-
   for (std::vector<Worker>* ws : {&E.W, &g_W2}) for (Worker& w : *ws) {
     w.H->r_next = 0; w.H->r_end = 0;
     cc14::Handle& C = w.CH->C;
@@ -8386,7 +8280,6 @@ static void h886_adopt() {
   { std::lock_guard<std::mutex> lk(g_h886_mx); if (g_h886_pend.valid) { g_h156_ev = g_h886_pend.ev; g_h156_fallback = g_h886_pend.fb; g_h156_compacts += g_h886_pend.cmp; g_h886_pend = H886Pend(); } }
   g_h886_rec = g_h854_rec;
 }
-
 static void h156_step_print(const Engine& E, int st) {
   const H156Snap s1 = h156_snap(E); const H156Snap& s0 = g_h156_s0;
   const long nh = s1.nf_h - s0.nf_h, nm = s1.nf_m - s0.nf_m;
@@ -8407,8 +8300,6 @@ static void h156_step_print(const Engine& E, int st) {
          xl, eh, xl ? (double)eh / (double)xl : 0.0, E.MM->nst.load(), mb_of(enc_b), g_h156_ev.enc_ev,
          g_h156_compacts, g_h156_fallback, g_h156_ev.thr);
 }
-
-
 #include "evo_loop_h33.hpp"
 #include "evo_loop_h53.hpp"
 #include <thread>
@@ -8416,8 +8307,6 @@ static void h156_step_print(const Engine& E, int st) {
 static const int g_h419 = getenv("H419") ? atoi(getenv("H419")) : 0;
 #include "evo_loop_i20_h709.hpp"
 #include "evo_loop_h696_h709.hpp"
-
-
 static void h826_breed(evo::Pool& pool, evo::State& S, const uint32_t* pidx, const uint32_t* cs, evo::BreedBuf& BB, uint64_t seed, uint64_t step,
                        uint32_t* rebreeds, uint32_t* failed, const evo::Cand** chp, uint8_t* cv, int d_lo, int d_hi) {
   using namespace evo;
@@ -8442,14 +8331,10 @@ static void h826_breed(evo::Pool& pool, evo::State& S, const uint32_t* pidx, con
     rebreeds[d] = rb; failed[d] = fl;
   });
 }
-
-
 static const int g_h320 = getenv("H320") ? atoi(getenv("H320")) : 0;
 static const char* g_h320_path = getenv("H320_DUMP");
 static const int g_h320_from = getenv("H320_DUMP_FROM") ? atoi(getenv("H320_DUMP_FROM")) : 1;
 static std::vector<evo::ChildLink320> g_h320_link;
-
-
 struct Rec320 { int32_t step, child; uint8_t side, n, lenA, lenB; uint8_t swap, xo, s, szi; uint8_t js, szj, k, pad; uint8_t op[24], opA[24], opB[24]; };
 static_assert(sizeof(Rec320) == 92, "Rec320 is 92 bytes");
 static FILE* g_h320_f = nullptr;
@@ -8504,8 +8389,6 @@ static void select_v3(evo::Pool& pool, evo::State& S, const std::vector<Meta>& p
     rank_crowd(m, s.pe.data(), s.pc.data(), s.prank.data(), s.pcrowd.data(), s.rs);
     choose_survivors(m, s.pcrowd.data(), s.rs, s.surv.data(), s.tmp);
   });
-
-
   FlatKeySet placed; placed.reserve((size_t)NP);
   auto place = [&](int dst, int slot, int j, uint32_t pos) {
     const SelScratch& sj = S.sel[j];
@@ -8545,7 +8428,6 @@ static void select_v3(evo::Pool& pool, evo::State& S, const std::vector<Meta>& p
     if (slot < DECK) { fprintf(stderr, "select: deme %d short by %d after both passes (impossible: parents are distinct)\n", d, DECK - slot); exit(1); }
   }
 }
-
 #endif
 struct TreeBuf { uint8_t op[evo::MAXLEN]; float c[evo::MAXLEN]; int len; bool over; };
 static void rgrow(evo::Rng& r, int depth, int maxd, bool full, TreeBuf& B) {
@@ -8587,7 +8469,6 @@ static void random_cand(evo::Rng& r, evo::Cand& c) {
     if (evo::cand_valid(c)) return;
   }
 }
-
 struct SeedSrc { FILE* f = nullptr; evo::Rng rng{20261008ull}; long file_read = 0, file_valid = 0, random_made = 0; bool file_done = false; };
 static void next_batch(SeedSrc& S, int want, std::vector<evo::Cand>& out) {
   out.clear();
@@ -8599,8 +8480,6 @@ static void next_batch(SeedSrc& S, int want, std::vector<evo::Cand>& out) {
   }
   while ((int)out.size() < want) { evo::Cand c; random_cand(S.rng, c); out.push_back(c); S.random_made++; }
 }
-
-
 static void check_fit(const StepBatch& SB, int s, const Target& tg, int ncheck, uint64_t seed, long& n, long& miss, long& better, long& startmiss, std::vector<double>& ratios,
                       long& rmiss, long& rbetter, long& rstart, std::vector<double>& sdiff) {
   if (ncheck <= 0) return;
@@ -8627,7 +8506,6 @@ static void check_fit(const StepBatch& SB, int s, const Target& tg, int ncheck, 
     ratios.push_back(g / std::max(o.rssf, 1e-30));
   }
 }
-
 #include <execinfo.h>
 #include <mach-o/dyld.h>
 extern "C" { typedef void (malloc_logger_t)(uint32_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uint32_t); extern malloc_logger_t* malloc_logger; }
@@ -8663,7 +8541,7 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
   g_h870 = getenv("H870") ? atoi(getenv("H870")) : 0;
   if (argc < 6) { fprintf(stderr, "usage: %s <seeds.bin|random> kernel_dir outdir prims.txt label [steps=25] [threads=4] [check=200] [rseed=20261008]\n", argv[0]); return 2; }
   const std::string seedarg = argv[1], kdir = argv[2], outdir = argv[3], label = argv[5];
-  g_psKdir = kdir;
+  g_psKdir = kdir; g_kcap_kdir = kdir;
   const int steps = argc > 6 ? atoi(argv[6]) : 25, nthr = argc > 7 ? atoi(argv[7]) : 4, ncheck = argc > 8 ? atoi(argv[8]) : 200;
   const uint64_t rseed = argc > 9 ? (uint64_t)strtoull(argv[9], nullptr, 10) : 20261008ull;
   if (const char* ev = getenv("S12_CHUNKS")) g_chunks = std::max(1, atoi(ev));
@@ -8680,11 +8558,12 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
   if (const char* ev = getenv("S14_TIME")) g_time14 = atoi(ev);
   if (const char* ev = getenv("S14_CHK_FIN")) g_chk_fin = atoi(ev);
   fitx::reset(); rec_set_pin(); g_fit_cands = nullptr;
+  { static const int h774_init = g_h774; g_h774 = h774_init; }
+  g_yfx = false; g_yfx_epoch++; geop::g_sc[0] = geop::g_sc[1] = 1.0;
   g_sf_axis = 0; uib::g_xf_on = 0; g_fr_score96 = nullptr; g_sicis_en = nullptr; g_cf_on = false; g_cf_buf = nil; g_pp_seen.clear(); g_pp_hit = g_pp_all = 0;
   for (auto& pp : PP) for (int s2 = 0; s2 < 2; s2++) pp.S[s2].yb = nil;
   g_wb_par = nullptr; g_kgp_par = nullptr; g_h301_after_front = nullptr; g_ovl_hook = nullptr; g_kfill = nullptr; g_kfin = nullptr; g_kskey.clear(); g_kvalid.clear(); g_kcs_prev.clear(); g_h826_head = nullptr; g_h826_rest = nullptr;
   delete g_h415_spare; g_h415_spare = nullptr; g_pool2 = nullptr; g_h250_pending = nullptr;
-
   g_h301r_t.clear(); g_h301r_e.clear(); g_h301r_n.store(0); g_stp.clear(); g_st_chunk = 0; g_W2.clear();
   g_h670_res.clear(); g_h670_have = false; g_h670_cs.clear(); g_loc16.clear(); g_h91s.clear(); g_h774_cstart.clear(); g_h320_link.clear();
   g_fdq[0] = FreetDeferred(); g_fdq[1] = FreetDeferred(); g_fdi = 0; g_fr = FrStats(); g_frs = FrStats(); g_cfn = 0; g_cfdead = 0; g_cfmaxabs = 0; g_cfmaxrel = 0;
@@ -8724,7 +8603,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     else printf("H912: hw.memsize unreadable, cap stays %.0f MB\n", g_h129_cap_mb);
   }
   {
-
     const int mc = getenv("MEM_CAP") ? atoi(getenv("MEM_CAP")) : 1;
     if (mc && g_h129_cap_mb > 0) { uint64_t ms = 0; size_t l = sizeof ms; double mem_mb = (sysctlbyname("hw.memsize", &ms, &l, nullptr, 0) == 0) ? (double)ms / 1048576.0 : 0.0;
       if (const char* mv = getenv("H912_MEM_MB")) mem_mb = atof(mv);
@@ -8845,8 +8723,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
            g_h99 ? "ON" : "OFF", (size_t)(g_h99 ? G99.cap : 0), (size_t)(g_h99 ? G99.arena_w : 0), g_h99 ? G99.arena_w * 4.0 / 1048576.0 : 0.0,
            g_h99 ? G99.bytes() / 1048576.0 - G99.arena_w * 4.0 / 1048576.0 : 0.0); }
   if (![[NSFileManager defaultManager] createDirectoryAtPath:[NSString stringWithUTF8String:outdir.c_str()] withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
-
-
   std::vector<Stroke> strokes; if (!load_strokes(argv[4], strokes)) { fprintf(stderr, "cannot read %s\n", argv[4]); return 1; }
   const Stroke* sk = nullptr; for (auto& s : strokes) if (s.label == label) { sk = &s; break; }
   if (!sk) { fprintf(stderr, "no stroke with label %s\n", label.c_str()); return 1; }
@@ -8860,7 +8736,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     printf("STROKE_IN: %s: %zu raw pts -> %d pts (arc-length resample + bbox-centre/span normalize, selection_core.hpp:95)\n", sin, rx.size(), NPT);
   }
   std::vector<double> XG, YG;
-
   int sf_axis = 0;
   if (getenv("SINGLE_FAST") && atoi(getenv("SINGLE_FAST")) != 0) {
     SingleFastDecision sfd = single_fast_detect(X, Y); sf_axis = sfd.axis;
@@ -8885,8 +8760,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
   if (XG.empty()) { XG = X; YG = Y; }
   Sketch::CisPerCellEnergyInput sicis_energies;
   if (sicis::enabled()) {
-
-
     static const int sgrid = getenv("SICIS_GRID") ? atoi(getenv("SICIS_GRID")) : 1;
     std::vector<float> fx(sgrid ? XG.begin() : X.begin(), sgrid ? XG.end() : X.end()), fy(sgrid ? YG.begin() : Y.begin(), sgrid ? YG.end() : Y.end());
     if (g_yfx) { fx.assign(g_yfx_txy[0].begin(), g_yfx_txy[0].end()); fy.assign(g_yfx_txy[1].begin(), g_yfx_txy[1].end()); }
@@ -8897,7 +8770,13 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     if (ok && (getenv("FJN_RES48_HOST") || getenv("FJN_CISFUSE_HOST"))) {
       g_fr_score96 = [](const float* r) -> double {
         float c[NPT];
-        for (int p = 0; p < NPT; p++) { const double zx = r[p], zy = r[NPT + p], h = std::hypot(zx, zy); c[p] = g_nres ? (float)(zx * (double)g_nres_n[p] + zy * (double)g_nres_n[NPT + p]) : (float)((zx + zy < 0) ? -h : h); }
+        for (int p = 0; p < NPT; p++) { const double zx = r[p], zy = r[NPT + p],
+#ifdef COFIT_SCOREFAST
+          h = std::sqrt(std::fma(zy, zy, zx * zx));
+#else
+          h = std::hypot(zx, zy);
+#endif
+          c[p] = g_nres ? (float)(zx * (double)g_nres_n[p] + zy * (double)g_nres_n[NPT + p]) : (float)((zx + zy < 0) ? -h : h); }
         return sicis::score48(c, *g_sicis_en);
       };
       printf("SICIS: free-t objective = SI-CIS NLL on kernel res48 (FJN_RES48_HOST)\n");
@@ -8940,8 +8819,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     if (sf_axis == 1) { uib::g_map[0] = s * d; uib::g_map[1] = s * g_sf_a0 + stroke_in::g_cx; }
     if (sf_axis == 2) { uib::g_map[2] = s * d; uib::g_map[3] = s * g_sf_a0 + stroke_in::g_cy; }
   }
-
-
   uib::g_xf_on = 0; for (int i = 0; i < 4; i++) uib::g_smap[i] = uib::g_map[i];
   { static const int yfx = getenv("YFX_FRAME") ? atoi(getenv("YFX_FRAME")) : 1;
     const double d = g_sf_a1 - g_sf_a0;
@@ -8951,7 +8828,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
       else { uib::g_map[0] = uib::g_map[2] = stroke_in::g_span; uib::g_map[1] = stroke_in::g_cx; uib::g_map[3] = stroke_in::g_cy; }
       printf("YFX_FRAME: %s equations in the drawing frame: t = %s over [%.6g, %.6g] (engine s = %.9g*t + %.9g), x_raw = %.6g*x + %.6g\n", sf_axis == 1 ? "y=f(x)" : "x=f(y)", sf_axis == 1 ? "x" : "y", g_sf_a0, g_sf_a1, uib::g_xf_a, uib::g_xf_b, uib::g_map[0], uib::g_map[1]);
     } }
-
   const int NP = evo::NPOP;
   SeedSrc src; src.rng = evo::Rng(rseed);
   const bool random_seeds = seedarg == "random";
@@ -8961,7 +8837,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
   printf("I18: miss = f42::compile_fused (H42 SU order, fused encode), post mode S16_POST=%d (%s), select H53 (H33 if H53=0), breed H25 (breed_i12), NF caps x8\n",
          g_post16,
          g_post16 == 1 ? "post16 per chunk" : g_post16 == 2 ? "post16 once after all chunks" : "post14 serial (v9 reference)");
-
   Engine E;
   E.dev = MTLCreateSystemDefaultDevice(); E.cq = [E.dev newCommandQueue];
   if (g_h891 && g_h891_gpu_us > 0) {
@@ -8977,17 +8852,15 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
   printf("I21 defaults: H141A %d H141B %d H150P %d H139 %d (env overrides: H141A=0 H141B=0 H150P=0 H139=0 restore i20)\n", h141a_on(), h141b_on(), h150p_on(), g_h139);
   printf("I22 defaults: H156 %d H182 %d H178 %d H178P %d H139 %d H141A %d H141B %d H150P %d (env off: H156=0 H182=0 H178=0 H178P=0)\n", h156::g_on ? 1 : 0, h182_on(), h178_on(), h178_pre(), g_h139, h141a_on(), h141b_on(), h150p_on());
   { NSError* e = nil; NSString* ps = [NSString stringWithUTF8String:(kdir + "/scan.metallib").c_str()];
-    E.Ls = [E.dev newLibraryWithURL:[NSURL fileURLWithPath:ps] error:&e]; if (!E.Ls) { fprintf(stderr, "scan.metallib: %s\n", e.description.UTF8String); return 1; } }
-  if (g_h335) { NSError* e = nil; g_h335L = [E.dev newLibraryWithURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:(kdir + (g_h333 ? "/kbuild_h335/scan_h333.metallib" : ((g_h802 || g_h803) ? (g_h802 && g_h803 ? "/kbuild_h802_h803/scan_h335.metallib" : g_h802 ? "/kbuild_h802/scan_h335.metallib" : "/kbuild_h803/scan_h335.metallib") : (getenv("H808F") && atoi(getenv("H808F")) >= 2) ? (atoi(getenv("H808F")) == 2 ? "/kbuild_h810_b1/scan_h335.metallib" : "/kbuild_h810_b1_bu/scan_h335.metallib") : (getenv("H808F") && atoi(getenv("H808F"))) ? (std::string("/kbuild_h808_f") + ((getenv("H805") && atoi(getenv("H805"))) ? "805" : "") + ((getenv("H806") && atoi(getenv("H806"))) ? ((getenv("H805") && atoi(getenv("H805"))) ? "_806" : "806") : "") + "/scan_h335.metallib").c_str() : getenv("H805") && atoi(getenv("H805")) && getenv("H806") && atoi(getenv("H806")) ? "/kbuild_h805_h806/scan_h335.metallib" : getenv("H805") && atoi(getenv("H805")) ? "/kbuild_h805/scan_h335.metallib" : getenv("H806") && atoi(getenv("H806")) ? "/kbuild_h806/scan_h335.metallib" : getenv("H622") && atoi(getenv("H622")) ? "/kbuild_h622/scan_h335.metallib" : getenv("H621") && atoi(getenv("H621")) ? "/kbuild_h621/scan_h335.metallib" : "/kbuild_h335/scan_h335.metallib"))).c_str()]] error:&e];
+    E.Ls = (kcap_sg_on() ? kcap_newlib(E.dev, [NSURL fileURLWithPath:ps], &e) : [E.dev newLibraryWithURL:[NSURL fileURLWithPath:ps] error:&e]); if (!E.Ls) { fprintf(stderr, "scan.metallib: %s\n", e.description.UTF8String); return 1; } }
+  if (g_h335) { NSError* e = nil; g_h335L = (kcap_sg_on() ? kcap_newlib(E.dev, [NSURL fileURLWithPath:[NSString stringWithUTF8String:(kdir + (g_h333 ? "/kbuild_h335/scan_h333.metallib" : ((g_h802 || g_h803) ? (g_h802 && g_h803 ? "/kbuild_h802_h803/scan_h335.metallib" : g_h802 ? "/kbuild_h802/scan_h335.metallib" : "/kbuild_h803/scan_h335.metallib") : (getenv("H808F") && atoi(getenv("H808F")) >= 2) ? (atoi(getenv("H808F")) == 2 ? "/kbuild_h810_b1/scan_h335.metallib" : "/kbuild_h810_b1_bu/scan_h335.metallib") : (getenv("H808F") && atoi(getenv("H808F"))) ? (std::string("/kbuild_h808_f") + ((getenv("H805") && atoi(getenv("H805"))) ? "805" : "") + ((getenv("H806") && atoi(getenv("H806"))) ? ((getenv("H805") && atoi(getenv("H805"))) ? "_806" : "806") : "") + "/scan_h335.metallib").c_str() : getenv("H805") && atoi(getenv("H805")) && getenv("H806") && atoi(getenv("H806")) ? "/kbuild_h805_h806/scan_h335.metallib" : getenv("H805") && atoi(getenv("H805")) ? "/kbuild_h805/scan_h335.metallib" : getenv("H806") && atoi(getenv("H806")) ? "/kbuild_h806/scan_h335.metallib" : getenv("H622") && atoi(getenv("H622")) ? "/kbuild_h622/scan_h335.metallib" : getenv("H621") && atoi(getenv("H621")) ? "/kbuild_h621/scan_h335.metallib" : "/kbuild_h335/scan_h335.metallib"))).c_str()]], &e) : [E.dev newLibraryWithURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:(kdir + (g_h333 ? "/kbuild_h335/scan_h333.metallib" : ((g_h802 || g_h803) ? (g_h802 && g_h803 ? "/kbuild_h802_h803/scan_h335.metallib" : g_h802 ? "/kbuild_h802/scan_h335.metallib" : "/kbuild_h803/scan_h335.metallib") : (getenv("H808F") && atoi(getenv("H808F")) >= 2) ? (atoi(getenv("H808F")) == 2 ? "/kbuild_h810_b1/scan_h335.metallib" : "/kbuild_h810_b1_bu/scan_h335.metallib") : (getenv("H808F") && atoi(getenv("H808F"))) ? (std::string("/kbuild_h808_f") + ((getenv("H805") && atoi(getenv("H805"))) ? "805" : "") + ((getenv("H806") && atoi(getenv("H806"))) ? ((getenv("H805") && atoi(getenv("H805"))) ? "_806" : "806") : "") + "/scan_h335.metallib").c_str() : getenv("H805") && atoi(getenv("H805")) && getenv("H806") && atoi(getenv("H806")) ? "/kbuild_h805_h806/scan_h335.metallib" : getenv("H805") && atoi(getenv("H805")) ? "/kbuild_h805/scan_h335.metallib" : getenv("H806") && atoi(getenv("H806")) ? "/kbuild_h806/scan_h335.metallib" : getenv("H622") && atoi(getenv("H622")) ? "/kbuild_h622/scan_h335.metallib" : getenv("H621") && atoi(getenv("H621")) ? "/kbuild_h621/scan_h335.metallib" : "/kbuild_h335/scan_h335.metallib"))).c_str()]] error:&e]);
     if (!g_h335L) { fprintf(stderr, "H335: kbuild_h335/scan_h335.metallib: %s\n", e.description.UTF8String); return 1; }
     if ((g_h802 || g_h803) && ((getenv("H805") && atoi(getenv("H805"))) || (getenv("H806") && atoi(getenv("H806"))) || g_h333)) { fprintf(stderr, "H802/H803 need H335=1 and exclude H805/H806/H333\n"); return 1; }
     printf("H335=%d: 24-point scan ranking + exact top-4 (kbuild_h335/scan_h335.metallib)\n", g_h335);  if (getenv("H621") && atoi(getenv("H621"))) printf("H621: scan from kbuild_h621 (lane-parallel top-4)\n");  if (getenv("H622") && atoi(getenv("H622"))) printf("H622: scan from kbuild_h622 (H621 + all-bad MGS skip)\n");  if (getenv("H805") && atoi(getenv("H805"))) printf("H805: scan from kbuild_h805 (skip rank-dropped columns)\n"); if (getenv("H806") && atoi(getenv("H806"))) printf("H806: scan from kbuild_h806 (bad-tree early exit)\n"); }
-  if (g_h139) { NSError* e = nil; g_h139L = [E.dev newLibraryWithURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:(kdir + "/scan_h139.metallib").c_str()]] error:&e];
+  if (g_h139) { NSError* e = nil; g_h139L = (kcap_sg_on() ? kcap_newlib(E.dev, [NSURL fileURLWithPath:[NSString stringWithUTF8String:(kdir + "/scan_h139.metallib").c_str()]], &e) : [E.dev newLibraryWithURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:(kdir + "/scan_h139.metallib").c_str()]] error:&e]);
     if (!g_h139L) { fprintf(stderr, "H139: scan_h139.metallib: %s\n", e.description.UTF8String); return 1; }
     printf("H139=%d: device-scratch scan kernels rcscand_* from scan_h139.metallib (over-limit = tgb > 32768 B)\n", g_h139); }
-
   auto load14 = [&](const char* base) -> id<MTLLibrary> {
-
     const bool h94k = h94_mode() >= 1 && (std::string(base) == "gn_i14" || std::string(base) == "pol_i14");
     const char* h331t = getenv("H331_TAUD");
     const bool h331k = !h94k && h331t && *h331t && (std::string(base) == "gn_i14" || std::string(base) == "pol_i14" || std::string(base) == "gnp_i14" || std::string(base) == "polp_i14");
@@ -9002,7 +8875,7 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
       printf("runtime source compile %s: %.0f ms\n", base, ms_since(t0));
       if (!L) { fprintf(stderr, "%s: %s\n", base, e.description.UTF8String); return nil; }
       return L; }
-    NSError* e = nil; L = [E.dev newLibraryWithURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:(dir + ".metallib").c_str()]] error:&e];
+    NSError* e = nil; L = (kcap_sg_on() ? kcap_newlib(E.dev, [NSURL fileURLWithPath:[NSString stringWithUTF8String:(dir + ".metallib").c_str()]], &e) : [E.dev newLibraryWithURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:(dir + ".metallib").c_str()]] error:&e]);
     if (!L) { fprintf(stderr, "%s.metallib: %s\n", base, e.description.UTF8String); return nil; }
     return L; };
   if (g_h711) {
@@ -9016,7 +8889,12 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
   if (g_h712 || g_h713) printf("H712=%d H713=%d: gn/pol/gnp/polp from kbuild_h712b_%s%s%s/\n", g_h712, g_h713, getenv("H331_TAUD"), (g_h712 && !g_h711) ? ((getenv("H710B") && atoi(getenv("H710B"))) ? "_n711" : "_n711_a") : "", (g_h713 && !g_h712) ? "_f713" : "");
   E.Lg = load14("gn_i14"); E.Lp = load14("pol_i14"); E.Lgr = load14("grid_i14"); E.Lb = load14("band_i14");
   if (!E.Lg || !E.Lp || !E.Lgr || !E.Lb) return 1;
-  if (g_freet) { if (const char* fl = getenv("FJN_LAY")) fjn::g_lay = atoi(fl); if (const char* fz = getenv("FJN_FUSE_HOST")) fjn::g_fuse = atoi(fz); NSError* fe = nil; g_fjnL = [E.dev newLibraryWithURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:(kdir + "/fjn_h950.metallib").c_str()]] error:&fe];
+  if (g_freet) { if (const char* fl = getenv("FJN_LAY")) fjn::g_lay = atoi(fl); if (const char* fz = getenv("FJN_FUSE_HOST")) fjn::g_fuse = atoi(fz); NSError* fe = nil; g_fjn_lib_gen++; g_fjnL = [E.dev newLibraryWithURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:(kdir + "/" + (getenv("FJN_LIB") ? getenv("FJN_LIB") : "fjn_h950.metallib")).c_str()]] error:&fe];
+    if (const char* fsrc = getenv("FJN_LIBSRC")) {
+      std::ifstream f(fsrc); if (!f) { fprintf(stderr, "FJN_LIBSRC: cannot read %s\n", fsrc); return 1; }
+      std::stringstream ss; ss << f.rdbuf(); NSError* e2 = nil; MTLCompileOptions* o2 = [MTLCompileOptions new]; o2.languageVersion = MTLLanguageVersion3_1; if (getenv("FJN_SAFEMATH")) o2.fastMathEnabled = NO;
+      auto t2 = clk::now(); g_fjnL = [E.dev newLibraryWithSource:[NSString stringWithUTF8String:ss.str().c_str()] options:o2 error:&e2]; printf("FJN_LIBSRC %s: runtime source compile %.0f ms\n", fsrc, ms_since(t2));
+      if (!g_fjnL) { fprintf(stderr, "FJN_LIBSRC: %s\n", e2.description.UTF8String); return 1; } fe = nil; }
     if (!g_fjnL) { fprintf(stderr, "fjn_h950.metallib: %s\n", fe.description.UTF8String); return 1; } }
   if (g_h713) { E.Lgp = load14("gnp_i14"); E.Lpp = load14("polp_i14"); if (!E.Lgp || !E.Lpp) return 1; }
   E.SH = new nf16::Shared(); E.SH->prefault((size_t)16 << 20); E.CS = new cc14::Shared(); if (!(g_h853 & 2)) E.CS->prefault((size_t)64 << 20);
@@ -9053,17 +8931,24 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     printf("PSO_PAR: %zu pipelines compiled concurrently in %.0f ms (created %ld absent %ld)\n", L.size(), ms_since(tpp), g_h178_created, g_h178_absent); fflush(stdout);
   }
   if (g_freet && !(getenv("S12_FREET_PRECREATE") && atoi(getenv("S12_FREET_PRECREATE")) == 0)) {
+    id<MTLBinaryArchive> sv_arch = g_h178_arch; const bool sv_ex = g_h178_exists, sv_dirty = g_h178_dirty; const long sv_hits = g_h178_hits, sv_miss = g_h178_miss; bool fa = false; NSString* fap = nil;
+    if (getenv("FJN_ARCH") && atoi(getenv("FJN_ARCH")) != 0) { fap = [NSString stringWithFormat:@"%s.fjn_%s", h178_path().c_str(), getenv("FJN_LIB") ? getenv("FJN_LIB") : "fjn_h950.metallib"];
+      const bool ex = [[NSFileManager defaultManager] fileExistsAtPath:fap]; MTLBinaryArchiveDescriptor* ad = [MTLBinaryArchiveDescriptor new]; if (ex) ad.url = [NSURL fileURLWithPath:fap];
+      NSError* e = nil; id<MTLBinaryArchive> ar = [E.dev newBinaryArchiveWithDescriptor:ad error:&e];
+      if (!ar && ex) { e = nil; ar = [E.dev newBinaryArchiveWithDescriptor:[MTLBinaryArchiveDescriptor new] error:&e]; if (ar) { g_h178_exists = false; } } else g_h178_exists = ex;
+      if (ar) { fa = true; g_h178_arch = ar; g_h178_dirty = false; g_h178_hits = g_h178_miss = 0; } else g_h178_exists = sv_ex; }
     const auto tpc = clk::now(); int npc = 0; for (NSString* fnm in g_fjnL.functionNames) { E.pipe(g_fjnL, std::string(fnm.UTF8String)); npc++; }
-    printf("H950: pre-created %d fjn PSOs in %.1f ms (archive hits %ld misses %ld)\n", npc, ms_since(tpc), g_h178_hits, g_h178_miss); }
+    printf("H950: pre-created %d fjn PSOs in %.1f ms (archive hits %ld misses %ld)\n", npc, ms_since(tpc), g_h178_hits, g_h178_miss);
+    if (fa) { if (g_h178_dirty) { NSString* tmp = [fap stringByAppendingString:@".tmp"]; NSError* e = nil; NSFileManager* fm = [NSFileManager defaultManager]; [fm removeItemAtPath:tmp error:nil];
+        const auto tsv = clk::now(); if ([g_h178_arch serializeToURL:[NSURL fileURLWithPath:tmp] error:&e]) { [fm removeItemAtPath:fap error:nil]; [fm moveItemAtPath:tmp toPath:fap error:&e];
+          printf("FJN_ARCH: written %s (%llu bytes) in %.0f ms\n", fap.UTF8String, (unsigned long long)[[fm attributesOfItemAtPath:fap error:nil] fileSize], ms_since(tsv)); }
+        else printf("FJN_ARCH: serialize failed: %s\n", e.description.UTF8String); }
+      g_h178_arch = sv_arch; g_h178_exists = sv_ex; g_h178_dirty = sv_dirty; g_h178_hits = sv_hits; g_h178_miss = sv_miss; } }
   if (g_freet) {
     double Lr = 0; for (int i = 1; i < NPT; i++) Lr += std::hypot(X[i] - X[i - 1], Y[i] - Y[i - 1]);
     const double gap = std::hypot(X[NPT - 1] - X[0], Y[NPT - 1] - Y[0]);
-
-
     static const bool cnr = getenv("CLOSED_NRAW") && atoi(getenv("CLOSED_NRAW")) != 0;
     g_fr_closed = gap <= Lr / std::sqrt((double)(cnr ? n_raw : sk->xs.size()));
-
-
     { static const bool cr = getenv("CLOSED_RULE") && atoi(getenv("CLOSED_RULE")) != 0; if (cr) g_fr_closed = single_fast_detect(X, Y).closed; }
     printf("H950: stroke arc length %.4f end gap %.4f raw points %zu -> %s\n", Lr, gap, cnr ? n_raw : sk->xs.size(), g_fr_closed ? "CLOSED (t0 free)" : "open (pinned ends)"); }
   printf("targets: x in [%.4f, %.4f], y in [%.4f, %.4f], yy_x %.4f yy_y %.4f\n",
@@ -9095,7 +8980,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     g_h178_arch = nil; g_h178_released = true;
     printf("H876: MTLBinaryArchive reference released\n"); }
   if (h876_mask() & 4) printf("H876 mem init end: rss %.1f MB phys %.1f MB\n", rss_mb_now(), phys_fp_mb());
-
   if (g_h298q & 2) pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
   printf("H299: %d (%s)\n", g_h299, g_h299 ? "per-chunk polish on the CPU after the chunk's grid + band (needs H91=1)" : "off");
   printf("H298Q: %d (bit1 fit threads UTILITY, bit2 main+pool USER_INTERACTIVE, bit4 tail polish UTILITY)\n", g_h298q);
@@ -9146,8 +9030,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     for (int i = 0; i < NP; i++) { uint64_t kh = KeyHash()(pm[i].key); uint32_t cx; float e; if (g_h740 == 1) { cx = g_h740e[pidx[i]].cx; e = g_h740e[pidx[i]].err; } else { const evo::Ind& PI = XC(S, pidx[i]); cx = PI.cx; e = PI.err; }
       fwrite(&kh, 8, 1, f); fwrite(&pm[i].r0, 8, 1, f); fwrite(&pm[i].r1, 8, 1, f); fwrite(&e, 4, 1, f); fwrite(&cx, 4, 1, f); }
     fclose(f); };
-
-
   {
     const long h178_g0 = g_h178_created;
     Times T0; std::vector<evo::Cand> popG; std::vector<float> popE, popRx, popRy; int nb_batches = 0; auto g0 = clk::now();
@@ -9185,12 +9067,14 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     for (int i = 0; i < NP; i++) {
       evo::Ind& I = S.par[i]; I.g = popG[i]; I.valid = 1; std::memset(I.res, 0, sizeof I.res); I.res[0] = popE[i]; I.err = popE[i]; I.cx = sp_cx(I.g, pm[i]); }
     evo::init_rank(pool, S.par.data(), S.sel.data());
+    if (getenv("DBG_MARK")) { printf("MARK init_rank done\n"); fflush(stdout); }
     if (g_h740) for (int i = 0; i < NP; i++) { const evo::Ind& I = S.par[i]; g_h740e[i] = H740E{I.err, I.cx, I.valid, 0}; g_h740r[i] = H740R{I.crowd, I.rank, {0, 0, 0}}; }
     for (int i = 0; i < NP; i++) pidx[i] = (uint32_t)i;
     next_children_h92(pidx.data(), cs.data());
+    if (getenv("DBG_MARK")) { printf("MARK next_children done\n"); fflush(stdout); }
     dump_gen(0);
   }
-
+  if (getenv("DBG_MARK")) { printf("MARK dump_gen done\n"); fflush(stdout); }
   const int steady_from = steps >= 15 ? 11 : 1;
   Times TT, TS; long nsteady = 0; double best_all = INFINITY;
   long h99_sl = 0, h99_sh = 0; double h99_su = 0;
@@ -9199,16 +9083,17 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
   H896Pop h896pop; g_h896p = &h896pop;
   std::thread pop_thr; std::function<void()> pend_print;
   std::thread h4_thr; std::shared_ptr<H4Job> Jh4;
-
   if ((g_h131 & 1) && !(g_freet && (evo::mem_lean() & 4))) h131_prealloc(E.dev, (size_t)NP);
   g_h301_main = std::this_thread::get_id(); (void)h401_tid();
   double h301_t0 = 0, h301_busy = 0, h301_idle = 0; long h301_n = 0; std::map<std::string, double> h301_acc;
   std::thread sb_thr, mb_thr;
   std::thread h652_thr; double h652_best = INFINITY, h652_join_ms = 0, h651_join_ms = 0;
   if (pf_thr.t.joinable()) pf_thr.t.join();
+  if (getenv("DBG_MARK")) { printf("MARK prefault joined\n"); fflush(stdout); }
   uib::g_t0 = h301_now();
   if (getenv("UI_STEP_LOG") && atoi(getenv("UI_STEP_LOG"))) printf("UI_STEP gen0_done t_ms %.1f\n", ui_ms_since_start());
   for (int st = 1; st <= steps && !uib::g_stop; st++) {
+    g_kcap_step = st; kcap_sg_step(st);
     if (g_h313x) { const bool on = ((st + (g_h313x == 2 ? 1 : 0)) & 1) != 0; c308::g_a2 = c720::g_a2 = on && (g_h313a_mask & 1); cmi6::g_a1 = on && (g_h313a_mask & 4); }
     if (g_h308x) g_t4 = (g_h308 >= 3) && (((st + (g_h308x == 2 ? 1 : 0)) & 1) != 0);
     static double h401_t0 = 0;
@@ -9227,8 +9112,8 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     h141_step_reset(); h150_step_reset();
     const long h178_c0 = g_h178_created;
     Times T;
-
-    const bool h651_lazy = g_h651 && mb_thr.joinable();
+    const bool ss2_lazy = g_ss2 && g_h826 && mb_thr.joinable();
+    const bool h651_lazy = (g_h651 || ss2_lazy) && mb_thr.joinable();
     if (!h651_lazy) { if (mb_thr.joinable()) { const double tj0 = h301_now(); if (g_h886 & 2) g_h886_boost.store(1, std::memory_order_relaxed); mb_thr.join(); g_h854_join_wait = (h301_now() - tj0) * 1e3; g_h854_join_done = h301_now(); g_h854_joined = true; } else { const double tj0 = h301_now(); memo_boundary(E, st); if (g_h854 & 1) { g_h854_rec.launch = tj0; g_h854_join_wait = (h301_now() - tj0) * 1e3; g_h854_join_done = h301_now(); g_h854_joined = (st > 1); } }
     h886_adopt(); h156_step_begin(E, st); }
     const auto t_iter0 = clk::now();
@@ -9271,7 +9156,8 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     else SBp.reset(new StepBatch());
     StepBatch& SB = *SBp;
     if (h652_thr.joinable()) { auto tj = clk::now(); h652_thr.join(); h652_join_ms = ms_since(tj); }
-    if (h651_lazy) { h301_mark("H651 memo join"); auto tj = clk::now(); if (g_h886 & 2) g_h886_boost.store(1, std::memory_order_relaxed); mb_thr.join(); h651_join_ms = ms_since(tj); h886_adopt(); h156_step_begin(E, st); memo_counts(E, nf_h0, nf_m0, nf_d0); }
+    if (ss2_lazy) g_ss_join = [&, st]() { auto tj = clk::now(); if (g_h886 & 2) g_h886_boost.store(1, std::memory_order_relaxed); mb_thr.join(); h651_join_ms = ms_since(tj); h886_adopt(); h156_step_begin(E, st); memo_counts(E, nf_h0, nf_m0, nf_d0); };
+    else if (h651_lazy) { h301_mark("H651 memo join"); auto tj = clk::now(); if (g_h886 & 2) g_h886_boost.store(1, std::memory_order_relaxed); mb_thr.join(); h651_join_ms = ms_since(tj); h886_adopt(); h156_step_begin(E, st); memo_counts(E, nf_h0, nf_m0, nf_d0); }
     h301_mark("evaluate entry");
     if (g_h301mb == 2 && st < steps) g_h301_after_front = [&E, &mb_thr, st] { { const double tl = h301_now(); g_h886_boost.store(0, std::memory_order_relaxed); mb_thr = std::thread([&E, st, tl] { h854_qos_self(); H401S h401s_("memo_boundary thread"); if (g_h854 & 1) { memo_boundary(E, st + 1); g_h854_rec.launch = tl; } else memo_boundary(E, st + 1); }); } };
     if (g_h320_f) { std::lock_guard<std::mutex> lk(nf308::g_h320_mx); nf308::g_h320_recs.clear(); }
@@ -9296,6 +9182,7 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     }
     h301_mark("K: evaluate_v7 setup");
     evaluate_v7(E, chp.data(), cv.data(), NP, popset, err.data(), rx.data(), ry.data(), adm, cmeta, T, SB);
+    if (g_ss_join) { fprintf(stderr, "SS2: memo join hook not consumed\n"); return 2; }
     const long mf874b = (g_h874 & 16) ? h874_mf() : 0;
     if (g_h826 && (g_h826_head || g_h826_rest)) { fprintf(stderr, "H826: a breed hook was not consumed by evaluate_v7\n"); return 2; }
     if (g_h320_f) h320_flush_step(st, S);
@@ -9373,7 +9260,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     if (g_pincensus && g_sf_axis) { long nnd = 0; for (int i = 0; i < NP; i++) if (!sf_is_driver(XC(S, pidx[i]).g)) nnd++; printf("PIN_CENSUS step %d: population %d non-driver driver side %ld\n", st, NP, nnd); }
     h301_mark("after select: dump/popset/prints");
     if (h650_is("tail")) h650_spin_ns(g_h650ms * 1e6);
-
     auto J = std::make_shared<H4Job>();
     auto h4_body = [&, J, st]() {
       auto td = clk::now(); dump_gen(st); J->dump_ms = ms_since(td);
@@ -9382,10 +9268,9 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
       for (int i = 0; i < NP; i++) { pairs.insert({pm[i].r0, pm[i].r1}); trees.insert(pm[i].r0); trees.insert(pm[i].r1); }
       J->npair = pairs.size(); J->ntree = trees.size(); J->sets_ms = ms_since(ts);
     };
-    if (getenv("H231") && atoi(getenv("H231")) == 1) {  }
+    if (getenv("H231") && atoi(getenv("H231")) == 1) {   }
     else if (g_h131 & 4) { h4_thr = std::thread([h4_body] { H401S h401s_("h4 dump+sets thread"); k_qos_set(2); h4_body(); }); Jh4 = J; }
     else { h4_body(); T.dump = J->dump_ms; T.h131_h4 += J->dump_ms + J->sets_ms; }
-
     t = clk::now();
     bool h921_hdl = false;
     if (g_h743 && (g_h921 & 3) && !(g_h896 & 1)) {
@@ -9420,11 +9305,9 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
         for (int b = 0; b < 16; b++) nadd += LA[(size_t)b].size();
         size_t ent = 0; for (const auto& x : popset.sh) ent += x.eh.size();
         if (ent + nadd <= (size_t)NP * 5 / 2) {
-
           PL(E).run(16, [&](int b) { for (int s = 0; s < 16; s++) { BK[((size_t)b * 16 + (size_t)s) * 2].clear(); BA[(size_t)b * 16 + (size_t)s].clear(); }
             for (size_t p = (size_t)NP * (size_t)b / 16; p < (size_t)NP * (size_t)(b + 1) / 16; p++) if (!keep[p]) { const uint32_t c = code[p]; BK[((size_t)b * 16 + (c >> 28)) * 2].push_back(c & EM); }
             for (uint32_t idx : LA[(size_t)b]) { const uint64_t kh = pm[idx].kh; BA[(size_t)b * 16 + FlatKeySet::shard_of(kh)].push_back({kh, idx}); } });
-
           std::atomic<int> bad{0};
           PL(E).run(16, [&](int s) { FlatKeySet& X = popset.sh[(size_t)s];
             for (int b = 0; b < 16; b++) for (uint32_t e : BK[((size_t)b * 16 + (size_t)s) * 2]) { if (e >= X.dead.size() || X.dead[e]) bad.fetch_add(1); else { X.dead[e] = 1; X.ndead++; } }
@@ -9505,7 +9388,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     }
     best_all = std::min(best_all, bc >= 0 ? (double)err[bc] : (double)INFINITY);
     if (g_h921 & 16) printf("H921 step %d: install %.2f best/check %.2f ms\n", st, T.h131_inst, ms_since(h921_tbc));
-
     t = clk::now();
     long n[2] = {0, 0}, miss[2] = {0, 0}, better[2] = {0, 0}, smiss[2] = {0, 0}, rmiss = 0, rbetter = 0, rstart = 0; std::vector<double> ratios, sdiff;
     for (int s = 0; s < 2; s++) check_fit(SB, s, E.tg[s], ncheck / 2, 1000 + st * 2 + s, n[s], miss[s], better[s], smiss[s], ratios, rmiss, rbetter, rstart, sdiff);
@@ -9595,14 +9477,14 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
         g_h891_cpu_ns.load() * 1e-6, (unsigned long long)g_h891_cpu_n.load(), g_h891_cpu_n.load() ? g_h891_cpu_ns.load() * 1e-3 / g_h891_cpu_n.load() : 0.0, g_h891_gpu_n, g_h891_gpu_req_ms, g_h891_gpu_cal_ms, g_h891_head_ms, g_h891_tail_ms);
       g_h891_cpu_ns = 0; g_h891_cpu_n = 0; g_h891_gpu_n = g_h891_gpu_req_ms = g_h891_gpu_cal_ms = 0; g_h891_head_ms = g_h891_tail_ms = 0; }
     printf("ITER WALL step %2d: %.1f ms (H131 whole-iteration wall; timed %.1f) thermal %ld\n", st, T.h131_iter, T.timed(), (long)g_thermal_state);
+    if (g_cbx) printf("ITERMARK step %d t_end %.4f wall_ms %.1f\n", st, gap_now(), T.h131_iter);
+    if (g_tm) tm_thr_snapshot(st);
     h301_mark("J: iter wall/addT");
     const bool kdef = kpop;
     if (kdef) {
       k_flush();
       struct KPK { std::vector<uint64_t> pk; std::vector<uint8_t> pres; std::vector<float> jmin; int nbk = 0, next = 0; };
       auto K = std::make_shared<KPK>(); const int JB = 2048; K->nbk = (NP + JB - 1) / JB; K->pk.resize((size_t)NP); K->pres.assign((size_t)NP, 1); K->jmin.assign((size_t)K->nbk, INFINITY);
-
-
       const size_t NS3 = (size_t)3 * NP; if (g_kskey.size() != NS3) { g_kskey.assign(NS3, 0); g_kvalid.assign(NS3, 0); g_kcs_prev.clear(); }
       { std::vector<uint8_t> dirty(NS3, 0); for (uint32_t x : kcsN) dirty[x] = 1; if (!(g_h826 && g_pinfix && g_sf_pin)) for (uint32_t x : g_kcs_prev) dirty[x] = 1;
         const int nb2 = (NP + 4095) / 4096; std::atomic<long> nmis{0}, nrec{0};
@@ -9641,18 +9523,17 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     if (jfp && NP >= 4096) { for (int b = 0; b < nbk; b++) if (jmin[(size_t)b] < bpe) bpe = jmin[(size_t)b]; }
     else for (int i = 0; i < NP; i++) { const float e_ = XC(S, pidx[i]).err; if (e_ < bpe) bpe = e_; } fitx::g_gate = std::isfinite(bpe) ? bpe + (float)fitx::gate_margin() : INFINITY;
     const double jb = ms_since(fx0);
-
     std::vector<uint8_t> jpres;
     if (jfp && NP >= 4096) { jpres.assign((size_t)NP, 1); pool.run(nbk, [&](int b) { const int lo = b * JB, hi = std::min(NP, lo + JB); for (int i = lo; i < hi; i++) pk[(size_t)i] = fitx::gkey(XC(S, pidx[i]).g); fitx::present_mask(pk, (size_t)lo, (size_t)hi, jpres.data() + lo); }); }
     else for (int i = 0; i < NP; i++) pk[(size_t)i] = fitx::gkey(XC(S, pidx[i]).g);
     const double jc = ms_since(fx0);
     if (!jpres.empty()) { size_t w = 0; for (int i = 0; i < NP; i++) if (jpres[(size_t)i]) pk[w++] = pk[(size_t)i]; pk.resize(w); }
-    fitx::retain(pk); if (g_jprof) printf("J_PROF fitx block: NP %d bpe %.2f gkey %.2f retain %.2f ms\n", NP, jb, jc - jb, ms_since(fx0) - jc); fitx::g_ms += ms_since(fx0); printf("FIT_EXPORT step %d: host ms on the main thread: writeback capture %.1f | fixed-capture+commit %.1f (commit %.1f) | retain %.1f | table %zu\n", st, fitx::g_ms_wb, fitx::g_ms, fitx::g_ms_commit, fitx::g_ms_retain, fitx::st().all.size()); fitx::g_ms = fitx::g_ms_wb = fitx::g_ms_commit = fitx::g_ms_retain = 0; }
-    if (kdef) { printf("FIT_EXPORT step %d: host ms on the main thread: writeback capture %.1f | fixed-capture+commit %.1f (commit %.1f) | retain %.1f | table %zu\n", st, fitx::g_ms_wb, fitx::g_ms, fitx::g_ms_commit, fitx::g_ms_retain, fitx::st().all.size()); fitx::g_ms = fitx::g_ms_wb = fitx::g_ms_commit = fitx::g_ms_retain = 0; }
+    static const int rt_defer = g_freet && !(getenv("RT_DEFER") && atoi(getenv("RT_DEFER")) == 0);
+    if (rt_defer) fitx::retain_join(); else fitx::retain(pk); if (g_jprof) printf("J_PROF fitx block: NP %d bpe %.2f gkey %.2f retain %.2f ms\n", NP, jb, jc - jb, ms_since(fx0) - jc); fitx::g_ms += ms_since(fx0); printf("FIT_EXPORT step %d: host ms on the main thread: writeback capture %.1f | fixed-capture+commit %.1f (commit %.1f) | retain %.1f | table %zu\n", st, fitx::g_ms_wb, fitx::g_ms, fitx::g_ms_commit, fitx::g_ms_retain, fitx::g_cap_pend.load() ? (size_t)0 : fitx::st().all.size()); fitx::g_ms = fitx::g_ms_wb = fitx::g_ms_commit = fitx::g_ms_retain = 0; { auto& cq = fitx::capq(); if (cq.started) { printf("FX_ASYNC step %d: capture worker %.1f ms | main waited %.1f ms\n", st, cq.work_ms, cq.wait_ms); cq.work_ms = cq.wait_ms = 0; } } if (rt_defer) fitx::retain_async(std::move(pk)); }
+    if (kdef) { printf("FIT_EXPORT step %d: host ms on the main thread: writeback capture %.1f | fixed-capture+commit %.1f (commit %.1f) | retain %.1f | table %zu\n", st, fitx::g_ms_wb, fitx::g_ms, fitx::g_ms_commit, fitx::g_ms_retain, fitx::g_cap_pend.load() ? (size_t)0 : fitx::st().all.size()); fitx::g_ms = fitx::g_ms_wb = fitx::g_ms_commit = fitx::g_ms_retain = 0; }
     h301_mark("J: fitx");
     int ui_pick = -1;
     {
-
       static const bool usp = !getenv("UI_STEP_PICK") || atoi(getenv("UI_STEP_PICK")) != 0;
       static const bool usl = getenv("UI_STEP_LOG") && atoi(getenv("UI_STEP_LOG")) != 0;
       const bool upk_ok = g_sicis_en != nullptr && fitx::on() && !(getenv("FINAL_PICK_NML") && atoi(getenv("FINAL_PICK_NML")) == 0);
@@ -9665,8 +9546,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
         static const bool trig_rule = !getenv("TRIG_RULE") || atoi(getenv("TRIG_RULE")) != 0;
         static const bool geo_pick = !getenv("GEO_PICK") || atoi(getenv("GEO_PICK")) != 0;
         static const bool kfit = getenv("FP_KFIT") && atoi(getenv("FP_KFIT")) != 0;
-
-
         const double ws = (w > 0 ? w : 1.0);
         std::vector<double> pe(NP), lb(NP); std::vector<int> pc(NP), pnx(NP), pny(NP), pkc(NP, 0); std::vector<fp::nml::FullTerms> fulls(NP);
         const int UB = 4096, unb = (NP + UB - 1) / UB;
@@ -9714,7 +9593,7 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
         const double t_pick = std::chrono::duration<double, std::milli>(clk::now() - up0).count();
         if (geo_pick && pk >= 0) {
           std::vector<int> ord; for (int i = 0; i < NP; i++) if (std::isfinite(pe[i])) ord.push_back(i);
-          static const bool pick_rescore_u = !getenv("PICK_RESCORE") || atoi(getenv("PICK_RESCORE")) != 0;   
+          static const bool pick_rescore_u = !getenv("PICK_RESCORE") || atoi(getenv("PICK_RESCORE")) != 0;
           const int T64 = pick_rescore_u ? (int)ord.size() : std::min<int>(64, (int)ord.size());
           std::partial_sort(ord.begin(), ord.begin() + T64, ord.end(), [&](int a, int b) { return tot0(a) < tot0(b); });
           std::vector<int> sub; std::vector<double> se; std::vector<int> sc2; std::vector<fp::nml::FullTerms> sf;
@@ -9808,6 +9687,7 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
   if (g_h139) printf("H139 final: TG-memory violations (threadgroup request > 32768 B on the threadgroup path) %llu\n", (unsigned long long)g_h139_viol);
   if (traj) fclose(traj);
   if (g_h320_f) fclose(g_h320_f);
+  if (g_tm2) { tm_seg_mark("(end)"); tm_seg_flush(steps); }
   if (g_h301 && h301_n) {
     std::vector<std::pair<double, std::string>> v; for (auto& kv : h301_acc) v.push_back({kv.second / h301_n, kv.first});
     std::sort(v.rbegin(), v.rend());
@@ -9815,7 +9695,8 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
     for (auto& p : v) printf(" | %s %.1f", p.second.c_str(), p.first);
     printf("\n");
     std::vector<std::pair<double, std::string>> va; for (auto& kv : g_h301_all) va.push_back({kv.second / h301_n, kv.first}); std::sort(va.rbegin(), va.rend());
-    printf("STEADY H301ALL (all wall ms/step by phase label; GPU busy or idle):"); for (auto& p : va) if (p.first >= 0.3) printf(" | %s %.1f", p.second.c_str(), p.first); printf("\n");
+    printf("STEADY H301ALL (all wall ms/step by phase label; GPU busy or idle):"); for (auto& p : va) if (p.first >= (g_tm ? 0.02 : 0.3)) printf(" | %s %.1f", p.second.c_str(), p.first); printf("\n");
+    if (g_tm) { double sm = 0; for (auto& p : va) sm += p.first; printf("TM_SUM labelled sum %.1f ms/step over %ld windows (compare ITER WALL / HEADLINE)\n", sm, h301_n); for (auto& p : va) if (p.first >= 0.02) printf("TM_ROW %8.2f %s\n", p.first, p.second.c_str()); }
   }
   if (nsteady) {
     scaleT(TS, 1.0 / nsteady);
@@ -9882,14 +9763,13 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
   printf("best admitted child err over run %.6g (rss_x + rss_y)\n", best_all);
   int fp_pick = -1;
   k_flush();
-  if (fitx::on()) { std::vector<uint64_t> pk((size_t)NP); for (int i = 0; i < NP; i++) pk[(size_t)i] = fitx::gkey(XC(S, pidx[i]).g); fitx::retain(pk, true);
+  if (fitx::on()) { std::vector<uint64_t> pk((size_t)NP); for (int i = 0; i < NP; i++) pk[(size_t)i] = fitx::gkey(XC(S, pidx[i]).g); if (g_cap_async) fitx::cap_join(); fitx::retain(pk, true);
     long miss = 0, missfin = 0; double mine = 1e300, mine_all = 1e300; for (int i = 0; i < NP; i++) { const double e = XC(S, pidx[i]).err; mine_all = std::min(mine_all, e); int q[2], nt[2]; if (!fitx::qnth(XC(S, pidx[i]).g, q, nt)) { miss++; if (e < 1e20) missfin++; mine = std::min(mine, e); } }
     printf("FIT_EXPORT: population %d, members without a fit record %ld (finite err < 1e20: %ld, lowest err among them %.6g; lowest err in population %.6g)\n", NP, miss, missfin, mine, mine_all); }
   if (getenv("FINAL_PICK")) {
     std::vector<double> pe(NP); std::vector<int> pc(NP);
     for (int i = 0; i < NP; i++) { const evo::Ind& PI = XC(S, pidx[i]); pe[i] = PI.err; pc[i] = sp_show_cx(PI); }
     const char* why[1] = {""};
-
     const bool fp_nml = g_sicis_en != nullptr && !(getenv("FINAL_PICK_NML") && atoi(getenv("FINAL_PICK_NML")) == 0);
     int pk;
     double sp_pp = NAN, sp_ps = NAN, sp_pt = NAN;
@@ -9900,14 +9780,10 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
         const evo::Ind& PI = XC(S, pidx[i]);
         pnx[i] = PI.g.len[0]; pny[i] = PI.g.len[1];
         pk_const[i] = fp::nml::const_leaves(PI.g.op[0], PI.g.len[0]) + fp::nml::const_leaves(PI.g.op[1], PI.g.len[1]);
-
-
         static const bool kfit = getenv("FP_KFIT") && atoi(getenv("FP_KFIT")) != 0;
         if (kfit) { int q_[2], n_[2]; if (fitx::qnth(PI.g, q_, n_, g_freet ? 1 : 0)) { pk_const[i] = 0; for (int sd = 0; sd < 2; sd++) pk_const[i] += q_[sd] + n_[sd]; } else { pk_const[i] = 0; kmiss[i] = 1; } }
       }
       const bool t13_all = fp::t13_bit(0);
-
-
       const int n_fit = 48;
       std::vector<fp::nml::FullTerms> fulls(NP);
       for (int i = 0; i < NP; i++) fulls[i] = fp::fallback_terms(pk_const[i], n_fit, pnx[i], pny[i]);
@@ -9916,7 +9792,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
         if (w > 0 && w != 1.0) for (int i = 0; i < NP; i++) { fulls[i].paramTerm *= w; fulls[i].structTerm *= w; fulls[i].fisherTerm *= w; fulls[i].rangeTerm *= w; fulls[i].total *= w; }
       }
       {
-
         static const double w = getenv("SIMPLICITY") ? atof(getenv("SIMPLICITY")) : 1.0; const double wk = (w > 0 ? w : 1.0);
         double bestL = INFINITY; for (int i = 0; i < NP; i++) if (!kmiss[(size_t)i] && std::isfinite(pe[i])) bestL = std::min(bestL, pe[i] + fulls[i].total);
         long ncomp = 0, nexcl = 0;
@@ -9938,7 +9813,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
       static const bool trig_rule = !getenv("TRIG_RULE") || atoi(getenv("TRIG_RULE")) != 0;
       static const bool geo_pick = !getenv("GEO_PICK") || atoi(getenv("GEO_PICK")) != 0;
       auto tot0 = [&](int i) { return (double)pe[i] + fulls[i].total; };
-
       struct D2Memo { int8_t done = 0, hasrec = 0, excl = 0; int ex = 0; };
       std::vector<D2Memo> d2memo((size_t)NP);
       auto d2eval = [&](int i, bool& hasrec, bool& excl, int& ex) {
@@ -9956,8 +9830,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
       if (g_sp_diag) { sp_totpre.resize((size_t)NP); for (int i = 0; i < NP; i++) sp_totpre[(size_t)i] = fulls[i].total; }
       const int pk_old = fp::pick_index_nml_full(pe, pc, fulls, nullptr, t13_all);
       const auto t_geo0 = std::chrono::steady_clock::now();
-
-
       static const bool pick_rescore = !getenv("PICK_RESCORE") || atoi(getenv("PICK_RESCORE")) != 0;
       bool rescored_all = false;
       int pg_bestidx = -2; double pg_best_ex = NAN;
@@ -9969,7 +9841,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
         std::vector<double> gg((size_t)rc.size(), NAN); std::vector<uint8_t> isk1(rc.size(), 0);
         const size_t RB = 32, nrb = (rc.size() + RB - 1) / RB;
         bool gpu_done = false;
-        
         static long pg_calls = 0, pg_fallbacks = 0;
         if (pick_gpu && t13_all && !g_nres && !g_yfx) {
           pg_calls++;
@@ -10017,7 +9888,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
               std::sort(c1.begin(), c1.end(), [&](size_t a, size_t b) { return key_u(rc[a]) < key_u(rc[b]); });
               const size_t k0 = std::min(pg_K0, c1.size());
               need.insert(need.end(), c1.begin(), c1.begin() + (long)k0);
-
               for (auto& v : bl) { std::sort(v.begin(), v.end(), [&](size_t a, size_t b) { return key_u(rc[a]) < key_u(rc[b]); }); const size_t m_ = v.size(), S_ = std::min<size_t>(pg_S, m_); for (size_t k = 0; k < S_; k++) need.push_back(v[k * m_ / S_]); }
               std::sort(need.begin(), need.end()); need.erase(std::unique(need.begin(), need.end()), need.end()); }
             const TP tg3 = std::chrono::steady_clock::now();
@@ -10065,7 +9935,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
             } else { pg_fallbacks++; printf("PICK_RESCORE_GPU: validation did not close within the exact-set cap (%zu members exact, %d passes): full CPU rescore | fallbacks %ld of %ld\\n", (size_t)nex, passes, pg_fallbacks, pg_calls); }
           } else { pg_fallbacks++; printf("PICK_RESCORE_GPU: GPU path unavailable (cfc/pipeline/command buffer): full CPU rescore | fallbacks %ld of %ld\\n", pg_fallbacks, pg_calls); }
         }
-
         if (!gpu_done) PL(E).run((int)nrb, [&](int b) { for (size_t r = (size_t)b * RB; r < std::min(rc.size(), (size_t)b * RB + RB); r++) { const int i = rc[r]; { int q_[2], n_[2]; if (!fitx::qnth(XC(S, pidx[i]).g, q_, n_, 1)) { gg[r] = pe[i]; continue; } }
             fitx::Rec fr; if (!fitx::find(XC(S, pidx[i]).g, fr)) { gg[r] = pe[i]; continue; }
             const float* Y0 = fr.kind == 1 ? g_fit_yv : g_yfx ? g_yfx_f[0] : fitx::g_target[0]; const float* Y1 = fr.kind == 1 ? g_fit_yv + 48 : g_yfx ? g_yfx_f[1] : fitx::g_target[1];
@@ -10081,7 +9950,6 @@ int engine_main(int argc, char** argv) { @autoreleasepool {
         printf("PICK_RESCORE: %zu pickable members, %ld re-scored with geo_nll (free-t records), %ld non-finite dropped, %ld lower than stored | %.1f ms | stored pick %d -> geo pick (pre-D2) %d (stored-total rank of the geo pick %ld)\n", rc.size(), nk1, ndrop, nbetter, ms_r, pk_old, pk_r, rank_st);
       }
       if (trig_rule) {
-
         std::vector<int> oa; for (int i = 0; i < NP; i++) if (std::isfinite(pe[i])) oa.push_back(i);
         std::sort(oa.begin(), oa.end(), [&](int a, int b) { return tot0(a) < tot0(b); });
         std::priority_queue<double> hp; long nch = 0, nrec = 0, nev = 0, nna = 0;

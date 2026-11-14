@@ -1,14 +1,10 @@
 #pragma once
 #include <cstdint>
 #include <cstring>
-
 namespace su30 {
 constexpr int MAXN = 512, MAXQ = 64;
-
 struct G { int n, Q; const int* opnd; const int* OP; const int* CA; const int* CB; const int* rr; };
-
 static inline bool bin_op(int op) { return op >= 3 && op <= 6; }
-
 static int build_F(const G& g, int r, int* out, int* vis, int stamp) {
   int stx[MAXN], sts[MAXN];
   int sp = 1, cnt = 0;
@@ -24,10 +20,8 @@ static int build_F(const G& g, int r, int* out, int* vis, int stamp) {
   }
   return cnt;
 }
-
 struct St { int pend[MAXN]; unsigned char held[MAXN], prod[MAXN]; int live; };
 struct Ulog { int x, pend; unsigned char held, prod; };
-
 static int sim(St& s, const G& g, const int* L, int len, int r, bool commit, int& endLive, Ulog* lg) {
   int cur = s.live, peak = cur, nl = 0;
   auto touch = [&](int x) { if (!commit) lg[nl++] = Ulog{x, s.pend[x], s.held[x], s.prod[x]}; };
@@ -62,7 +56,6 @@ static int sim(St& s, const G& g, const int* L, int len, int r, bool commit, int
   else for (int i = nl - 1; i >= 0; --i) { const Ulog& u = lg[i]; s.pend[u.x] = u.pend; s.held[u.x] = u.held; s.prod[u.x] = u.prod; }
   return peak;
 }
-
 static bool order(const G& g, int* out) {
   const int n = g.n, Q = g.Q;
   if (Q < 1 || Q > MAXQ || n < 1 || n > MAXN) return false;
@@ -76,7 +69,6 @@ static bool order(const G& g, int* out) {
   int fill = 0;
   for (int q = 0; q < Q; q++) { fo[q] = fill; fill += build_F(g, g.rr[q], fl + fill, vis, q + 1); }
   fo[Q] = fill;
-
   unsigned char inR[MAXN];
   for (int x = 0; x < n; x++) { inR[x] = 0; s.pend[x] = 0; s.held[x] = 0; s.prod[x] = 0; }
   s.live = 0;
@@ -88,7 +80,6 @@ static bool order(const G& g, int* out) {
     if (bin_op(g.OP[x])) { const int B = g.CB[x]; if (B >= 0 && g.opnd[B] < 0) s.pend[B]++; }
   }
   for (int q = 0; q < Q; q++) { const int r = g.rr[q]; if (g.opnd[r] < 0) s.pend[r]++; }
-
   int rem[MAXQ]; int nr = Q;
   for (int q = 0; q < Q; q++) rem[q] = q;
   for (int step = 0; step < Q; step++) {
@@ -113,7 +104,6 @@ static bool order(const G& g, int* out) {
   }
   return true;
 }
-
 static bool order_static(const G& g, int* out) {
   const int n = g.n, Q = g.Q;
   if (Q < 1 || Q > MAXQ || n < 1 || n > MAXN) return false;
@@ -146,7 +136,6 @@ static bool order_static(const G& g, int* out) {
   }
   return true;
 }
-
 static int peak_of(const G& g, const int* ord, int* mOut) {
   const int n = g.n, Q = g.Q;
   static thread_local int sN[MAXN + MAXQ + 8], sA[MAXN + MAXQ + 8], sB[MAXN + MAXQ + 8];

@@ -1,20 +1,17 @@
 #pragma once
 #include "nf_flat_h16_h264.hpp"
-#include "../fe_stack/nfc_core.hpp"
+#include "../scope_2026-10-11/fe/nfc_core.hpp"
 #include <mutex>
 #include <atomic>
 #include <chrono>
 #include <algorithm>
-
 namespace nf308 {
 using namespace skn;
-
 struct DumpRec { int32_t child; uint8_t side, n; uint8_t op[24]; uint8_t pad[2]; };
 static_assert(sizeof(DumpRec) == 32, "DumpRec is 32 bytes");
 inline bool g_h320_on = false;
 inline std::mutex g_h320_mx;
 inline std::vector<DumpRec> g_h320_recs;
-
 struct DagB {
   int32_t lmap[MAXTE]; uint32_t lgen[MAXTE]; uint32_t lg;
   std::vector<PNode> out;
@@ -47,14 +44,12 @@ struct DagB {
     return true;
   }
 };
-
 inline bool g_h315a = false;
 inline bool g_h315t = false;
 inline std::atomic<uint64_t> g_t_pubcopy_h890{0};
 inline std::atomic<uint64_t> g_t_nf{0}, g_t_cmp{0}, g_t_pub{0}, g_t_class{0}, g_t_sort{0}, g_t_eval{0}, g_t_out{0}, g_t_all{0}, g_t_rb{0}, g_n_rb{0}, g_w_obj{0}, g_w_objre{0}, g_w_vp{0}, g_w_vpre{0};
 static inline uint64_t tnow() { return std::chrono::steady_clock::now().time_since_epoch().count(); }
 inline std::atomic<uint64_t> g_h315_miss{0}, g_h315_inc{0}, g_h315_nodes{0}, g_h315_reused{0}, g_h315_groups{0}, g_h315_stage_hit{0};
-
 struct IncSt {
   bool valid = false; int n = 0, done = 0, monoT = 1;
   uint8_t op[nfc::MAXN];
@@ -74,7 +69,6 @@ static inline void rollback_to(nfc::Ctx& C, const IncSt::Snap& s) {
   for (int j = C.nsum - 1; j >= s.nsum; --j) erase_slot(C.tsum, C.gen, C.sum[j].h, j);
   C.nte = s.nte; C.nfac = s.nfac; C.nmon = s.nmon; C.nmp = s.nmp; C.nsum = s.nsum; C.nsp = s.nsp; C.nvp = s.nvp; C.ovf = false;
 }
-
 inline bool nf_tree_inc(nfc::Ctx& C, IncSt& I, const uint8_t* op, int n, nfc::NFOut* out, int* reused) {
   using namespace nfc;
   *reused = 0;
@@ -158,7 +152,6 @@ inline bool nf_tree_inc(nfc::Ctx& C, IncSt& I, const uint8_t* op, int n, nfc::NF
   out->cols = root; out->q = q;
   return true;
 }
-
 static inline void publish_inplace_h890(nf16::Handle& H, uint64_t h, const NFMemo::Key& k, const nf16::BHdr& X, const void* w, size_t wbytes, const void* nd, size_t ndbytes) {
   nf16::Shared& S = H.S;
   const size_t nbody = wbytes + ndbytes;
@@ -198,7 +191,6 @@ struct St {
   St() : C(new nfc::Ctx()) {}
   ~St() { delete C; }
 };
-
 template <int MODE>
 static inline bool miss_nfc(nf16::Handle& H, St& S, const NFMemo::Key& k, uint64_t h, const uint8_t* op, const float* c, int n) {
   H.misses++;
@@ -245,7 +237,6 @@ static inline bool miss_nfc(nf16::Handle& H, St& S, const NFMemo::Key& k, uint64
   if (g_h315t) { const uint64_t T3 = tnow(); g_t_nf += T1 - T0; g_t_cmp += T2 - T1; g_t_pub += T3 - T2; }
   return good;
 }
-
 template <int MODE, class C>
 static inline bool tree_seg_h308(nf16::Handle& H, St& S, const C& cd, int t, const NFMemo::Key& k, uint64_t hk, nf16::Block& B, nf16::Child& ch, uint64_t& r) {
   const size_t t0 = B.w.size();
@@ -298,7 +289,6 @@ static inline bool tree_seg_h308(nf16::Handle& H, St& S, const C& cd, int t, con
   }
   return ok;
 }
-
 template <int MODE, class C>
 static void chunk_h308(nf16::Handle& H, St& S, const C* const* cands, const uint8_t* valid, int b0, int b1, nf16::Block& B, nf16::Child* out) {
   B.w.clear();
@@ -357,14 +347,12 @@ static void chunk_h308(nf16::Handle& H, St& S, const C* const* cands, const uint
   }
   if (g_h320_on && !S.dump.empty()) { std::lock_guard<std::mutex> lk(g_h320_mx); g_h320_recs.insert(g_h320_recs.end(), S.dump.begin(), S.dump.end()); S.dump.clear(); }
 }
-
 struct MissKey { uint64_t k[3]; int32_t j; uint8_t t, n; };
 struct StageRec { uint8_t state; uint32_t off, nw; uint64_t r; };
 struct GroupBuf {
   std::vector<MissKey> mk; std::vector<uint32_t> words; StageRec sr[512][2];
   NFMemo::Key K[512][2]; uint64_t HK[512][2];
 };
-
 template <int MODE, class C>
 static void group_h315(nf16::Handle& H, St& S, const C* const* cands, const uint8_t* valid, int a0, int a1, nf16::Block* blk0, nf16::Child* out) {
   static thread_local GroupBuf* GBp = nullptr;
@@ -485,5 +473,4 @@ static void group_h315(nf16::Handle& H, St& S, const C* const* cands, const uint
   S.c_miss = S.c_inc = S.c_nodes = S.c_reused = 0;
   if (g_h320_on && !S.dump.empty()) { std::lock_guard<std::mutex> lk(g_h320_mx); g_h320_recs.insert(g_h320_recs.end(), S.dump.begin(), S.dump.end()); S.dump.clear(); }
 }
-
 }

@@ -9,26 +9,20 @@
 #include <cmath>
 #include <random>
 #include <vector>
-
 namespace band {
-
 constexpr int NROW = 48, NLEV = 64, NSEG = 63, WCOR = 12, SLOTS = 25;
-
 struct Tables {
     int32_t base[NROW];
     int32_t del[NROW];
     uint32_t valid[NROW];
 };
-
 static inline long floordiv_l(long a, long b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
 static inline long ceildiv_l(long a, long b) { return -floordiv_l(-a, b); }
-
 static inline bool corridor_ok(int s, int i) {
     if (s < 0 || s > 62) return false;
     long d = 47L * s - 63L * i;
     return d <= 564 && d >= -564;
 }
-
 static inline Tables make_tables() {
     Tables T{};
     for (int i = 0; i < NROW; i++) T.base[i] = (int32_t)ceildiv_l(63L * i - 564L, 47L);
@@ -41,7 +35,6 @@ static inline Tables make_tables() {
     }
     return T;
 }
-
 static inline void make_stroke(float S[NROW][2]) {
     for (int i = 0; i < NROW; i++) {
         double s = (double)i / 47.0;
@@ -49,14 +42,11 @@ static inline void make_stroke(float S[NROW][2]) {
         S[i][1] = (float)std::sin(2.0 * M_PI * s);
     }
 }
-
 static inline void gen_candidates_rng(std::mt19937& rng, float* aos, int P);
-
 static inline void gen_candidates(float* aos, int P, uint32_t seed) {
     std::mt19937 rng(seed);
     gen_candidates_rng(rng, aos, P);
 }
-
 static inline void gen_candidates_rng(std::mt19937& rng, float* aos, int P) {
     std::uniform_real_distribution<double> U(0.0, 1.0);
     for (int c = 0; c < P; c++) {
@@ -70,21 +60,17 @@ static inline void gen_candidates_rng(std::mt19937& rng, float* aos, int P) {
         }
     }
 }
-
 static inline void aos_to_soa(const float* aos, float* soa, int P) {
     for (int c = 0; c < P; c++) {
         int tile = c >> 5, lane = c & 31;
         for (int j = 0; j < 128; j++) soa[(size_t)tile * 4096 + (size_t)j * 32 + lane] = aos[(size_t)c * 128 + j];
     }
 }
-
 static const char* msl_source() {
     return R"MSL(
 #include <metal_stdlib>
 using namespace metal;
-
 constant float BIGV = 1.0e30f;
-
 // Mapping A: one candidate per thread. curve layout SoA: [tile][j][lane], j = 2*level + coord.
 kernel void band_lane(device const float* curve [[buffer(0)]],
                       constant float2* stroke [[buffer(1)]],
@@ -166,7 +152,6 @@ kernel void band_lane(device const float* curve [[buffer(0)]],
     }
     outObj[gid] = obj;
 }
-
 // Mapping B: one candidate per SIMD-group (32 lanes = 25 DP slots + idle). curve AoS [cand][128].
 kernel void band_simd(device const float* curve [[buffer(0)]],
                       constant float2* stroke [[buffer(1)]],
@@ -204,7 +189,6 @@ kernel void band_simd(device const float* curve [[buffer(0)]],
         segB[sg][s] = float4(ex.x, ex.y, h, 0.0f);
     }
     simdgroup_barrier(mem_flags::mem_threadgroup);
-
     float PMv = 0.0f;
     for (int i = 0; i < 48; i++) {
         const int base = tbase[i];
@@ -258,7 +242,6 @@ kernel void band_simd(device const float* curve [[buffer(0)]],
 }
 )MSL";
 }
-
 struct Engine {
     id<MTLDevice> dev;
     id<MTLCommandQueue> queue;
@@ -277,15 +260,12 @@ struct Engine {
         if (!pSimd) { fprintf(stderr, "pso simd: %s\n", [[err description] UTF8String]); exit(2); }
     }
 };
-
 struct Bufs {
     id<MTLBuffer> curve, stroke, tb, td, tv, oT, oS, oO;
 };
-
 static inline id<MTLBuffer> new_buf(Engine& E, size_t bytes) {
     return [E.dev newBufferWithLength:bytes options:MTLResourceStorageModeShared];
 }
-
 static inline Bufs alloc_bufs(Engine& E, int P) {
     Bufs b;
     b.curve = new_buf(E, (size_t)P * 128 * sizeof(float));
@@ -298,14 +278,12 @@ static inline Bufs alloc_bufs(Engine& E, int P) {
     b.oO = new_buf(E, (size_t)P * sizeof(float));
     return b;
 }
-
 static inline void fill_tables(Bufs& b, const Tables& T, const float S[NROW][2]) {
     memcpy([b.stroke contents], S, NROW * sizeof(float) * 2);
     memcpy([b.tb contents], T.base, sizeof(T.base));
     memcpy([b.td contents], T.del, sizeof(T.del));
     memcpy([b.tv contents], T.valid, sizeof(T.valid));
 }
-
 static inline double run_kernel(Engine& E, bool simd, const Bufs& b, uint32_t P) {
     id<MTLCommandBuffer> cb = [E.queue commandBuffer];
     id<MTLComputeCommandEncoder> enc = [cb computeCommandEncoder];
@@ -329,5 +307,4 @@ static inline double run_kernel(Engine& E, bool simd, const Bufs& b, uint32_t P)
     if (cb.error) { fprintf(stderr, "gpu error: %s\n", [[cb.error description] UTF8String]); exit(3); }
     return cb.GPUEndTime - cb.GPUStartTime;
 }
-
 }

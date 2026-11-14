@@ -1,10 +1,8 @@
 #pragma once
 #include "nf_flat_h16_i13_h156.hpp"
 #include "h156_flags.h"
-
 namespace nf16h264 {
 using namespace skn;
-
 template <class C>
 static inline bool tree_seg_h264(nf16::Handle& H, const C& cd, int t, const NFMemo::Key& k, uint64_t hk, nf16::Block& B, nf16::Child& ch, uint64_t& r) {
   const size_t t0 = B.w.size();
@@ -52,7 +50,6 @@ static inline bool tree_seg_h264(nf16::Handle& H, const C& cd, int t, const NFMe
   }
   return ok;
 }
-
 template <class C>
 static void chunk_h264(nf16::Handle& H, const C* const* cands, const uint8_t* valid, int b0, int b1, nf16::Block& B, nf16::Child* out) {
   B.w.clear();
@@ -107,5 +104,4 @@ static void chunk_h264(nf16::Handle& H, const C* const* cands, const uint8_t* va
     ch.kh = nf16::sm(r[0] ^ nf16::sm(r[1] + ch.klen));
   }
 }
-
 }

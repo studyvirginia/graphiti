@@ -8,16 +8,13 @@
 #ifdef I17_VERIFY
 #include "compile_tree_h30.h"
 #endif
-
 namespace cmi6i17 {
-
 #ifdef I17_VERIFY
 struct VerifyCount {
   std::atomic<long> checked{0}, bad{0};
   ~VerifyCount() { fprintf(stderr, "I17_VERIFY: %ld misses checked vs h30+h34, %ld mismatches\n", checked.load(), bad.load()); }
 };
 static VerifyCount g_verify;
-
 static inline bool same_tree(const Tree& A, const Tree& B) {
   return A.Q == B.Q && A.nth == B.nth && A.nS == B.nS && A.nslot == B.nslot && A.prog == B.prog && A.sp == B.sp &&
          (A.th.size() == B.th.size() && (A.th.empty() || std::memcmp(A.th.data(), B.th.data(), A.th.size() * sizeof(float)) == 0)) && std::memcmp(A.segs, B.segs, sizeof A.segs) == 0;
@@ -27,12 +24,10 @@ static inline bool same_enc(const cmi6::TreeEnc& A, const cmi6::TreeEnc& B) {
          std::memcmp(A.gg, B.gg, sizeof A.gg) == 0 && A.ghw == B.ghw && A.gper == B.gper && A.sp4 == B.sp4 && A.gp4 == B.gp4;
 }
 #endif
-
 static inline bool compile_enc_i17(cmi6::Handle& H, const View& V, Tree& T, cmi6::TreeEnc& te, double& enc_ms,
                                    const uint64_t* hpre = nullptr) {
   const size_t nk = (size_t)(V.theta - V.w);
   const uint64_t h = hpre ? *hpre : cc14::hkey(V.w, nk);
-
   bool hit = false;
   uint32_t p = (uint32_t)(h & (cc14::Shared::TB - 1));
   for (;;) {
@@ -54,7 +49,6 @@ static inline bool compile_enc_i17(cmi6::Handle& H, const View& V, Tree& T, cmi6
     }
     p = (p + 1) & (cc14::Shared::TB - 1);
   }
-
   if (!hit) {
     ++H.C.misses;
     f38::Grid g;
@@ -93,7 +87,6 @@ static inline bool compile_enc_i17(cmi6::Handle& H, const View& V, Tree& T, cmi6
       return false;
     }
   }
-
   uint32_t idx = 0;
   if (!cmi6::locate(H.C.S, V.w, nk, h, idx)) {
     if (hit) { const auto t1 = std::chrono::steady_clock::now(); enc34::encode_tree_h34(T, te); enc_ms += cmi6::since_ms(t1); }
@@ -124,5 +117,4 @@ static inline bool compile_enc_i17(cmi6::Handle& H, const View& V, Tree& T, cmi6
   }
   return true;
 }
-
 }

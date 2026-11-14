@@ -4,12 +4,9 @@
 #include <vector>
 #include "compile_tree_h30.h"
 #include "encode_h34_h156.h"
-
 namespace f38 {
 using h14::MAXN; using h14::MAXQ; using h14::MAXM; using h14::NWD;
-
 struct Grid { uint8_t ok = 0; uint32_t sg[36]; uint32_t hw = 0; std::vector<uint32_t> p4; };
-
 static bool zgconv14_ref(const Tree& T, std::vector<uint32_t>& p4, uint32_t* segs, uint32_t& hw) {
   const uint32_t NSC = (uint32_t)T.nS + 2, SS = 48u, SB = (uint32_t)T.nslot * SS;
   auto enc = [&](uint32_t c) -> uint32_t { if (c == 1022) return 1u << 31; if (c < 64) return c * SS; if (c == 900) return 1u << 29;
@@ -30,7 +27,6 @@ static bool zgconv14_ref(const Tree& T, std::vector<uint32_t>& p4, uint32_t* seg
   hw = NSC | (SB << 8) | ((uint32_t)T.nth << 24);
   return true;
 }
-
 struct Scratch {
   enc34::Dec rec[MAXM];
   int sn[MAXM + 1], sa[MAXM + 1], sb[MAXM + 1];
@@ -43,7 +39,6 @@ struct Scratch {
   uint32_t segmap[18];
 };
 static thread_local Scratch scr;
-
 static inline bool rec_fields(uint32_t op, uint32_t d, uint32_t a, uint32_t b, enc34::Dec& x) {
   const uint32_t cls = enc34::kDec.cls[op];
   const uint32_t cs = (a == 1022 && b == 1022) ? 2u : (b == 1022 ? 1u : 0u);
@@ -52,10 +47,12 @@ static inline bool rec_fields(uint32_t op, uint32_t d, uint32_t a, uint32_t b, e
   x.zo = (uint16_t)(cls == 0 ? zbin : cls == 1 ? op : 6u);
   x.A = (uint16_t)(cls == 0 && cs == 1 ? b : a);
   x.B = (uint16_t)(cls != 0 ? 901u : cs == 0 ? b : cs == 1 ? a : enc34::kDec.bothB[op]);
+#ifdef H308_MULSW
+  if (cls == 0 && cs == 0 && op == 5) { const uint16_t t = x.A; x.A = x.B; x.B = t; }
+#endif
   x.d = (uint16_t)d; x.d63 = d == 63; x.fuse = 0;
   return true;
 }
-
 static bool compile_composed(const View& V, Tree& T, cmi6::TreeEnc& te, Grid& g) {
   if (!h30::compile_tree_h30(V, T)) return false;
   static thread_local enc34::Scratch SC;
@@ -63,7 +60,6 @@ static bool compile_composed(const View& V, Tree& T, cmi6::TreeEnc& te, Grid& g)
   g.ok = zgconv14_ref(T, g.p4, g.sg, g.hw) ? 1 : 0;
   return true;
 }
-
 static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, Grid& g, int upto, int* path) {
   const int Q = V.Q, n = V.n();
   if (path) *path = 0;
@@ -73,7 +69,6 @@ static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, Grid&
   if (V.nS > NSV || V.nth > 32) return false;
   T.sp.reserve((size_t)V.nS);
   for (int i = 0; i < V.nS; i++) { int o = V.op(i), a = V.a(i), b = V.b(i); if (a > 31 || b > 31) return false; T.sp.push_back((uint16_t)(o | (a << 6) | (b << 11))); }
-
   h30::PrepBuf P;
   h30::prepare(V, P);
   const int* opnd = P.opnd;
@@ -81,7 +76,6 @@ static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, Grid&
   for (int q = 0; q < Q; q++) ord[q] = q;
   if (Q > 1 && !h30::order_mode(h30::MODE_SU, ord)) { if (path) *path = 1; return compile_composed(V, T, te, g); }
   if (upto <= 1) return true;
-
   h14::Tab& C = h14::tab;
   const h14::Seq S{scr.sn, scr.sa, scr.sb};
   for (int x = 0; x <= n; x++) { scr.reads[x] = 0; scr.lastread[x] = -1; }
@@ -137,14 +131,12 @@ static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, Grid&
   T.th.reserve((size_t)V.nth);
   for (int s = 0; s < V.nth; s++) T.th.push_back(V.th(s));
   if (upto <= 2) return true;
-
   if (decFail) {
     if (path) *path = 2;
     cmi6::encode_tree_i6(T, te);
     g.ok = zgconv14_ref(T, g.p4, g.sg, g.hw) ? 1 : 0;
     return true;
   }
-
   const int SS = T.nth == 0 ? 2 : 16;
   const enc34::ScanE es = enc34::make_scan(T, SS);
   const bool gin = T.nth >= 1 && T.nth <= GN_TH_MAX;
@@ -192,7 +184,6 @@ static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, Grid&
     te.g_ok = 1;
   }
   if (upto <= 3) return true;
-
   const uint32_t SB1 = (uint32_t)T.nslot * 48u;
   const uint32_t NSC1 = (uint32_t)T.nS + 2;
   g.ok = SB1 < 65536 ? 1 : 0;
@@ -212,9 +203,7 @@ static bool compile_fused_stage(const View& V, Tree& T, cmi6::TreeEnc& te, Grid&
   if (path) *path = 0;
   return true;
 }
-
 static bool compile_fused(const View& V, Tree& T, cmi6::TreeEnc& te, Grid& g, int* path = nullptr) {
   return compile_fused_stage(V, T, te, g, 4, path);
 }
-
 }

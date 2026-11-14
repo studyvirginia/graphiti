@@ -1,5 +1,4 @@
 #pragma once
-
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -15,14 +14,10 @@
 #if defined(__APPLE__)
 #include <mach-o/dyld.h>
 #endif
-
 #if defined(__APPLE__)
 #include <Accelerate/Accelerate.h>
 #endif
-
 namespace sketch {
-
-
 struct SigmaV2Block {
     std::vector<float> c1W, c1B;
     std::vector<float> n1W, n1B;
@@ -31,7 +26,6 @@ struct SigmaV2Block {
     std::vector<float> n2W, n2B;
     std::vector<float> f2gW, f2gB, f2bW, f2bB;
 };
-
 struct SigmaV2Member {
     std::vector<float> h0;
     std::vector<float> invMean, invStd;
@@ -44,7 +38,6 @@ struct SigmaV2Member {
     std::vector<float> cell2W, cell2B;
     std::vector<float> cell4W, cell4B;
 };
-
 struct SigmaV2Model {
     uint32_t version = 0, M = 0, H = 0, LAYERS = 0, N_INV = 0, L = 0, NC = 0, G = 0, GDIM = 0;
     std::vector<int32_t> cellLevel, cellIndex;
@@ -54,9 +47,7 @@ struct SigmaV2Model {
     std::vector<float> conformalQ;
     std::vector<SigmaV2Member> members;
 };
-
 namespace detail {
-
 inline std::vector<float> readF32(std::ifstream& f, size_t n)
 {
     std::vector<float> v(n);
@@ -65,7 +56,6 @@ inline std::vector<float> readF32(std::ifstream& f, size_t n)
     for (float x : v) { if (!std::isfinite(x)) { throw std::runtime_error("sigma_v2_native: non-finite weight"); } }
     return v;
 }
-
 inline uint32_t readU32(std::ifstream& f)
 {
     uint32_t v = 0;
@@ -73,9 +63,7 @@ inline uint32_t readU32(std::ifstream& f)
     if (!f) { throw std::runtime_error("sigma_v2_native: truncated header"); }
     return v;
 }
-
 }
-
 inline SigmaV2Model loadSigmaV2Model(std::string const& path)
 {
     std::ifstream f(path, std::ios::binary);
@@ -99,7 +87,6 @@ inline SigmaV2Model loadSigmaV2Model(std::string const& path)
     if (m.M == 0u || m.H == 0u || (m.H % 2u) != 0u || m.LAYERS == 0u || m.N_INV != 28u || m.L < 2u || m.NC != m.L) {
         throw std::runtime_error("sigma_v2_native: header violates the model contract");
     }
-
     auto readI32 = [&](size_t n) {
         std::vector<int32_t> v(n);
         f.read(reinterpret_cast<char*>(v.data()), static_cast<std::streamsize>(n * sizeof(int32_t)));
@@ -113,7 +100,6 @@ inline SigmaV2Model loadSigmaV2Model(std::string const& path)
     m.cellGeo = detail::readF32(f, static_cast<size_t>(m.NC) * m.G);
     m.nLevels = detail::readU32(f);
     m.conformalQ = detail::readF32(f, static_cast<size_t>(m.nLevels) * 3);
-
     size_t const H = m.H, N_INV = m.N_INV, cellIn = 2 * H + m.G + m.GDIM;
     for (uint32_t mi = 0; mi < m.M; ++mi) {
         SigmaV2Member mem;
@@ -146,7 +132,6 @@ inline SigmaV2Model loadSigmaV2Model(std::string const& path)
     }
     return m;
 }
-
 inline std::vector<std::array<double, 2>> sigmaV2ShapeSpaceRaw(
     float const* x, float const* y, int n, int L, std::array<double, 2>& outMean, double& outScale)
 {
@@ -162,7 +147,6 @@ inline std::vector<std::array<double, 2>> sigmaV2ShapeSpaceRaw(
     }
     std::vector<double> u(static_cast<size_t>(n));
     for (int i = 0; i < n; ++i) { u[static_cast<size_t>(i)] = arc[static_cast<size_t>(i)] / total; }
-
     std::vector<std::array<double, 2>> R(static_cast<size_t>(L));
     for (int j = 0; j < L; ++j) {
         double const s = static_cast<double>(j) / static_cast<double>(L - 1);
@@ -195,7 +179,6 @@ inline std::vector<std::array<double, 2>> sigmaV2ShapeSpaceRaw(
     }
     return R;
 }
-
 inline std::vector<std::array<double, 2>> sigmaV2ShapeSpace(float const* x, float const* y, int n, int L)
 {
     std::array<double, 2> m{};
@@ -204,13 +187,11 @@ inline std::vector<std::array<double, 2>> sigmaV2ShapeSpace(float const* x, floa
     for (auto& p : R) { p[0] = (p[0] - m[0]) / sc; p[1] = (p[1] - m[1]) / sc; }
     return R;
 }
-
 inline std::array<double, 28> sigmaV2IntrInvariants(std::vector<std::array<double, 2>> const& P)
 {
     int const n = static_cast<int>(P.size());
     std::vector<float> x(static_cast<size_t>(n)), y(static_cast<size_t>(n));
     for (int i = 0; i < n; ++i) { x[static_cast<size_t>(i)] = static_cast<float>(P[static_cast<size_t>(i)][0]); y[static_cast<size_t>(i)] = static_cast<float>(P[static_cast<size_t>(i)][1]); }
-
     std::vector<float> seg(static_cast<size_t>(n - 1)), ang(static_cast<size_t>(n - 1));
     for (int i = 0; i < n - 1; ++i) {
         float const dx = x[static_cast<size_t>(i + 1)] - x[static_cast<size_t>(i)];
@@ -233,7 +214,6 @@ inline std::array<double, 28> sigmaV2IntrInvariants(std::vector<std::array<doubl
     for (int i = 0; i < nd; ++i) { aca[static_cast<size_t>(i)] = std::fabs(da[static_cast<size_t>(i)]); }
     std::vector<float> dcurv(static_cast<size_t>(n - 1));
     for (int i = 0; i < n - 1; ++i) { dcurv[static_cast<size_t>(i)] = std::fabs(curv[static_cast<size_t>(i + 1)] - curv[static_cast<size_t>(i)]); }
-
     auto mean = [](std::vector<float> const& v) { float s = 0; for (float e : v) s += e; return v.empty() ? 0.0f : s / static_cast<float>(v.size()); };
     auto stddev = [&](std::vector<float> const& v) { float m = mean(v); float s = 0; for (float e : v) s += (e - m) * (e - m); return v.empty() ? 0.0f : std::sqrt(s / static_cast<float>(v.size())); };
     auto vmax = [](std::vector<float> const& v) { float b = v.empty() ? 0.0f : v[0]; for (float e : v) b = std::max(b, e); return b; };
@@ -247,14 +227,12 @@ inline std::array<double, 28> sigmaV2IntrInvariants(std::vector<std::array<doubl
         float const t = pos - static_cast<float>(lo);
         return v[lo] + t * (v[hi] - v[lo]);
     };
-
     int inflections = 0;
     {
         std::vector<int> sgn(static_cast<size_t>(std::max(nd, 0)));
         for (int i = 0; i < nd; ++i) { sgn[static_cast<size_t>(i)] = (da[static_cast<size_t>(i)] > 0) - (da[static_cast<size_t>(i)] < 0); }
         for (int i = 0; i + 1 < nd; ++i) { if (std::abs(sgn[static_cast<size_t>(i + 1)] - sgn[static_cast<size_t>(i)]) > 0) { ++inflections; } }
     }
-
     float const cmean = mean(curv);
     int const nb = n / 2 + 1;
     std::vector<float> mag(static_cast<size_t>(nb));
@@ -275,7 +253,6 @@ inline std::array<double, 28> sigmaV2IntrInvariants(std::vector<std::array<doubl
     for (float c : cf) { specEntropy += -(c * std::log(c + 1e-12f)); }
     float const cf1 = cf.size() > 1 ? cf[1] : 0.0f, cf2 = cf.size() > 2 ? cf[2] : 0.0f,
                 cf3 = cf.size() > 3 ? cf[3] : 0.0f, cf4v = cf.size() > 4 ? cf[4] : 0.0f;
-
     std::vector<float> rad(static_cast<size_t>(n));
     {
         float xm = mean(x), ym = mean(y);
@@ -287,7 +264,6 @@ inline std::array<double, 28> sigmaV2IntrInvariants(std::vector<std::array<doubl
     float const arclen = vsum(seg);
     float const chordx = x[static_cast<size_t>(n - 1)] - x[0], chordy = y[static_cast<size_t>(n - 1)] - y[0];
     float const chord = std::sqrt(chordx * chordx + chordy * chordy);
-
     int const n2 = static_cast<int>(P.size());
     double xm2 = 0, ym2 = 0;
     for (auto const& p : P) { xm2 += p[0]; ym2 += p[1]; }
@@ -308,7 +284,6 @@ inline std::array<double, 28> sigmaV2IntrInvariants(std::vector<std::array<doubl
         sa += P[static_cast<size_t>(i)][0] * P[static_cast<size_t>(i + 1)][1] - P[static_cast<size_t>(i + 1)][0] * P[static_cast<size_t>(i)][1];
     }
     sa = 0.5 * std::fabs(sa);
-
     std::array<double, 28> inv{};
     inv[0] = mean(aca);
     inv[1] = stddev(aca);
@@ -342,14 +317,11 @@ inline std::array<double, 28> sigmaV2IntrInvariants(std::vector<std::array<doubl
     }
     return inv;
 }
-
 namespace detail {
-
 inline float gelu(float x)
 {
     return 0.5f * x * (1.0f + std::erf(x * 0.70710678118654752440f));
 }
-
 inline void linear(float const* W, float const* b, float const* x, float* y, int out, int in)
 {
     for (int o = 0; o < out; ++o) {
@@ -359,7 +331,6 @@ inline void linear(float const* W, float const* b, float const* x, float* y, int
         y[o] = static_cast<float>(acc);
     }
 }
-
 inline void layerNorm(float const* w, float const* b, float const* x, float* y, int n)
 {
     double m = 0; for (int i = 0; i < n; ++i) { m += x[i]; } m /= n;
@@ -367,7 +338,6 @@ inline void layerNorm(float const* w, float const* b, float const* x, float* y, 
     double const inv = 1.0 / std::sqrt(v + 1e-5);
     for (int i = 0; i < n; ++i) { y[i] = static_cast<float>((x[i] - m) * inv * w[i] + b[i]); }
 }
-
 inline void groupNorm(float const* w, float const* b, std::vector<float> const& x, std::vector<float>& y, int H, int L, int groups)
 {
     y.resize(x.size());
@@ -392,7 +362,6 @@ inline void groupNorm(float const* w, float const* b, std::vector<float> const& 
         }
     }
 }
-
 inline void conv1dSame(float const* W, float const* b, std::vector<float> const& x, std::vector<float>& y, int H, int L, int dilation)
 {
     y.assign(x.size(), 0.0f);
@@ -412,7 +381,6 @@ inline void conv1dSame(float const* W, float const* b, std::vector<float> const&
         for (int l = 0; l < L; ++l) { y[static_cast<size_t>(oc) * L + static_cast<size_t>(l)] = static_cast<float>(acc[static_cast<size_t>(l)]); }
     }
 }
-
 inline auto b3Zi5AccelFromEnv() -> bool
 {
     static bool const v = [] {
@@ -425,15 +393,12 @@ inline auto b3Zi5AccelFromEnv() -> bool
     }();
     return v;
 }
-
 #if defined(__APPLE__)
-
 inline void linearAccel(float const* W, float const* b, float const* x, float* y, int out, int in)
 {
     std::memcpy(y, b, static_cast<size_t>(out) * sizeof(float));
     cblas_sgemv(CblasRowMajor, CblasNoTrans, out, in, 1.0f, W, in, x, 1, 1.0f, y, 1);
 }
-
 inline void conv1dSameAccel(float const* W, float const* b, std::vector<float> const& x, std::vector<float>& y,
                              int H, int L, int dilation)
 {
@@ -466,9 +431,7 @@ inline void conv1dSameAccel(float const* W, float const* b, std::vector<float> c
                     1.0f, y.data(), L);
     }
 }
-
 #endif
-
 inline void film(float const* gW, float const* gB, float const* bW, float const* bB, float const* z,
                  std::vector<float>& x, int H, int L)
 {
@@ -482,7 +445,6 @@ inline void film(float const* gW, float const* gB, float const* bW, float const*
         }
     }
 }
-
 inline std::vector<float> sigmaV2MemberForward(SigmaV2Model const& model, SigmaV2Member const& mem, float const* invStd)
 {
     int const H = static_cast<int>(model.H), L = static_cast<int>(model.L), N_INV = static_cast<int>(model.N_INV);
@@ -502,10 +464,8 @@ inline std::vector<float> sigmaV2MemberForward(SigmaV2Model const& model, SigmaV
     lin(mem.cond3W.data(), mem.cond3B.data(), z0g.data(), z1.data(), H, H);
     layerNorm(mem.cond4W.data(), mem.cond4B.data(), z1.data(), z1n.data(), H);
     for (int i = 0; i < H; ++i) { z[static_cast<size_t>(i)] = gelu(z1n[static_cast<size_t>(i)]); }
-
     std::vector<float> h(static_cast<size_t>(H) * static_cast<size_t>(L));
     for (int c = 0; c < H; ++c) { for (int l = 0; l < L; ++l) { h[static_cast<size_t>(c) * L + static_cast<size_t>(l)] = mem.h0[static_cast<size_t>(c)]; } }
-
     std::vector<float> t1, t1n, t2, t2n;
     for (uint32_t bi = 0; bi < model.LAYERS; ++bi) {
         auto const& bl = mem.blocks[bi];
@@ -520,14 +480,12 @@ inline std::vector<float> sigmaV2MemberForward(SigmaV2Model const& model, SigmaV
         for (auto& v : t2n) { v = gelu(v); }
         for (size_t i = 0; i < h.size(); ++i) { h[i] = t2n[i] + h[i]; }
     }
-
     std::vector<float> gcat(model.GDIM);
     for (int c = 0; c < H; ++c) {
         double m = 0; for (int l = 0; l < L; ++l) { m += h[static_cast<size_t>(c) * L + static_cast<size_t>(l)]; }
         gcat[static_cast<size_t>(c)] = static_cast<float>(m / L);
     }
     for (int c = 0; c < H; ++c) { gcat[static_cast<size_t>(H + c)] = z[static_cast<size_t>(c)]; }
-
     int const NC = static_cast<int>(model.NC), G = static_cast<int>(model.G);
     size_t const cellIn = 2 * static_cast<size_t>(H) + static_cast<size_t>(G) + model.GDIM;
     int const H2 = H / 2;
@@ -557,21 +515,17 @@ inline std::vector<float> sigmaV2MemberForward(SigmaV2Model const& model, SigmaV
     }
     return logE;
 }
-
 }
-
 struct SigmaV2CellOutput {
     std::vector<double> lnE;
     std::vector<double> sd;
     std::vector<int32_t> level, index;
     std::vector<std::vector<double>> memberLnE;
 };
-
 inline SigmaV2CellOutput sigmaV2Infer(SigmaV2Model const& model, float const* x, float const* y, int n)
 {
     auto const P = sigmaV2ShapeSpace(x, y, n, static_cast<int>(model.L));
     auto const inv = sigmaV2IntrInvariants(P);
-
     int const NC = static_cast<int>(model.NC), N_INV = static_cast<int>(model.N_INV);
     std::vector<std::vector<float>> muMembers(model.M, std::vector<float>(static_cast<size_t>(NC)));
     for (uint32_t mi = 0; mi < model.M; ++mi) {
@@ -589,7 +543,6 @@ inline SigmaV2CellOutput sigmaV2Infer(SigmaV2Model const& model, float const* x,
             muMembers[mi][static_cast<size_t>(c)] = static_cast<float>(v);
         }
     }
-
     SigmaV2CellOutput out;
     out.lnE.resize(static_cast<size_t>(NC));
     out.sd.resize(static_cast<size_t>(NC));
@@ -614,7 +567,6 @@ inline SigmaV2CellOutput sigmaV2Infer(SigmaV2Model const& model, float const* x,
     }
     return out;
 }
-
 namespace detail {
 struct SigmaV2Cache {
     std::mutex m;
@@ -628,7 +580,6 @@ inline auto sigmaV2CacheSingleton() -> SigmaV2Cache&
     return cache;
 }
 }
-
 inline auto resolveSigmaV2ModelPath() -> std::string
 {
     char const* envPath = std::getenv("SKETCH_SIGMA_V2_BIN");
@@ -664,7 +615,6 @@ inline auto resolveSigmaV2ModelPath() -> std::string
 #endif
     return rel;
 }
-
 inline auto loadSigmaV2ModelCached() -> SigmaV2Model const*
 {
     auto& cache = detail::sigmaV2CacheSingleton();
@@ -683,5 +633,4 @@ inline auto loadSigmaV2ModelCached() -> SigmaV2Model const*
     }
     return cache.ok ? &cache.model : nullptr;
 }
-
 }

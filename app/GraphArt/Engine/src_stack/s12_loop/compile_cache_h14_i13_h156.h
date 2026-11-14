@@ -11,9 +11,7 @@
 #include <cstring>
 #include "h156_flags.h"
 #include "compile_tree_h14.h"
-
 namespace cc14 {
-
 struct Ent {
   uint64_t h;
   uint32_t key_off, nkey, prog_off, nprog, sp_off, nsp;
@@ -21,14 +19,12 @@ struct Ent {
   uint8_t ok;  uint32_t touch;
   uint16_t segs[36];
 };
-
 static inline uint64_t hkey(const uint32_t* w, size_t n) {
   uint64_t h = 0x243F6A8885A308D3ull ^ (uint64_t)n;
   for (size_t i = 0; i < n; i++) { h = (h ^ w[i]) * 0x9E3779B97F4A7C15ull; h ^= h >> 31; }
   h *= 0xBF58476D1CE4E5B9ull; h ^= h >> 29;
   return h;
 }
-
 inline std::mutex g_bigalloc_m; inline std::map<std::string, std::pair<void*, size_t>> g_bigalloc_prev;
 static inline void* ios_bigalloc(size_t n, size_t sz, const char* what){
   size_t b=n*sz;
@@ -39,7 +35,10 @@ static inline void* ios_bigalloc(size_t n, size_t sz, const char* what){
   { std::lock_guard<std::mutex> lk(g_bigalloc_m); g_bigalloc_prev[what] = {p, b}; }
   return p; }
 struct Shared {
-  static constexpr uint32_t TB = 1u << 24;
+#ifndef CC14_TBLOG
+#define CC14_TBLOG 24
+#endif
+  static constexpr uint32_t TB = 1u << CC14_TBLOG;
   static constexpr uint32_t MAXENT = 1u << 21;
   static constexpr size_t MAXKEY = (size_t)1 << 27;
   static constexpr size_t MAXPROG = (size_t)1 << 26;
@@ -67,7 +66,6 @@ struct Shared {
   Shared(const Shared&) = delete;
   Shared& operator=(const Shared&) = delete;
 };
-
 static constexpr uint32_t RSV_ENT = 256, RSV_WORDS = 1u << 14;
 static inline bool take_block(std::atomic<uint32_t>& ctr, uint32_t& nxt, uint32_t& end, uint32_t n, uint32_t blk, size_t cap, uint32_t& off) {
   if (end - nxt < n) { const uint32_t want = std::max(blk, n); const uint32_t base = ctr.fetch_add(want, std::memory_order_relaxed); nxt = base; end = base + want; }
@@ -76,13 +74,11 @@ static inline bool take_block(std::atomic<uint32_t>& ctr, uint32_t& nxt, uint32_
   nxt += n;
   return true;
 }
-
 struct alignas(128) Handle {
   Shared& S;
   long hits, misses, neg_hits, drops;
   uint32_t r_ent_next = 0, r_ent_end = 0, r_key_next = 0, r_key_end = 0, r_prog_next = 0, r_prog_end = 0, r_sp_next = 0, r_sp_end = 0;
   explicit Handle(Shared& s) : S(s), hits(0), misses(0), neg_hits(0), drops(0) {}
-
   void publish(uint64_t h, Ent X, const uint32_t* kw, size_t nk, const uint32_t* pw, size_t np, const uint16_t* spw, size_t ns) {
     uint32_t idx, koff, poff, soff;
     if (!take_block(S.nent, r_ent_next, r_ent_end, 1, RSV_ENT, Shared::MAXENT, idx)) { ++drops; return; }
@@ -105,7 +101,6 @@ struct alignas(128) Handle {
     }
   }
 };
-
 static inline bool compile_cached(Handle& H, const View& V, Tree& T) {
   const size_t nk = (size_t)(V.theta - V.w);
   const uint64_t h = hkey(V.w, nk);
@@ -140,5 +135,4 @@ static inline bool compile_cached(Handle& H, const View& V, Tree& T) {
   }
   return ok;
 }
-
 }

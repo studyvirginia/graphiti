@@ -1,7 +1,6 @@
 #pragma once
 #include "compile_tree_h12.h"
 #include "corder_h14.h"
-
 static bool compile_tree_corder_h14(const View& V, Tree& T) {
   if (V.Q > 17 || V.n() > h14::MAXN) return compile_tree_corder_h12(V, T);
   T.Q = V.Q; T.nth = V.nth; T.nS = V.nS; T.prog.clear(); T.sp.clear(); T.th.clear();
@@ -42,7 +41,6 @@ static bool compile_tree_corder_h14(const View& V, Tree& T) {
   int ord[h14::MAXQ];
   for (int q = 0; q < V.Q; q++) ord[q] = q;
   if (V.Q > 1 && !h14::corder_h14(C, ord)) return compile_tree_corder_h12(V, T);
-
   int ns[h14::MAXM], as[h14::MAXM], bs[h14::MAXM]; const h14::Seq S{ns, as, bs};
   int reads[h14::MAXN], lastread[h14::MAXN];
   for (int x = 0; x < n; x++) { reads[x] = 0; lastread[x] = -1; }
@@ -54,7 +52,6 @@ static bool compile_tree_corder_h14(const View& V, Tree& T) {
     if (bs[k] == n) bs[k] = -1;
   }
   H14_P(h14::PR_EMIT);
-
   int pos[h14::MAXN]; unsigned char chain[h14::MAXN];
   for (int x = 0; x < n; x++) { pos[x] = -1; chain[x] = 0; }
   for (int k = 0; k < m; k++) if (ns[k] >= 0) pos[ns[k]] = k;
@@ -65,7 +62,6 @@ static bool compile_tree_corder_h14(const View& V, Tree& T) {
     if (r1 == reads[x]) chain[x] = 1;
   }
   H14_P(h14::PR_PREP);
-
   int slot[h14::MAXN], freeS[h14::MAXM]; int nf = 0, nsl = 0;
   for (int x = 0; x < n; x++) slot[x] = -1;
   uint16_t capt[18]; for (int q = 0; q < 18; q++) capt[q] = 1022;
@@ -94,7 +90,6 @@ static bool compile_tree_corder_h14(const View& V, Tree& T) {
     newend[k + 1] = (int)T.prog.size();
   }
   H14_P(h14::PR_SLOT);
-
   for (int q = 0; q < 36; q++) T.segs[q] = 0;
   T.segs[0] = 0; for (int q = 0; q < V.Q; q++) T.segs[q + 1] = (uint16_t)newend[segend[q]];
   for (int q = 0; q < 18; q++) T.segs[18 + q] = 1022;

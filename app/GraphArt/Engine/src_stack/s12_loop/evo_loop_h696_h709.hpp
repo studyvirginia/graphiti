@@ -1,8 +1,6 @@
 #pragma once
 #include <memory>
-
 static std::vector<const evo::Cand*> g_h777_gp;
-
 __attribute__((always_inline)) inline bool make_child_i12_p(const evo::BreedBuf& BB, const evo::Cand* const* Gp, int base, evo::Rng& r,
                                                             evo::Ind& out, uint32_t& rebreeds, evo::ChildLink320* pv = nullptr) {
   using namespace evo;
@@ -41,7 +39,6 @@ __attribute__((always_inline)) inline bool make_child_i12_p(const evo::BreedBuf&
   out.valid = 0;
   return false;
 }
-
 inline void breed_h777(evo::Pool& pool, evo::State& S, const uint32_t* pidx, const uint32_t* cs, evo::BreedBuf& BB,
                        uint64_t seed, uint64_t step, uint32_t* rebreeds, uint32_t* failed) {
   using namespace evo;
@@ -59,7 +56,6 @@ inline void breed_h777(evo::Pool& pool, evo::State& S, const uint32_t* pidx, con
     rebreeds[d] = rb; failed[d] = fl;
   });
 }
-
 struct Sh774 { std::vector<uint64_t> h; std::vector<uint32_t> rep, id; size_t cap = 0, cnt = 0; uint32_t nid = 0; };
 struct Sel774 {
   SelH92 H;
@@ -73,7 +69,6 @@ struct Sel774 {
 };
 static Sel774 g_sel774;
 static const uint32_t SEL774_EMPTY = 0xFFFFFFFFu;
-
 inline double h774_ms(std::chrono::steady_clock::time_point& t0) {
   auto t1 = std::chrono::steady_clock::now(); const double v = std::chrono::duration<double, std::milli>(t1 - t0).count(); t0 = t1; return v;
 }
@@ -90,7 +85,6 @@ inline void sh774_grow(Sh774& A) {
   }
   A.h.swap(h); A.rep.swap(rep); A.id.swap(id); A.cap = nc;
 }
-
 inline void sel774_begin(evo::Pool& pool, evo::State& S, const uint32_t* pidx) {
   using namespace evo;
   Sel774& G = g_sel774; SelH92& H = G.H;
@@ -111,7 +105,6 @@ inline void sel774_begin(evo::Pool& pool, evo::State& S, const uint32_t* pidx) {
   pool.run(NDEME, [&](int d) { migrants_h92(d, S, pidx, S.migtab.data() + d * MIGR, H.mk[(size_t)d]); });
   G.ms[0] += h774_ms(t0);
 }
-
 inline void sel774_demes(evo::Pool& pool, evo::State& S, const uint32_t* pidx, const uint32_t* cs, std::vector<Meta>& pm, std::vector<Meta>& cm,
                          const uint8_t* admit, int lo, int hi) {
   using namespace evo;
@@ -184,7 +177,6 @@ inline void sel774_demes(evo::Pool& pool, evo::State& S, const uint32_t* pidx, c
   }
   G.next_keys = hi;
 }
-
 inline void sel774_finish(evo::Pool& pool, evo::State& S, const uint32_t* pidx, const uint32_t* cs, uint32_t* pidx_out,
                           std::vector<Meta>& pm, std::vector<Meta>& cm, std::vector<Meta>& nm, Times& T, bool move_mode) {
   using namespace evo;
@@ -290,7 +282,6 @@ inline void sel774_finish(evo::Pool& pool, evo::State& S, const uint32_t* pidx, 
   G.ms[3] += h774_ms(t0);
   G.passB_total += G.passB_demes; G.calls++;
 }
-
 inline void h774_run(evo::Pool& pool, evo::State& S, const uint32_t* pidx, const uint32_t* cs, uint32_t* pidx_out,
                      std::vector<Meta>& pm, std::vector<Meta>& cm, const uint8_t* admit, std::vector<Meta>& nm, Times& T,
                      bool move_mode, int st, const std::vector<int>& cstart, int pre = -1) {

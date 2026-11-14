@@ -124,11 +124,9 @@ static void report(int st, const char* tag) {
   busy_set(0);
 }
 }
-
 namespace memdiag { static double region_res_mb(const void* p, size_t len) {
   const size_t pg = 16384; const uintptr_t a = (uintptr_t)p & ~(uintptr_t)(pg - 1); const size_t l = (((uintptr_t)p + len + pg - 1) & ~(uintptr_t)(pg - 1)) - a; const size_t np = l / pg;
   std::vector<char> v(np); if (mincore((void*)a, l, v.data()) != 0) return -1; size_t c = 0; for (char x : v) c += (x & 1); return (double)(c * pg) / 1048576.0; } }
-
 #include <sys/mman.h>
 namespace memdiag {
 static inline void* mmap_w(void* a, size_t len, int prot, int fl, int fd, off_t off) {
@@ -137,7 +135,6 @@ static inline void* mmap_w(void* a, size_t len, int prot, int fl, int fd, off_t 
   return r; }
 static inline int munmap_w(void* a, size_t len) { if (tab && !busy_get()) { busy_set(1); take((uintptr_t)a); busy_set(0); } return ::munmap(a, len); }
 }
-
 #include <thread>
 #include <chrono>
 #include <mach/task_info.h>

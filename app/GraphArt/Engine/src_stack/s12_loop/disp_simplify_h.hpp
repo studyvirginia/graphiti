@@ -6,21 +6,16 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
-
 namespace uib { namespace ds {
-
 inline bool on() { static const int v = getenv("DISPLAY_SIMPLIFY") ? atoi(getenv("DISPLAY_SIMPLIFY")) : 1; return v != 0; }
 constexpr double DEAD = 1e-4;
 inline bool sincos_on() { static const int v = getenv("DISPLAY_SINCOS") ? atoi(getenv("DISPLAY_SINCOS")) : 1; return v != 0; }
 inline bool abs_on() { static const int v = getenv("DISPLAY_ABS") ? atoi(getenv("DISPLAY_ABS")) : 1; return v != 0; }
 inline double ph_tol() { static const double v = getenv("DISPLAY_PHASE_TOL") ? atof(getenv("DISPLAY_PHASE_TOL")) : 1e-3; return v; }
-
 struct Stats { bool applied = false; int mask = -1; int len0[2] = {0, 0}, len1[2] = {0, 0}; double rss0[2] = {0, 0}, rss1[2] = {0, 0}, dmax[2] = {0, 0}; double span = 0; bool haveY = false; };
-
 struct Nd { uint8_t op; double c; int a, b; };
 struct Tm { double k; int p; };
 struct Lin { double c0 = 0; std::vector<Tm> t; };
-
 struct Simp {
   std::vector<Nd> v; std::vector<std::string> ks; bool phase = true;
   int mk(uint8_t op, double c, int a = -1, int b = -1) { v.push_back({op, c, a, b}); ks.emplace_back(); return (int)v.size() - 1; }
@@ -182,7 +177,6 @@ struct Simp {
     if (hasc && keep[idx.size()]) R.c0 = coef[idx.size()];
     L = R; }
 };
-
 inline bool side(const Tree& in, int sd, int mask, const double* x48, const double* Y, double span, bool isdrv, Tree& out) {
   Simp S; S.phase = (mask & 1) != 0;
   const int r = S.parse(in); if (r < 0) return false;
@@ -195,7 +189,6 @@ inline bool side(const Tree& in, int sd, int mask, const double* x48, const doub
   if (!S.emit(root, R, sd, len)) return false;
   R.len = (uint8_t)len; out = R; return true;
 }
-
 inline bool simplify_pair(Tree T[2], const double* x48, const double* x120, const float* const Y[2], int drv, Stats& st, double ink[2][120]) {
   st = Stats(); double o120[2][120], o48[2][48];
   for (int s = 0; s < 2; s++) { st.len0[s] = T[s].len; for (int i = 0; i < 48; i++) o48[s][i] = eval_tree(T[s], x48[i]); for (int j = 0; j < 120; j++) o120[s][j] = eval_tree(T[s], x120[j]);
@@ -223,5 +216,4 @@ inline bool simplify_pair(Tree T[2], const double* x48, const double* x120, cons
     st.applied = true; st.mask = m; return true; }
   return false;
 }
-
 }}
